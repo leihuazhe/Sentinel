@@ -29,6 +29,9 @@ app.controller('FlowControllerV2', ['$scope', '$stateParams', 'FlowServiceV2', '
 
     $scope.generateThresholdTypeShow = (rule) => {
       if (!rule.clusterMode) {
+        if(rule.singleStrategy==1){
+          return '总量平均';
+        }
         return '单机';
       }
       if (rule.clusterConfig.thresholdType === 0) {
@@ -83,7 +86,10 @@ app.controller('FlowControllerV2', ['$scope', '$stateParams', 'FlowServiceV2', '
         clusterConfig: {
           thresholdType: 0,
           fallbackToLocalWhenFail: true
-        }
+        },
+        adapterType:0,
+        adapterWebType:0,
+        singleStrategy:0
       };
       $scope.flowRuleDialog = {
         title: '新增流控规则',

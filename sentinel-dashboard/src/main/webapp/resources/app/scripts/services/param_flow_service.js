@@ -99,6 +99,12 @@ angular.module('sentinelDashboardApp').service('ParamFlowService', ['$http', fun
               }
           }
       }
+      if (rule.singleStrategy == 1 ) {
+          if (rule.singleCount === undefined || rule.singleCount == '') {
+              alert('请填写总量平均');
+              return false;
+          }
+      }
       return true;
   };
 }]);

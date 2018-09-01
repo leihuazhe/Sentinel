@@ -168,7 +168,8 @@ angular.module('sentinelDashboardApp').controller('ParamFlowController', ['$scop
           clusterConfig: {
             thresholdType: 0,
             fallbackToLocalWhenFail: true,
-          }
+          },
+          singleStrategy:0
         }
       };
       $scope.paramFlowRuleDialog = {

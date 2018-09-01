@@ -117,8 +117,8 @@ public class ClusterSingleTotalChangeService {
 
             //拿出所有，要计算的项目(例：机器数) current
             Set<AppInfo> appInfos = appManagement.getBriefApps();
-            Map<String,Long> currentMachines = new HashMap<>();
-            appInfos.stream().forEach(appInfo -> currentMachines.put(appInfo.getApp(),appInfo.getMachines().stream().filter(machineInfo -> machineInfo.isHealthy()).count()));
+            Map<String,Integer> currentMachines = new HashMap<>();
+            appInfos.stream().forEach(appInfo -> currentMachines.put(appInfo.getApp(),(int)appInfo.getMachines().stream().filter(machineInfo -> machineInfo.isHealthy()).count()));
 
             stringRedisTemplate.opsForValue().set(CLUSTER_CHANGE_NAME_CURRENT, JSON.toJSONString(currentMachines));
 
@@ -126,12 +126,12 @@ public class ClusterSingleTotalChangeService {
                 logger.info("last machines redis value is NULL");
                 return;
             }
-            Map<String,Long> lastMachines = JSON.parseObject(lastString,Map.class);
+            Map<String,Integer> lastMachines = JSON.parseObject(lastString,Map.class);
 
             //计算变化
             for(String key:currentMachines.keySet()){
-                Long currentValue = currentMachines.get(key);
-                Long lastValue = lastMachines.get(key);
+                Integer currentValue = currentMachines.get(key);
+                Integer lastValue = lastMachines.get(key);
                 if(lastValue==null || currentValue==null){
                     continue;
                 }

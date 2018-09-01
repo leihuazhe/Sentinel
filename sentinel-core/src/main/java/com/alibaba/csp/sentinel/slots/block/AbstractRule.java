@@ -65,12 +65,12 @@ public abstract class AbstractRule implements Rule {
     private int adapterWebType = 0 ;
 
     /**
-     * 集群总量单机平均
+     * 单机阈值模式 (0:单机 1:总量平均)
      */
-    private boolean singleTotal = false;
+    private int singleStrategy = 0;
 
     /**
-     * 单机平均
+     * 单机阈值-总量
      */
     private double singleCount;
 
@@ -191,12 +191,12 @@ public abstract class AbstractRule implements Rule {
         this.adapterProperties = adapterProperties;
     }
 
-    public boolean isSingleTotal() {
-        return singleTotal;
+    public int getSingleStrategy() {
+        return singleStrategy;
     }
 
-    public void setSingleTotal(boolean singleTotal) {
-        this.singleTotal = singleTotal;
+    public void setSingleStrategy(int singleStrategy) {
+        this.singleStrategy = singleStrategy;
     }
 
     public double getSingleCount() {

@@ -15,28 +15,6 @@
  */
 package com.alibaba.csp.sentinel.dashboard.metric;
 
-import java.io.StringReader;
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.alibaba.csp.sentinel.Constants;
 import com.alibaba.csp.sentinel.concurrent.NamedThreadFactory;
 import com.alibaba.csp.sentinel.config.SentinelConfig;
@@ -44,10 +22,9 @@ import com.alibaba.csp.sentinel.dashboard.datasource.entity.MetricEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.AppInfo;
 import com.alibaba.csp.sentinel.dashboard.discovery.AppManagement;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
+import com.alibaba.csp.sentinel.dashboard.repository.metric.MetricsRepository;
 import com.alibaba.csp.sentinel.node.metric.MetricNode;
 import com.alibaba.csp.sentinel.util.StringUtil;
-
-import com.alibaba.csp.sentinel.dashboard.repository.metric.MetricsRepository;
 import com.taobao.diamond.manager.ManagerListener;
 import com.taobao.diamond.manager.ManagerListenerAdapter;
 import com.yunji.diamond.client.api.DiamondClient;
@@ -65,13 +42,18 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.io.StringReader;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.ThreadPoolExecutor.DiscardPolicy;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Fetch metric of machines.
@@ -111,8 +93,10 @@ public class MetricFetcher {
     private ExecutorService fetchService;
     private ExecutorService fetchWorker;
 
-
-    private boolean monitorEnableReport = false;
+    /**
+     * 开启kafka客户端上报
+     */
+    private boolean enableClientReport = false;
 
     private DiamondClient nacosDiamondClient = null;
 
@@ -161,7 +145,7 @@ public class MetricFetcher {
 
         try (StringReader stringReader = new StringReader(config)) {
             properties.load(stringReader);
-            monitorEnableReport = "false".equals(properties.getProperty("enableClientReport"));
+            enableClientReport = "true".equals(properties.getProperty("enableClientReport"));
         }catch (Exception ex){
             logger.error("init sentinel kafka fail",ex);
         }
@@ -181,7 +165,7 @@ public class MetricFetcher {
 
     private void start() {
         fetchScheduleService.scheduleAtFixedRate(() -> {
-            if(!monitorEnableReport){
+            if(enableClientReport){
                 return;
             }
             try {

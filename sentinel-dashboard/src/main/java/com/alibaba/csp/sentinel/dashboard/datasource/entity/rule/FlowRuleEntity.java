@@ -82,9 +82,9 @@ public class FlowRuleEntity implements RuleEntity {
     private int adapterWebType = 0 ;
 
     /**
-     * 集群总量单机平摊
+     * 单机阈值模式
      */
-    private boolean singleTotal = false;
+    private int singleStrategy = 0;
 
     /**
      * 单机平摊
@@ -120,7 +120,7 @@ public class FlowRuleEntity implements RuleEntity {
 
         }
         rule.setSingleCount(rule.getSingleCount());
-        rule.setSingleTotal(rule.isSingleTotal());
+        rule.setSingleStrategy(rule.getSingleStrategy());
 
         return entity;
     }
@@ -305,12 +305,12 @@ public class FlowRuleEntity implements RuleEntity {
     }
 
 
-    public boolean isSingleTotal() {
-        return singleTotal;
+    public int getSingleStrategy() {
+        return singleStrategy;
     }
 
-    public void setSingleTotal(boolean singleTotal) {
-        this.singleTotal = singleTotal;
+    public void setSingleStrategy(int singleStrategy) {
+        this.singleStrategy = singleStrategy;
     }
 
     public double getSingleCount() {
@@ -347,7 +347,7 @@ public class FlowRuleEntity implements RuleEntity {
         flowRule.setAdapterType(this.adapterType);
         flowRule.setAdapterWebType(this.adapterWebType);
 
-        flowRule.setSingleTotal(this.singleTotal);
+        flowRule.setSingleStrategy(this.singleStrategy);
         flowRule.setSingleCount(this.singleCount);
 
         return flowRule;

@@ -30,7 +30,9 @@ app.service('FlowServiceV1', ['$http', function ($http) {
             port: rule.port,
             adapterType: rule.adapterType,
             adapterText: rule.adapterText,
-            adapterWebType: rule.adapterWebType
+            adapterWebType: rule.adapterWebType,
+            singleStrategy:rule.singleStrategy,
+            singleCount:rule.singleCount,
         };
 
         return $http({
@@ -54,7 +56,9 @@ app.service('FlowServiceV1', ['$http', function ($http) {
             maxQueueingTimeMs: rule.maxQueueingTimeMs,
             adapterType: rule.adapterType,
             adapterText: rule.adapterText,
-            adapterWebType: rule.adapterWebType
+            adapterWebType: rule.adapterWebType,
+            singleStrategy:rule.singleStrategy,
+            singleCount:rule.singleCount,
         };
 
         return $http({
@@ -101,6 +105,12 @@ app.service('FlowServiceV1', ['$http', function ($http) {
         if (rule.strategy == 1 || rule.strategy == 2) {
             if (rule.refResource === undefined || rule.refResource == '') {
                 alert('请填写关联资源或入口');
+                return false;
+            }
+        }
+        if (rule.singleStrategy == 1 ) {
+            if (rule.singleCount === undefined || rule.singleCount == '') {
+                alert('请填写总量平均');
                 return false;
             }
         }

@@ -129,6 +129,12 @@ angular.module('sentinelDashboardApp').controller('ParamFlowControllerV2', ['$sc
       if ($scope.currentRule.rule && $scope.currentRule.rule.durationInSec === undefined) {
         $scope.currentRule.rule.durationInSec = 1;
       }
+      if($scope.currentRule.rule.clusterConfig === undefined){
+        $scope.currentRule.rule.clusterConfig = {
+          thresholdType: 0,
+          fallbackToLocalWhenFail: true
+        }
+      }
       $scope.paramFlowRuleDialog = {
         title: '编辑热点规则',
         type: 'edit',
@@ -161,7 +167,8 @@ angular.module('sentinelDashboardApp').controller('ParamFlowControllerV2', ['$sc
           clusterConfig: {
             thresholdType: 0,
             fallbackToLocalWhenFail: true,
-          }
+          },
+          singleStrategy:0
         }
       };
       $scope.paramFlowRuleDialog = {

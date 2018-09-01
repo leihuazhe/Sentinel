@@ -64,7 +64,7 @@ public final class MachineUtils {
      * @param entity
      */
     public static boolean calcByMachines(FlowRuleEntity entity,AppInfo appInfo ){
-        if(!entity.isClusterMode() && entity.isSingleTotal() && entity.getSingleCount() > 0 ){ //&& entity.getAdapterType()!=3 因为nginx都是单机
+        if(!entity.isClusterMode() && entity.getSingleStrategy() ==1 && entity.getSingleCount() >0){ //&& entity.getAdapterType()!=3 因为nginx都是单机
             int machinesSize = appInfo==null ? 0 :appInfo.getMachines().size();
             if(machinesSize > 0){
                 entity.setCount(Math.ceil(entity.getSingleCount()/machinesSize));
@@ -81,7 +81,7 @@ public final class MachineUtils {
      * @param entity
      */
     public static boolean calcByMachines(ParamFlowRuleEntity entity,AppInfo appInfo){
-        if(!entity.isClusterMode() && entity.getRule().isSingleTotal() && entity.getRule().getSingleCount() > 0 ){ //&& entity.getAdapterType()!=3 因为nginx都是单机
+        if(!entity.isClusterMode() && entity.getRule().getSingleStrategy()==1 && entity.getRule().getSingleCount() >0 ){ //&& entity.getAdapterType()!=3 因为nginx都是单机
             int machinesSize = appInfo==null ? 0 :appInfo.getMachines().size();
             if(machinesSize > 0){
                 entity.getRule().setCount(Math.ceil(entity.getRule().getSingleCount()/machinesSize));

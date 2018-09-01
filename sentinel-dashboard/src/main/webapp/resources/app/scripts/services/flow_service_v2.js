@@ -62,6 +62,12 @@ app.service('FlowServiceV2', ['$http', function ($http) {
                 return false;
             }
         }
+        if (rule.singleStrategy == 1 ) {
+            if (rule.singleCount === undefined || rule.singleCount == '') {
+                alert('请填写总量平均');
+                return false;
+            }
+        }
         if (rule.controlBehavior === undefined || rule.controlBehavior < 0) {
             alert('无效的流控整形方式');
             return false;

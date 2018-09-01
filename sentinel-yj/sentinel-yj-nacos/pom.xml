@@ -138,6 +138,7 @@
         <dependency>
             <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-transport-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

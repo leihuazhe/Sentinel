@@ -91,7 +91,8 @@ app.controller('FlowControllerV1', ['$scope', '$stateParams', 'FlowServiceV1', '
           thresholdType: 0
         },
         adapterType:0,
-        adapterWebType:0
+        adapterWebType:0,
+        singleStrategy:0
       };
       $scope.flowRuleDialog = {
         title: '新增流控规则',
