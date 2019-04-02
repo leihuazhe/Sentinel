@@ -58,7 +58,9 @@ app.controller('IdentityCtl', ['$scope', '$stateParams', 'IdentityService',
         },
         app: $scope.app,
         ip: mac[0],
-        port: mac[1]
+        port: mac[1],
+        adapterType:0,
+        adapterWebType:0
       };
 
       flowRuleDialogScope.flowRuleDialog = {

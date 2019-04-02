@@ -28,6 +28,7 @@ import com.alibaba.csp.sentinel.dashboard.datasource.entity.MetricEntity;
 import com.alibaba.csp.sentinel.util.StringUtil;
 
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,6 +47,8 @@ public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity
      */
     private Map<String, Map<String, ConcurrentLinkedHashMap<Long, MetricEntity>>> allMetrics = new ConcurrentHashMap<>();
 
+    @Autowired
+    private InfluxDBMetricsRepository influxDBMetricsRepository;
 
 
     @Override
@@ -69,6 +72,7 @@ public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity
             return;
         }
         metrics.forEach(this::save);
+        influxDBMetricsRepository.saveAll(metrics);
     }
 
     @Override
@@ -96,6 +100,11 @@ public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity
 
     @Override
     public List<String> listResourcesOfApp(String app) {
+
+        if(influxDBMetricsRepository!=null){
+            return influxDBMetricsRepository.listResourcesOfApp(app);
+        }
+
         List<String> results = new ArrayList<>();
         if (StringUtil.isBlank(app)) {
             return results;

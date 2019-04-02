@@ -89,7 +89,9 @@ app.controller('FlowControllerV1', ['$scope', '$stateParams', 'FlowServiceV1', '
         clusterMode: false,
         clusterConfig: {
           thresholdType: 0
-        }
+        },
+        adapterType:0,
+        adapterWebType:0
       };
       $scope.flowRuleDialog = {
         title: '新增流控规则',

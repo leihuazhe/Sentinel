@@ -1,4 +1,5 @@
 const gulp = require('gulp');
+var bower = require('gulp-bower');
 const plugins = require('gulp-load-plugins')();
 const open = require('open');
 const app = {
@@ -24,6 +25,10 @@ const JS_LIBS = [
   'node_modules/angular-ui-notification/dist/angular-ui-notification.min.js',
   'node_modules/angular-utils-pagination/dirPagination.js',
   'app/scripts/libs/treeTable.js',
+  'node_modules/ace-builds/src-min-noconflict/ace.js',
+  'node_modules/ace-builds/src-min-noconflict/theme-monokai.js',
+  'node_modules/ace-builds/src-min-noconflict/mode-json.js',
+  'node_modules/angular-ui-ace/src/ui-ace.js'
 ];
 
 const CSS_APP = [

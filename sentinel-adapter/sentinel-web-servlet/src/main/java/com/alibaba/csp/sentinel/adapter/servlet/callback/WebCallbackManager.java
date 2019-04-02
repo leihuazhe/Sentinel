@@ -32,7 +32,7 @@ public class WebCallbackManager {
     /**
      * URL block handler.
      */
-    private static volatile UrlBlockHandler urlBlockHandler = new DefaultUrlBlockHandler();
+    private static volatile UrlBlockHandler urlBlockHandler = new CustomUrlBlockHandler();
 
     private static volatile RequestOriginParser requestOriginParser = null;
 

@@ -8,7 +8,7 @@
             <label class="col-sm-2 control-label">资源名</label>
             <div class="col-sm-9">
               <input type="text" ng-if="flowRuleDialog.type == 'edit'" class="form-control" placeholder="资源名" ng-model='currentRule.resource'
-                disabled="" />
+                     disabled="" />
               <input type="text" ng-if="flowRuleDialog.type == 'add'" class="form-control highlight-border" placeholder="资源名" ng-model='currentRule.resource'
               />
             </div>
@@ -115,7 +115,7 @@
               </div>
 
             </div>
-            <div class="form-group">
+            <div class="form-group" ng-if="currentRule.controlBehavior!=0">
               <div ng-if="currentRule.controlBehavior==1">
                 <label class="col-sm-2 control-label">预热时长</label>
                 <div class="col-sm-9">
@@ -129,6 +129,74 @@
                 </div>
               </div>
             </div>
+
+            <div class="form-group">
+              <label class="col-sm-2 control-label">自定义返回</label>
+              <div class="col-sm-9">
+                <div class="form-control highlight-border" align="center">
+                  <input type="radio" name="adapterType" value="0" checked ng-model='currentRule.adapterType' />&nbsp;无&nbsp;&nbsp;
+                  <input type="radio" name="adapterType" value="1" ng-model='currentRule.adapterType' />&nbsp;Dubbo&nbsp;&nbsp;
+                  <input type="radio" name="adapterType" value="2" ng-model='currentRule.adapterType' />&nbsp;Web
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group" ng-if="currentRule.adapterType==2">
+              <label class="col-sm-2 control-label">返回类型</label>
+              <div class="col-sm-9">
+                <div class="form-control highlight-border" align="center">
+                  <input type="radio" name="adapterWebType" value="0" checked ng-model='currentRule.adapterWebType' />&nbsp;默认(Html)&nbsp;&nbsp;
+                  <input type="radio" name="adapterWebType" value="1" ng-model='currentRule.adapterWebType' />&nbsp;Json&nbsp;&nbsp;
+                  <input type="radio" name="adapterWebType" value="2" ng-model='currentRule.adapterWebType' />&nbsp;Xml&nbsp;&nbsp;
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group" ng-if="currentRule.adapterType==1">
+              <label class="col-sm-2 control-label">返回信息</label>
+              <div class="col-sm-9">
+                <!--
+                <textarea name="adapterText" class="form-control highlight-border" placeholder="text输入框" ng-model='currentRule.adapterText'  style="margin: 0px -28.0938px 0px 0px; height: 214px; width: 478px;"/>
+                -->
+
+                <textarea ui-ace="{ theme: 'monokai',mode:'json'}"  ng-class="{red: !itParsesForm}" name="adapterText" ng-model='currentRule.adapterText'></textarea>
+
+
+              </div>
+            </div>
+
+            <div class="form-group" ng-if="currentRule.adapterType==2">
+              <label class="col-sm-2 control-label">返回信息</label>
+              <div class="col-sm-9" ng-if="currentRule.adapterWebType==0">
+                <!--
+                   <textarea name="adapterText" class="form-control highlight-border" placeholder="text输入框" ng-model='currentRule.adapterText'  style="margin: 0px -28.0938px 0px 0px; height: 214px; width: 478px;"/>
+                   -->
+
+                <textarea ui-ace="{ theme: 'monokai',mode:'html'}" ng-class="{red: !itParsesForm}" name="adapterText" ng-model='currentRule.adapterText'></textarea>
+
+
+              </div>
+              <div class="col-sm-9" ng-if="currentRule.adapterWebType==1">
+                <!--
+               <textarea name="adapterText" class="form-control highlight-border" placeholder="text输入框" ng-model='currentRule.adapterText'  style="margin: 0px -28.0938px 0px 0px; height: 214px; width: 478px;"/>
+               -->
+
+                <textarea ui-ace="{ theme: 'monokai',mode:'json'}" ng-class="{red: !itParsesForm}" name="adapterText" ng-model='currentRule.adapterText'></textarea>
+
+              </div>
+              <div class="col-sm-9" ng-if="currentRule.adapterWebType==2">
+                <!--
+                <textarea name="adapterText" class="form-control highlight-border" placeholder="text输入框" ng-model='currentRule.adapterText'  style="margin: 0px -28.0938px 0px 0px; height: 214px; width: 478px;"/>
+                -->
+
+                <textarea ui-ace="{ theme: 'monokai',mode:'xml'}" ng-class="{red: !itParsesForm}" name="adapterText" ng-model='currentRule.adapterText'></textarea>
+
+
+              </div>
+            </div>
+
+
+
           </div>
           <div class="form-group text-center">
             <a ng-click="onOpenAdvanceClick()" ng-if="flowRuleDialog.showAdvanceButton" style="cursor: pointer;">高级选项</a>
@@ -141,7 +209,7 @@
         <button class="btn btn-outline-danger" style="float:right; height: 30px;font-size: 12px;margin-left: 10px;" ng-click="closeThisDialog()">取消</button>
         <button class="btn btn-outline-success" style="float:right; height: 30px;font-size: 12px;margin-left: 10px;" ng-click="saveRule()">{{flowRuleDialog.confirmBtnText}}</button>
         <button ng-if="flowRuleDialog.saveAndContinueBtnText" class="btn btn-default" style="float:right; height: 30px;font-size: 12px;"
-          ng-click="saveRuleAndContinue()">{{flowRuleDialog.saveAndContinueBtnText}}</button>
+                ng-click="saveRuleAndContinue()">{{flowRuleDialog.saveAndContinueBtnText}}</button>
       </div>
     </div>
   </div>

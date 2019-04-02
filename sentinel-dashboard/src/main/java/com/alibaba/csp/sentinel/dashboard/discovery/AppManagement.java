@@ -17,6 +17,7 @@ package com.alibaba.csp.sentinel.dashboard.discovery;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
@@ -35,11 +36,41 @@ public class AppManagement implements MachineDiscovery {
     @PostConstruct
     public void init() {
         machineDiscovery = context.getBean(SimpleMachineDiscovery.class);
+
+//        //自动加入nginx
+//        MachineInfo machineInfo = new MachineInfo();
+//        machineInfo.setApp("nginx");
+//        machineInfo.setIp("127.0.0.1");
+//        machineInfo.setPort(80);
+//        machineInfo.setVersion("0.0.1");
+//
+//        addMachine(machineInfo);
     }
 
     @Override
     public Set<AppInfo> getBriefApps() {
-        return machineDiscovery.getBriefApps();
+        Set<AppInfo> appInfos = machineDiscovery.getBriefApps();
+        appInfos.add(getNginxAppInfo());
+        return appInfos;
+    }
+
+    private AppInfo getNginxAppInfo(){
+        AppInfo appInfo = new AppInfo();
+        appInfo.setApp("nginx");
+
+        MachineInfo machineInfo = new MachineInfo();
+        machineInfo.setApp("nginx");
+        machineInfo.setIp("127.0.0.1");
+        machineInfo.setPort(80);
+        machineInfo.setVersion("1.5.1");
+        machineInfo.setHostname("nginx-pc");
+        machineInfo.setLastHeartbeat(System.currentTimeMillis());
+        machineInfo.setHeartbeatVersion(System.currentTimeMillis()-10);
+
+
+        appInfo.addMachine(machineInfo);
+
+        return appInfo;
     }
 
     @Override
@@ -59,6 +90,9 @@ public class AppManagement implements MachineDiscovery {
 
     @Override
     public AppInfo getDetailApp(String app) {
+        if("nginx".equals(app)){
+            return getNginxAppInfo();
+        }
         return machineDiscovery.getDetailApp(app);
     }
     

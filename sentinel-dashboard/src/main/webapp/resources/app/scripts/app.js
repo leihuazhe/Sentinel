@@ -21,7 +21,7 @@ angular
     'rzTable',
     'angular-clipboard',
     'selectize',
-    'angularUtils.directives.dirPagination'
+    'angularUtils.directives.dirPagination','ui.ace'
   ])
   .config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider',
     function ($stateProvider, $urlRouterProvider, $ocLazyLoadProvider) {

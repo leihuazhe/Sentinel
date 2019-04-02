@@ -52,6 +52,7 @@ public class AppController {
     @GetMapping("/briefinfos.json")
     public Result<List<AppInfo>> queryAppInfos(HttpServletRequest request) {
         List<AppInfo> list = new ArrayList<>(appManagement.getBriefApps());
+
         Collections.sort(list, Comparator.comparing(AppInfo::getApp));
         return Result.ofSuccess(list);
     }

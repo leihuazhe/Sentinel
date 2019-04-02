@@ -1,0 +1,19 @@
+{
+  "name": "sentinel-dashboard",
+  "description": "",
+  "authors": [
+    "x-cold <lxstart@outlook.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/wangchongya/Sentinel",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-ui-ace": "^0.2.3"
+  }
+}

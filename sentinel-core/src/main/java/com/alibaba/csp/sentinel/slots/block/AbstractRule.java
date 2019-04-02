@@ -15,6 +15,8 @@
  */
 package com.alibaba.csp.sentinel.slots.block;
 
+import java.util.Map;
+
 /**
  * Abstract rule entity.
  *
@@ -38,6 +40,34 @@ public abstract class AbstractRule implements Rule {
      * </p>
      */
     private String limitApp;
+
+
+    /**
+     * 适配器类型适配器类型(默认=0|dubbo=1|WebFilter=2)
+     */
+    private int adapterType = 0;
+
+    /**
+     * 适配器开关
+     */
+    private boolean adapterResultOn;
+
+    /**
+     * 缓存返回对象
+     */
+    private Object adapterResult;
+
+    /**
+     * 返回text
+     */
+    private String adapterText;
+
+    private int adapterWebType = 0 ;
+
+    /**
+     * 适配器属性
+     */
+    private Map<String,String> adapterProperties;
 
     public String getResource() {
         return resource;
@@ -91,6 +121,54 @@ public abstract class AbstractRule implements Rule {
 
     public <T extends AbstractRule> T as(Class<T> clazz) {
         return (T)this;
+    }
+
+    public int getAdapterType() {
+        return adapterType;
+    }
+
+    public void setAdapterType(int adapterType) {
+        this.adapterType = adapterType;
+    }
+
+    public boolean getAdapterResultOn() {
+        return adapterResultOn;
+    }
+
+    public void setAdapterResultOn(boolean adapterResultOn) {
+        this.adapterResultOn = adapterResultOn;
+    }
+
+    public Object getAdapterResult() {
+        return adapterResult;
+    }
+
+    public void setAdapterResult(Object adapterResult) {
+        this.adapterResult = adapterResult;
+    }
+
+    public String getAdapterText() {
+        return adapterText;
+    }
+
+    public void setAdapterText(String adapterText) {
+        this.adapterText = adapterText;
+    }
+
+    public int getAdapterWebType() {
+        return adapterWebType;
+    }
+
+    public void setAdapterWebType(int adapterWebType) {
+        this.adapterWebType = adapterWebType;
+    }
+
+    public Map<String, String> getAdapterProperties() {
+        return adapterProperties;
+    }
+
+    public void setAdapterProperties(Map<String, String> adapterProperties) {
+        this.adapterProperties = adapterProperties;
     }
 
     @Override

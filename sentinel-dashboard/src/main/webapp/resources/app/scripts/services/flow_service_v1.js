@@ -27,7 +27,10 @@ app.service('FlowServiceV1', ['$http', function ($http) {
             maxQueueingTimeMs: rule.maxQueueingTimeMs,
             app: rule.app,
             ip: rule.ip,
-            port: rule.port
+            port: rule.port,
+            adapterType: rule.adapterType,
+            adapterText: rule.adapterText,
+            adapterWebType: rule.adapterWebType
         };
 
         return $http({
@@ -49,6 +52,9 @@ app.service('FlowServiceV1', ['$http', function ($http) {
             controlBehavior: rule.controlBehavior,
             warmUpPeriodSec: rule.warmUpPeriodSec,
             maxQueueingTimeMs: rule.maxQueueingTimeMs,
+            adapterType: rule.adapterType,
+            adapterText: rule.adapterText,
+            adapterWebType: rule.adapterWebType
         };
 
         return $http({

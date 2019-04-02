@@ -18,6 +18,7 @@ package com.alibaba.csp.sentinel.dashboard.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.alibaba.csp.sentinel.dashboard.repository.metric.InfluxDBMetricsRepository;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.csp.sentinel.command.vo.NodeVo;
 
@@ -45,6 +46,9 @@ public class ResourceController {
     @Autowired
     private SentinelApiClient httpFetcher;
 
+    @Autowired
+    private InfluxDBMetricsRepository influxDBMetricsRepository;
+
     /**
      * Fetch real time statistics info of the machine.
      *
@@ -57,7 +61,7 @@ public class ResourceController {
      */
     @GetMapping("/machineResource.json")
     public Result<List<ResourceVo>> fetchResourceChainListOfMachine(String ip, Integer port, String type,
-                                                                    String searchKey) {
+                                                                    String searchKey,String app) {
         if (StringUtil.isEmpty(ip) || port == null) {
             return Result.ofFail(-1, "invalid param, give ip, port");
         }
@@ -65,6 +69,21 @@ public class ResourceController {
         final String DEFAULT = "default";
         if (StringUtil.isEmpty(type)) {
             type = ROOT;
+        }
+        if(StringUtil.isBlank(app)){
+            app = "sentinel-dashboard";
+        }
+        if(StringUtil.isNotBlank(app)){
+            List<NodeVo> nodeVos = influxDBMetricsRepository.fetchResourceOfMachine(app);
+            if (nodeVos == null) {
+                return Result.ofSuccess(null);
+            }
+            if (StringUtil.isNotEmpty(searchKey)) {
+                nodeVos = nodeVos.stream().filter(node -> node.getResource()
+                        .toLowerCase().contains(searchKey.toLowerCase()))
+                        .collect(Collectors.toList());
+            }
+            return Result.ofSuccess(ResourceVo.fromNodeVoList(nodeVos));
         }
         if (ROOT.equalsIgnoreCase(type) || DEFAULT.equalsIgnoreCase(type)) {
             List<NodeVo> nodeVos = httpFetcher.fetchResourceOfMachine(ip, port, type);

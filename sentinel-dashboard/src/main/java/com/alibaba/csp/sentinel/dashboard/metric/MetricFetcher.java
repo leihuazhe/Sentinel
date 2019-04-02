@@ -70,11 +70,11 @@ public class MetricFetcher {
     public static final String NO_METRICS = "No metrics";
     private static final int HTTP_OK = 200;
     private static final long MAX_LAST_FETCH_INTERVAL_MS = 1000 * 15;
-    private static final long FETCH_INTERVAL_SECOND = 6;
+    private static final long FETCH_INTERVAL_SECOND = 60;
     private static final Charset DEFAULT_CHARSET = Charset.forName(SentinelConfig.charset());
     private final static String METRIC_URL_PATH = "metric";
     private static Logger logger = LoggerFactory.getLogger(MetricFetcher.class);
-    private final long intervalSecond = 1;
+    private final long intervalSecond = 10;
 
     private Map<String, AtomicLong> appLastFetchTime = new ConcurrentHashMap<>();
 
@@ -154,10 +154,14 @@ public class MetricFetcher {
         }
         for (final String app : apps) {
             fetchService.submit(() -> {
-                try {
-                    doFetchAppMetric(app);
-                } catch (Exception e) {
-                    logger.error("fetchAppMetric error", e);
+                if("nginx".equals(app)){
+                    //写入数据
+                }else{
+                    try {
+                        doFetchAppMetric(app);
+                    } catch (Exception e) {
+                        logger.error("fetchAppMetric error", e);
+                    }
                 }
             });
         }
