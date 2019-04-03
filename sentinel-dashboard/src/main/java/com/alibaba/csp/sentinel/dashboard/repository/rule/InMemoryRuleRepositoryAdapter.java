@@ -22,6 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.RuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
+import com.alibaba.csp.sentinel.dashboard.service.NginxLuaRedisSerivce;
+import com.alibaba.csp.sentinel.dashboard.util.NginxUtils;
+import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.util.AssertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -42,12 +45,8 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
 
     private static final int MAX_RULES_SIZE = 10000;
 
-
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-
-    @Autowired
-    private RedisTemplate redisTemplate;
+    private NginxLuaRedisSerivce nginxLuaRedisSerivce;
 
 
     @Override
@@ -65,8 +64,8 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
                 .put(processedEntity.getId(), processedEntity);
         }
 
-        if("nginx".equals(entity.getApp())){
-
+        if("nginx".equals(entity.getApp()) && entity instanceof FlowRule){
+            nginxLuaRedisSerivce.save(entity);
         }
         return processedEntity;
     }

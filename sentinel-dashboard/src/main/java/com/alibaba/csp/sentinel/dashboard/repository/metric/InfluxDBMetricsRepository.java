@@ -145,7 +145,7 @@ public class InfluxDBMetricsRepository  {
 
             httpPost.setEntity(new UrlEncodedFormEntity(pairs, HTTP.UTF_8));
 
-            logger.info("url:{}",url);
+            logger.info("url:{} ,data:{}",url,data);
 
             httpclient.execute(httpPost, new FutureCallback<HttpResponse>() {
                 @Override

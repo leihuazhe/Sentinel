@@ -9,7 +9,7 @@ public class NginxUtils {
      * @param url
      * @return
      */
-    public String excludeHttpPre(String url){
+    public static String excludeHttpPre(String url){
         if(StringUtil.isNotBlank(url)){
             if(url.startsWith("http:")){
                 return url.substring(4);
@@ -27,7 +27,7 @@ public class NginxUtils {
      * @param url
      * @return
      */
-    public String includeHttpPre(String url){
+    public static String includeHttpPre(String url){
         if(StringUtil.isNotBlank(url) && (!url.startsWith("http:") || url.startsWith("https:") )){
             return "https:" + url;
         }
