@@ -23,6 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.RuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.util.AssertUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
  * @author leyou
@@ -39,6 +42,14 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
 
     private static final int MAX_RULES_SIZE = 10000;
 
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+
     @Override
     public T save(T entity) {
         if (entity.getId() == null) {
@@ -54,6 +65,9 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
                 .put(processedEntity.getId(), processedEntity);
         }
 
+        if("nginx".equals(entity.getApp())){
+
+        }
         return processedEntity;
     }
 

@@ -109,7 +109,21 @@ public class InfluxDBMetricsRepository  {
                 Map<String,String> tags = new HashMap<>();
                 tags.put("app",metric.getApp());
                 tags.put("resource",metric.getResource());
-                list.add(new InfluxDBMetric(metric,metric.getApp(),20,metric.getTimestamp().getTime(),tags));
+
+                Map<String,Object> mapField = new HashMap<>();
+                mapField.put("blockQps",metric.getBlockQps());
+                mapField.put("count",metric.getCount());
+                mapField.put("exceptionQps",metric.getExceptionQps());
+                mapField.put("passQps",metric.getPassQps());
+                mapField.put("successQps",metric.getSuccessQps());
+                mapField.put("rt",metric.getRt());
+                mapField.put("resourceCode",metric.getResourceCode());
+                mapField.put("gmtCreate",metric.getGmtCreate());
+                mapField.put("gmtModified",metric.getGmtModified());
+                mapField.put("id",metric.getId());
+
+
+                list.add(new InfluxDBMetric(mapField,metric.getApp(),20,metric.getTimestamp().getTime(),tags));
             }
 
             final String data = JSON.toJSONString(list);
