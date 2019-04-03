@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.RuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.service.NginxLuaRedisSerivce;
@@ -64,7 +65,7 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
                 .put(processedEntity.getId(), processedEntity);
         }
 
-        if("nginx".equals(entity.getApp()) && entity instanceof FlowRule){
+        if("nginx".equals(entity.getApp()) && entity instanceof FlowRuleEntity){
             nginxLuaRedisSerivce.save(entity);
         }
         return processedEntity;

@@ -440,7 +440,7 @@ app.controller('IdentityCtl', ['$scope', '$stateParams', 'IdentityService',
         return;
       }
       if ($scope.isTreeView) {
-        IdentityService.fetchIdentityOfMachine(mac[0], mac[1], $scope.searchKey).success(
+        IdentityService.fetchIdentityOfMachine(mac[0], mac[1], $scope.searchKey,$scope.app).success(
           function (data) {
             if (data.code == 0 && data.data) {
               $scope.identities = data.data;
@@ -452,7 +452,7 @@ app.controller('IdentityCtl', ['$scope', '$stateParams', 'IdentityService',
           }
         );
       } else {
-        IdentityService.fetchClusterNodeOfMachine(mac[0], mac[1], $scope.searchKey).success(
+        IdentityService.fetchClusterNodeOfMachine(mac[0], mac[1], $scope.searchKey,$scope.app).success(
           function (data) {
             if (data.code == 0 && data.data) {
               $scope.identities = data.data;

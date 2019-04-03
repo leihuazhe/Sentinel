@@ -19,6 +19,7 @@ import java.util.Date;
 
 import com.alibaba.csp.sentinel.slots.block.flow.ClusterFlowConfig;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
+import com.alibaba.csp.sentinel.util.StringUtil;
 
 /**
  * @author leyou
@@ -60,6 +61,26 @@ public class FlowRuleEntity implements RuleEntity {
     private Date gmtCreate;
     private Date gmtModified;
 
+    /**
+     * 适配器类型(默认=0|dubbo=1|WebFilter=2)
+     */
+    private int adapterType;
+
+    /**
+     * 适配器开关
+     */
+    private boolean adapterResultOn;
+
+
+    /**
+     * 返回text
+     */
+    private String adapterText;
+
+
+    private int adapterWebType = 0 ;
+
+
     public static FlowRuleEntity fromFlowRule(String app, String ip, Integer port, FlowRule rule) {
         FlowRuleEntity entity = new FlowRuleEntity();
         entity.setApp(app);
@@ -76,6 +97,15 @@ public class FlowRuleEntity implements RuleEntity {
         entity.setMaxQueueingTimeMs(rule.getMaxQueueingTimeMs());
         entity.setClusterMode(rule.isClusterMode());
         entity.setClusterConfig(rule.getClusterConfig());
+
+        entity.setAdapterText(rule.getAdapterText());
+        entity.setAdapterType(rule.getAdapterType());
+        entity.setAdapterResultOn(rule.getAdapterResultOn());
+        entity.setAdapterWebType(rule.getAdapterWebType());
+        if(rule.getAdapterType() == 2){ //web
+
+        }
+
         return entity;
     }
 
@@ -223,6 +253,41 @@ public class FlowRuleEntity implements RuleEntity {
         this.gmtModified = gmtModified;
     }
 
+
+    public int getAdapterType() {
+        return adapterType;
+    }
+
+    public void setAdapterType(int adapterType) {
+        this.adapterType = adapterType;
+    }
+
+    public boolean getAdapterResultOn() {
+        return adapterResultOn;
+    }
+
+    public void setAdapterResultOn(boolean adapterResultOn) {
+        this.adapterResultOn = adapterResultOn;
+    }
+
+
+    public String getAdapterText() {
+        return adapterText;
+    }
+
+    public void setAdapterText(String adapterText) {
+        this.adapterText = adapterText;
+    }
+
+
+    public int getAdapterWebType() {
+        return adapterWebType;
+    }
+
+    public void setAdapterWebType(int adapterWebType) {
+        this.adapterWebType = adapterWebType;
+    }
+
     public FlowRule toFlowRule() {
         FlowRule flowRule = new FlowRule();
         flowRule.setCount(this.count);
@@ -242,6 +307,13 @@ public class FlowRuleEntity implements RuleEntity {
         }
         flowRule.setClusterMode(clusterMode);
         flowRule.setClusterConfig(clusterConfig);
+
+        flowRule.setAdapterResultOn(StringUtil.isNotBlank(this.adapterText));
+        flowRule.setAdapterText(this.adapterText);
+        flowRule.setAdapterType(this.adapterType);
+        flowRule.setAdapterWebType(this.adapterWebType);
+
+
         return flowRule;
     }
 
