@@ -15,12 +15,12 @@
 
         <dependency>
             <groupId>com.alibaba.csp</groupId>
-            <artifactId>sentinel-web-servlet</artifactId>
+            <artifactId>sentinel-yj-dubbo</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba.csp</groupId>
-            <artifactId>sentinel-transport-simple-http</artifactId>
+            <artifactId>sentinel-yj-web</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
