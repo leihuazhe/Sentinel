@@ -35,7 +35,7 @@ public class NginxLuaRedisSerivce {
 
     private static final String MSG_LIST = "msg_list";
 
-    private static final String MAX_STR = "max_/";
+    private static final String MAX_STR = "max_";
 
     private static final String SENTINEL_NGINX_LIMIT = "sentinel_nginx_limit";
 
@@ -68,19 +68,19 @@ public class NginxLuaRedisSerivce {
         String env = "local";
         Map<String,String> redisIps = new HashMap<>();;
         if("idc".equals(env)){
-            redisIps.put("m.yunjiglobal.com","172.22.14.91");
-            redisIps.put("app.yunjiglobal.com","172.22.14.61");
-            redisIps.put("vipapp.yunjiglobal.com","172.22.14.159");
+            redisIps.put("//m.yunjiglobal.com","172.22.14.91");
+            redisIps.put("//app.yunjiglobal.com","172.22.14.61");
+            redisIps.put("//vipapp.yunjiglobal.com","172.22.14.159");
             //redisIps.put(        "","172.21.153.23");
-            //redisIps.put("","172.21.153.48");
+            redisIps.put("//yunjioperate.yunjiglobal.com","172.21.153.48");
             redisIps.put(        "","172.21.154.203");
-            redisIps.put(       "","172.21.150.75");//
-            redisIps.put(       "","172.21.154.79");
+            redisIps.put("//ys.yunjiglobal.com","172.21.150.75");
+            redisIps.put(       "","172.21.154.79");//
             redisIps.put(       "","172.21.154.221");
             redisIps.put(        "","172.21.154.235");
             redisIps.put(        "","172.21.154.201");
             redisIps.put(        "","172.21.154.87");
-            redisIps.put(        "","172.21.153.135");
+            redisIps.put("item.yunjiglobal.com","172.21.153.135");
             redisIps.put(       "","172.21.154.162");
             redisIps.put(       "","172.21.154.165");
             redisIps.put(       "","172.21.200.184");
@@ -129,9 +129,10 @@ public class NginxLuaRedisSerivce {
             List<String> keys = syncCommands.keys(MAX_STR + "*");
             keys.stream().forEach((key)->{
                 //创建实体
-                String redisKey = prefix + NginxUtils.excludeHttpPre(key);
+                String newKey = key.substring(MAX_STR.length());
+                String redisKey = prefix + NginxUtils.excludeHttpPre(newKey);
                 String msg = syncCommands.hget(MSG_LIST,redisKey);
-                String value = syncCommands.get(MAX_STR + key);
+                String value = syncCommands.get(MAX_STR + newKey);
                 FlowRuleEntity flowRuleEntity = new FlowRuleEntity();
                 flowRuleEntity.setApp("nginx");
                 flowRuleEntity.setResource(redisKey);
