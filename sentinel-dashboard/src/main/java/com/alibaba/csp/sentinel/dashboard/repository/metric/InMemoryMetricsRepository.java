@@ -78,6 +78,9 @@ public class InMemoryMetricsRepository implements MetricsRepository<MetricEntity
     @Override
     public synchronized List<MetricEntity> queryByAppAndResourceBetween(String app, String resource,
                                                                         long startTime, long endTime) {
+        if(influxDBMetricsRepository!=null){
+            return influxDBMetricsRepository.queryByAppAndResourceBetween(app,resource,startTime,endTime);
+        }
         List<MetricEntity> results = new ArrayList<>();
         if (StringUtil.isBlank(app)) {
             return results;

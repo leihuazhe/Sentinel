@@ -10,6 +10,7 @@ import com.alibaba.csp.sentinel.node.Node;
 import com.alibaba.csp.sentinel.node.metric.MetricNode;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -325,28 +326,48 @@ public class InfluxDBMetricsRepository  {
 
     // @Override
     public List<MetricEntity> queryByAppAndResourceBetween(String app, String resource, long startTime, long endTime) {
-        final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=select+sum(successQps)+as+successQps%2csum(blockQps)+as+blockQps%2csum(exceptionQps)+as+exceptionQps%2csum(rt)+as+rt++from+sentinel_monitor+where+app%3d%27sentinel-dashboard%27+and+time+%3e%3d+now()+-+2m+group+by+resource#query_select#"+app;
-        String result = httpGetContent(url);
-        return JSON.parseArray(result,MetricEntity.class);
+
+        final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=";
+        try {
+            String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\".sentinel_monitor where app='"+app+"' and resource='"+resource+"' and time >= now() - 5m group by time(1m) #query_select#"+app,"UTF-8");
+            String result = httpGetContent(url + q);
+            logger.debug("listResourcesOfApp:{}",result);
+
+            QueryResult queryResult = JSON.parseObject(result,QueryResult.class);
+            System.out.println("listResourcesOfApp:"+queryResult);
+
+            List<NodeVo2> vos = new InfluxDBResultMapper().toPOJO(queryResult, NodeVo2.class, "sentinel_monitor");
+
+            List<MetricEntity> list = new ArrayList<>();
+            try{
+                for(NodeVo2 vo : vos){
+                    MetricEntity metricEntity = new MetricEntity();
+                    metricEntity.setResource(resource);
+                    metricEntity.setBlockQps(NumberUtils.toLong(vo.getBlockQps(),0));
+                    metricEntity.setExceptionQps(NumberUtils.toLong(vo.getExceptionQps(),0));
+                    metricEntity.setRt(NumberUtils.toLong(vo.getAverageRt(),0));
+                    metricEntity.setSuccessQps(NumberUtils.toLong(vo.getSuccessQps(),0));
+                    metricEntity.setPassQps(NumberUtils.toLong(vo.getPassQps(),0));
+                    Date date =  DateUtils.parseDate(vo.getTime(),new String[]{"yyyy-MM-dd'T'HH:mm:ss'Z'"});
+                    metricEntity.setTimestamp(date);
+                    metricEntity.setGmtCreate(date);
+                    metricEntity.setGmtModified(date);
+                    list.add(metricEntity);
+                }
+            }catch (Exception ex){
+                logger.warn("解析失败",ex);
+            }
+
+            return list;
+
+        }catch (Exception ex){
+            logger.warn("listResourcesOfApp",ex);
+        }
+        return null;
     }
 
     //@Override
     public List<String> listResourcesOfApp(String app) {
-        /*
-        final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=";
-        try {
-            String q = URLEncoder.encode("select resource  from sentinel_monitor where app='"+app+"' and time >= now() - 2d group by resource#query_select#"+app,"UTF-8");
-            String result = httpGetContent(url + q);
-            logger.info("listResourcesOfApp:{}",result);
-
-            Map<String,Object> map = JSON.parseObject(result,Map.class);
-        }catch (Exception ex){
-            logger.warn("listResourcesOfApp",ex);
-        }
-
-        return null;
-        */
-
         List<NodeVo> list = fetchResourceOfMachine(app);
         List<String> lst = new ArrayList<>();
         for(NodeVo node:list){
@@ -359,7 +380,7 @@ public class InfluxDBMetricsRepository  {
     public List<NodeVo> fetchResourceOfMachine(String app){
         final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=";
         try {
-            String q = URLEncoder.encode("select sum(successQps)/5 as successQps,sum(blockQps)/5 as blockQps,sum(exceptionQps)/5 as exceptionQps,sum(rt)/5 as rt  from \"1d\".sentinel_monitor where app='"+app+"' and time >= now() - 5m group by resource#query_select#"+app,"UTF-8");
+            String q = URLEncoder.encode("select sum(successQps)/5 as successQps,sum(blockQps)/5 as blockQps,sum(exceptionQps)/5 as exceptionQps,sum(rt)/5 as rt,sum(passQps) as passQps  from \"1d\".sentinel_monitor where app='"+app+"' and time >= now() - 5m group by resource#query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
             logger.debug("listResourcesOfApp:{}",result);
 
@@ -375,6 +396,7 @@ public class InfluxDBMetricsRepository  {
                 nodeVo.setBlockQps(NumberUtils.toLong(vo.getBlockQps(),0));
                 nodeVo.setExceptionQps(NumberUtils.toLong(vo.getExceptionQps(),0));
                 nodeVo.setAverageRt(NumberUtils.toLong(vo.getAverageRt(),0));
+
 
                 nodeVo.setOneMinutePass(NumberUtils.toLong(vo.getSuccessQps(),0));
                 nodeVo.setOneMinuteBlock(NumberUtils.toLong(vo.getBlockQps(),0));

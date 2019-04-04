@@ -11,7 +11,8 @@ public class NodeVo {
     private String resource;
 
     private Integer threadNum;
-    private Integer passQps;
+    @Column(name = "passQps")
+    private String passQps;
     @Column(name = "blockQps")
     private String blockQps;
     private Long totalQps;
@@ -64,11 +65,11 @@ public class NodeVo {
         this.threadNum = threadNum;
     }
 
-    public Integer getPassQps() {
+    public String getPassQps() {
         return passQps;
     }
 
-    public void setPassQps(Integer passQps) {
+    public void setPassQps(String passQps) {
         this.passQps = passQps;
     }
 
