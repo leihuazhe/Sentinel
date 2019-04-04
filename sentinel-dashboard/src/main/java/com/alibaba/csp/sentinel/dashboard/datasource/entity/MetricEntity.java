@@ -47,6 +47,8 @@ public class MetricEntity {
 
     private int resourceCode;
 
+    private String ip;
+
     public static MetricEntity copyOf(MetricEntity oldEntity) {
         MetricEntity entity = new MetricEntity();
         entity.setId(oldEntity.getId());
@@ -62,6 +64,7 @@ public class MetricEntity {
         entity.setRt(oldEntity.getRt());
         entity.setCount(oldEntity.getCount());
         entity.setResource(oldEntity.getResource());
+        entity.setIp(entity.getIp());
         return entity;
     }
 
@@ -196,6 +199,14 @@ public class MetricEntity {
 
     public void setSuccessQps(Long successQps) {
         this.successQps = successQps;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
     @Override

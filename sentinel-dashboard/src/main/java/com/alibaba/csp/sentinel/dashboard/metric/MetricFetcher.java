@@ -336,6 +336,7 @@ public class MetricFetcher {
                     entity.addRtAndSuccessQps(node.getRt(), node.getSuccessQps());
                     entity.addExceptionQps(node.getExceptionQps());
                     entity.addCount(1);
+                    entity.setIp(machine.getIp());
                 } else {
                     entity = new MetricEntity();
                     entity.setApp(machine.getApp());
@@ -346,6 +347,7 @@ public class MetricFetcher {
                     entity.setExceptionQps(node.getExceptionQps());
                     entity.setCount(1);
                     entity.setResource(node.getResource());
+                    entity.setIp(machine.getIp());
                     map.put(key, entity);
                 }
             } catch (Exception e) {

@@ -18,6 +18,8 @@ public class InfluxDBMetric implements Serializable {
 
     private Object tag;
 
+    private String retentionPolicy = "1d";
+
 
     public Object getField() {
         return field;
@@ -57,6 +59,14 @@ public class InfluxDBMetric implements Serializable {
 
     public void setTag(Object tag) {
         this.tag = tag;
+    }
+
+    public String getRetentionPolicy() {
+        return retentionPolicy;
+    }
+
+    public void setRetentionPolicy(String retentionPolicy) {
+        this.retentionPolicy = retentionPolicy;
     }
 
     public InfluxDBMetric() {

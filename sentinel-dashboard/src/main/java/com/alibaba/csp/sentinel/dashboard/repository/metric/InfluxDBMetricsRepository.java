@@ -109,6 +109,7 @@ public class InfluxDBMetricsRepository  {
                 Map<String,String> tags = new HashMap<>();
                 tags.put("app",metric.getApp());
                 tags.put("resource",metric.getResource());
+                tags.put("ip",metric.getIp());
 
                 Map<String,Object> mapField = new HashMap<>();
                 mapField.put("blockQps",metric.getBlockQps());
@@ -117,7 +118,7 @@ public class InfluxDBMetricsRepository  {
                 mapField.put("passQps",metric.getPassQps());
                 mapField.put("successQps",metric.getSuccessQps());
                 mapField.put("rt",metric.getRt());
-                mapField.put("resourceCode",metric.getResourceCode());
+                //mapField.put("resourceCode",metric.getResourceCode());
                 mapField.put("gmtCreate",metric.getGmtCreate());
                 mapField.put("gmtModified",metric.getGmtModified());
                 mapField.put("id",metric.getId());
@@ -324,7 +325,7 @@ public class InfluxDBMetricsRepository  {
 
     // @Override
     public List<MetricEntity> queryByAppAndResourceBetween(String app, String resource, long startTime, long endTime) {
-        final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=select+sum(successQps)+as+successQps%2csum(blockQps)+as+blockQps%2csum(exceptionQps)+as+exceptionQps%2csum(rt)+as+rt++from+sentinel_monitor+where+app%3d%27sentinel-dashboard%27+and+time+%3e%3d+now()+-+2d+group+by+resource#query_select#"+app;
+        final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=select+sum(successQps)+as+successQps%2csum(blockQps)+as+blockQps%2csum(exceptionQps)+as+exceptionQps%2csum(rt)+as+rt++from+sentinel_monitor+where+app%3d%27sentinel-dashboard%27+and+time+%3e%3d+now()+-+2m+group+by+resource#query_select#"+app;
         String result = httpGetContent(url);
         return JSON.parseArray(result,MetricEntity.class);
     }
@@ -358,7 +359,7 @@ public class InfluxDBMetricsRepository  {
     public List<NodeVo> fetchResourceOfMachine(String app){
         final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=";
         try {
-            String q = URLEncoder.encode("select sum(successQps) as successQps,sum(blockQps) as blockQps,sum(exceptionQps) as exceptionQps,sum(rt) as rt  from sentinel_monitor where app='"+app+"' and time >= now() - 2d group by resource#query_select#"+app,"UTF-8");
+            String q = URLEncoder.encode("select sum(successQps)/5 as successQps,sum(blockQps)/5 as blockQps,sum(exceptionQps)/5 as exceptionQps,sum(rt)/5 as rt  from \"1d\".sentinel_monitor where app='"+app+"' and time >= now() - 5m group by resource#query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
             logger.debug("listResourcesOfApp:{}",result);
 
