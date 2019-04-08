@@ -22,7 +22,23 @@ public class NacosDataSource {
      * 启动
      */
     public void start(){
+        if (nacosConfig.getNamespace()) {
+            loadMyNamespaceRules();
+        } else {
+            loadRules();
+        }
 
+    }
+
+
+    private  void loadRules() {
+        ReadableDataSource<String, List<FlowRule>> flowRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(nacosConfig.getRemoteAddress(), nacosConfig.getGroupId(), nacosConfig.getDataId(),
+                source -> JSON.parseObject(source, new TypeReference<List<FlowRule>>() {
+                }));
+        FlowRuleManager.register2Property(flowRuleDataSource.getProperty());
+    }
+
+    private void loadMyNamespaceRules() {
         Properties properties = new Properties();
         properties.put(PropertyKeyConst.SERVER_ADDR, nacosConfig.getRemoteAddress());
         properties.put(PropertyKeyConst.NAMESPACE, nacosConfig.getNamespaceId());

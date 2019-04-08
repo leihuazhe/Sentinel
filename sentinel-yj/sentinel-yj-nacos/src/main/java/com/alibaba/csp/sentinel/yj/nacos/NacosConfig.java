@@ -13,6 +13,8 @@ public class NacosConfig implements Serializable {
     // fill your namespace id,if you want to use namespace. for example: 0f5c7314-4983-4022-ad5a-347de1d1057d,you can get it on nacos's console
     private   String namespaceId ;
 
+    private boolean namespace = false;
+
 
     public String getRemoteAddress() {
         return remoteAddress;
@@ -44,5 +46,13 @@ public class NacosConfig implements Serializable {
 
     public void setNamespaceId(String namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public boolean getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(boolean namespace) {
+        this.namespace = namespace;
     }
 }
