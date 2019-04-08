@@ -5,7 +5,7 @@
     <parent>
         <artifactId>sentinel-yj</artifactId>
         <groupId>com.alibaba.csp</groupId>
-        <version>1.5.1</version>
+        <version>1.5.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -42,7 +42,7 @@
         <!-- sentinel adapter and transport -->
         <dependency>
             <groupId>com.alibaba.csp</groupId>
-            <artifactId>sentinel-dubbo-adapter</artifactId>
+            <artifactId>sentinel-yj-dubbo-adapter</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

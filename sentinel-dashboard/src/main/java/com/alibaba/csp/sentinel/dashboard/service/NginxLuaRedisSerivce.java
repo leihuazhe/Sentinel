@@ -190,6 +190,18 @@ public class NginxLuaRedisSerivce {
 
     }
 
+    public void delete(Object entity){
+        FlowRuleEntity flowRule = (FlowRuleEntity) entity;
+        String url = NginxUtils.excludeHttpPre(flowRule.getResource());
+        String key = MAX_STR + url;
+
+        stringRedisTemplate.delete(key);
+        //HASH返回值
+
+        stringRedisTemplate.boundHashOps(MSG_LIST).delete(url);
+
+    }
+
 
 
 
