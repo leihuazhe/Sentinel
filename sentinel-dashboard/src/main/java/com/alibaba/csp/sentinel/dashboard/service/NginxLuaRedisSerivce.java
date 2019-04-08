@@ -5,6 +5,7 @@ import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemFlowRuleStore;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemoryRuleRepositoryAdapter;
 import com.alibaba.csp.sentinel.dashboard.util.NginxUtils;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
+import com.alibaba.csp.sentinel.util.StringUtil;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
@@ -68,6 +69,7 @@ public class NginxLuaRedisSerivce {
         //环境判断
         String configKey = "config_env";
         String env = NginxUtils.getEnvConfig(configKey);
+        logger.warn("config_env:{}",env);
         Map<String,String> redisIps = new HashMap<>();;
         if("idc".equals(env)){
             redisIps.put("//m.yunjiglobal.com","172.22.14.91");
@@ -103,11 +105,12 @@ public class NginxLuaRedisSerivce {
             //return;
         }
 
-        Set<Map.Entry<String, String>> set =  redisIps.entrySet();
-        for(Map.Entry<String, String> e:set){
-            transform(e.getKey(),e.getValue());
-        }
-
+        new Thread(()->{
+            Set<Map.Entry<String, String>> set =  redisIps.entrySet();
+            for(Map.Entry<String, String> e:set){
+                transform(e.getKey(),e.getValue());
+            }
+        }).start();
 
 
         //做事并且写入
@@ -129,6 +132,7 @@ public class NginxLuaRedisSerivce {
         if(redis.split(":").length==1){
             redis +=":6379";
         }
+        logger.warn("transform prefix:{},redis:{}",prefix,redis);
         RedisClient redisClient = RedisClient.create("redis://@"+redis);
 
         try(StatefulRedisConnection<String, String> connection = redisClient.connect()){
@@ -170,11 +174,16 @@ public class NginxLuaRedisSerivce {
             FlowRuleEntity flowRule = (FlowRuleEntity) entity;
             //先写在这
             //key限流
+
             String url = NginxUtils.excludeHttpPre(flowRule.getResource());
             String key = MAX_STR + url;
+            logger.warn("save nginx url:{},value:{},msg:{}",url,flowRule.getCount(),flowRule.getAdapterText());
             stringRedisTemplate.opsForValue().set(key,String.valueOf(flowRule.getCount()));
             //HASH返回值
-            stringRedisTemplate.boundHashOps(MSG_LIST).put(url,flowRule.getAdapterText());
+            if(StringUtils.isNotBlank(flowRule.getAdapterText())){
+                stringRedisTemplate.boundHashOps(MSG_LIST).put(url,flowRule.getAdapterText());
+            }
+
         }catch (Exception ex){
             logger.error("nginx save redis",ex);
         }
