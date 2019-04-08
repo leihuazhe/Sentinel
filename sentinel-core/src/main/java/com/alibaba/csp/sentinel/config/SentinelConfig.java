@@ -71,7 +71,8 @@ public class SentinelConfig {
                 appName = "";
             }
             // We first retrieve the properties from the property file.
-            String fileName = LogBase.getLogBaseDir() + appName + ".properties";
+//            String fileName = LogBase.getLogBaseDir() + appName + ".properties";
+            String fileName = "/usr/local/yunji/config/" + appName +"/"+appName+"_sentinel_"+AppNameUtil.getEnvConfig("config_env")+ ".properties";
             File file = new File(fileName);
             if (file.exists()) {
                 RecordLog.info("[SentinelConfig] Reading config from " + fileName);

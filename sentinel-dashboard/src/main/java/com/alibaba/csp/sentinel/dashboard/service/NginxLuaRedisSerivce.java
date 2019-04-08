@@ -5,6 +5,7 @@ import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemFlowRuleStore;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemoryRuleRepositoryAdapter;
 import com.alibaba.csp.sentinel.dashboard.util.NginxUtils;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
+import com.alibaba.csp.sentinel.util.AppNameUtil;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -68,7 +69,7 @@ public class NginxLuaRedisSerivce {
 
         //环境判断
         String configKey = "config_env";
-        String env = NginxUtils.getEnvConfig(configKey);
+        String env = AppNameUtil.getEnvConfig(configKey);
         logger.warn("config_env:{}",env);
         Map<String,String> redisIps = new HashMap<>();;
         if("idc".equals(env)){
@@ -142,7 +143,7 @@ public class NginxLuaRedisSerivce {
                 //创建实体
                 String newKey = key.substring(MAX_STR.length());
                 String redisKey = prefix + NginxUtils.excludeHttpPre(newKey);
-                String msg = syncCommands.hget(MSG_LIST,redisKey);
+                String msg = syncCommands.hget(MSG_LIST,newKey);
                 String value = syncCommands.get(MAX_STR + newKey);
                 FlowRuleEntity flowRuleEntity = new FlowRuleEntity();
                 flowRuleEntity.setApp("nginx");

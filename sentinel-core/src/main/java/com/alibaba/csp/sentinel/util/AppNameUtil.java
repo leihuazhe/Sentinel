@@ -97,4 +97,28 @@ public final class AppNameUtil {
     private static boolean isEmpty(String str) {
         return str == null || "".equals(str);
     }
+
+    /**
+     * 获取环境变量
+     * @param configKey
+     * @return
+     */
+    public static String getEnvConfig(String configKey){
+        String env = System.getProperty(configKey);
+        if(StringUtil.isBlank(env)){
+            env = System.getProperty(configKey.toUpperCase());
+            if(StringUtil.isBlank(env)){
+                env = System.getenv(configKey);
+                if(StringUtil.isBlank(env)){
+                    env = System.getenv(configKey.toUpperCase());
+                }
+            }
+
+            if(StringUtil.isBlank(env)){
+                throw new NullPointerException("未正确读取到环境配置信息");
+            }
+
+        }
+        return env;
+    }
 }
