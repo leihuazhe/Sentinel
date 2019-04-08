@@ -1,6 +1,7 @@
 package com.alibaba.csp.sentinel.dashboard.util;
 
 import com.alibaba.csp.sentinel.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 public class NginxUtils {
 
@@ -32,5 +33,25 @@ public class NginxUtils {
             return "https:" + url;
         }
         return url;
+    }
+
+
+    public static String getEnvConfig(String configKey){
+        String env = System.getProperty(configKey);
+        if(StringUtils.isBlank(env)){
+            env = System.getProperty(configKey.toUpperCase());
+            if(StringUtils.isBlank(env)){
+                env = System.getenv(configKey);
+                if(StringUtils.isBlank(env)){
+                    env = System.getenv(configKey.toUpperCase());
+                }
+            }
+
+            if(StringUtils.isBlank(env)){
+                throw new NullPointerException("未正确读取到环境配置信息");
+            }
+
+        }
+        return env;
     }
 }

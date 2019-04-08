@@ -8,6 +8,7 @@ import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
@@ -65,27 +66,28 @@ public class NginxLuaRedisSerivce {
          */
 
         //环境判断
-        String env = "local";
+        String configKey = "config_env";
+        String env = NginxUtils.getEnvConfig(configKey);
         Map<String,String> redisIps = new HashMap<>();;
         if("idc".equals(env)){
             redisIps.put("//m.yunjiglobal.com","172.22.14.91");
             redisIps.put("//app.yunjiglobal.com","172.22.14.61");
             redisIps.put("//vipapp.yunjiglobal.com","172.22.14.159");
-            //redisIps.put(        "","172.21.153.23");
+            redisIps.put("//marketing.yunjiglobal.com","172.21.153.23");
             redisIps.put("//yunjioperate.yunjiglobal.com","172.21.153.48");
-            redisIps.put(        "","172.21.154.203");
+            redisIps.put("//reward.yunjiglobal.com","172.21.154.203");
             redisIps.put("//ys.yunjiglobal.com","172.21.150.75");
-            redisIps.put(       "","172.21.154.79");//
-            redisIps.put(       "","172.21.154.221");
-            redisIps.put(        "","172.21.154.235");
-            redisIps.put(        "","172.21.154.201");
-            redisIps.put(        "","172.21.154.87");
+            redisIps.put("//spe.yunjix.com","172.21.154.79");//
+            redisIps.put("//user.yunjiglobal.com","172.21.154.221");
+            redisIps.put("//order.yunjiglobal.com","172.21.154.235");
+            redisIps.put("//search.yunjiglobal.com","172.21.154.201");
+            redisIps.put("//m.yj.ink","172.21.154.87");
             redisIps.put("item.yunjiglobal.com","172.21.153.135");
-            redisIps.put(       "","172.21.154.162");
-            redisIps.put(       "","172.21.154.165");
-            redisIps.put(       "","172.21.200.184");
+            redisIps.put("//sc.yunjiglobal.com","172.21.154.162");
+            redisIps.put("//chicken.yunjiglobal.com","172.21.154.165");
+            redisIps.put("//insurance.yunjiglobal.com","172.21.200.184");
         }else if("dev".equals(env)){
-
+            redisIps.put("//m.yunjiglobal.com","172.30.220.215:14159");
         }else if ("local".equals(env)){
             redisIps.put("//m.yunjiglobal.com","172.16.0.2:7777");
         }
@@ -111,8 +113,10 @@ public class NginxLuaRedisSerivce {
         //做事并且写入
         stringRedisTemplate.opsForValue().set(SENTINEL_NGINX_LIMIT,SENTINEL_NGINX_LIMIT);
         val = stringRedisTemplate.opsForValue().get(SENTINEL_NGINX_LIMIT);
-        System.out.println("val:"+val);
+        logger.warn("val:{}",val);
     }
+
+
 
 
     /**
@@ -122,6 +126,9 @@ public class NginxLuaRedisSerivce {
      */
     public void transform(String prefix,String redis){
 
+        if(redis.split(":").length==1){
+            redis +=":6379";
+        }
         RedisClient redisClient = RedisClient.create("redis://@"+redis);
 
         try(StatefulRedisConnection<String, String> connection = redisClient.connect()){
@@ -167,7 +174,7 @@ public class NginxLuaRedisSerivce {
             String key = MAX_STR + url;
             stringRedisTemplate.opsForValue().set(key,String.valueOf(flowRule.getCount()));
             //HASH返回值
-            stringRedisTemplate.boundHashOps(MSG_LIST).put(url,flowRule.getResource());
+            stringRedisTemplate.boundHashOps(MSG_LIST).put(url,flowRule.getAdapterText());
         }catch (Exception ex){
             logger.error("nginx save redis",ex);
         }
