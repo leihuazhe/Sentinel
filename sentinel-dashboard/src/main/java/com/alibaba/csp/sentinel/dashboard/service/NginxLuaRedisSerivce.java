@@ -73,26 +73,26 @@ public class NginxLuaRedisSerivce {
         logger.warn("config_env:{}",env);
         Map<String,String> redisIps = new HashMap<>();;
         if("idc".equals(env)){
-            redisIps.put("//m.yunjiglobal.com","172.22.14.91");
-            redisIps.put("//app.yunjiglobal.com","172.22.14.61");
-            redisIps.put("//vipapp.yunjiglobal.com","172.22.14.159");
-            redisIps.put("//marketing.yunjiglobal.com","172.21.153.23");
-            redisIps.put("//yunjioperate.yunjiglobal.com","172.21.153.48");
-            redisIps.put("//reward.yunjiglobal.com","172.21.154.203");
-            redisIps.put("//ys.yunjiglobal.com","172.21.150.75");
-            redisIps.put("//spe.yunjix.com","172.21.154.79");//
-            redisIps.put("//user.yunjiglobal.com","172.21.154.221");
-            redisIps.put("//order.yunjiglobal.com","172.21.154.235");
-            redisIps.put("//search.yunjiglobal.com","172.21.154.201");
-            redisIps.put("//m.yj.ink","172.21.154.87");
+            redisIps.put("m.yunjiglobal.com","172.22.14.91");
+            redisIps.put("app.yunjiglobal.com","172.22.14.61");
+            redisIps.put("vipapp.yunjiglobal.com","172.22.14.159");
+            redisIps.put("marketing.yunjiglobal.com","172.21.153.23");
+            redisIps.put("yunjioperate.yunjiglobal.com","172.21.153.48");
+            redisIps.put("reward.yunjiglobal.com","172.21.154.203");
+            redisIps.put("ys.yunjiglobal.com","172.21.150.75");
+            redisIps.put("spe.yunjix.com","172.21.154.79");//
+            redisIps.put("user.yunjiglobal.com","172.21.154.221");
+            redisIps.put("order.yunjiglobal.com","172.21.154.235");
+            redisIps.put("search.yunjiglobal.com","172.21.154.201");
+            redisIps.put("m.yj.ink","172.21.154.87");
             redisIps.put("item.yunjiglobal.com","172.21.153.135");
-            redisIps.put("//sc.yunjiglobal.com","172.21.154.162");
-            redisIps.put("//chicken.yunjiglobal.com","172.21.154.165");
-            redisIps.put("//insurance.yunjiglobal.com","172.21.200.184");
+            redisIps.put("sc.yunjiglobal.com","172.21.154.162");
+            redisIps.put("chicken.yunjiglobal.com","172.21.154.165");
+            redisIps.put("insurance.yunjiglobal.com","172.21.200.184");
         }else if("dev".equals(env)){
-            redisIps.put("//m.yunjiglobal.com","172.30.220.215:14159");
+            redisIps.put("m.yunjiglobal.com","172.30.220.215:14159");
         }else if ("local".equals(env)){
-            redisIps.put("//m.yunjiglobal.com","172.16.0.2:7777");
+            redisIps.put("m.yunjiglobal.com","172.16.0.2:7777");
         }
 
 
@@ -105,6 +105,8 @@ public class NginxLuaRedisSerivce {
             //测试注释
             //return;
         }
+
+        clear();
 
         new Thread(()->{
             Set<Map.Entry<String, String>> set =  redisIps.entrySet();
@@ -121,6 +123,16 @@ public class NginxLuaRedisSerivce {
     }
 
 
+    /**
+     * 清空原有数据
+     */
+    public void clear(){
+        logger.warn("begin clear old redis data");
+        stringRedisTemplate.keys(MAX_STR + "*").stream().forEach((key)->{
+            stringRedisTemplate.delete(key);
+        });
+        stringRedisTemplate.delete(MSG_LIST);
+    }
 
 
     /**

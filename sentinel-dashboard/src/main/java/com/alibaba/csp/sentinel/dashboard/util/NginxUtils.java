@@ -12,11 +12,11 @@ public class NginxUtils {
      */
     public static String excludeHttpPre(String url){
         if(StringUtil.isNotBlank(url)){
-            if(url.startsWith("http:")){
-                return url.substring(4);
+            if(url.startsWith("http://")){
+                return url.substring(6);
             }
-            if(url.startsWith("https:")){
-                return url.substring(5);
+            if(url.startsWith("https://")){
+                return url.substring(7);
             }
 
         }
@@ -24,13 +24,13 @@ public class NginxUtils {
     }
 
     /**
-     * 加上https前缀
+     * 加上https://、http://前缀
      * @param url
      * @return
      */
     public static String includeHttpPre(String url){
-        if(StringUtil.isNotBlank(url) && (!url.startsWith("http:") || url.startsWith("https:") )){
-            return "https:" + url;
+        if(StringUtil.isNotBlank(url) && (!url.startsWith("http://") || url.startsWith("https://") )){
+            return "https://" + url;
         }
         return url;
     }
