@@ -3,12 +3,8 @@
     <span style="font-size: 30px;font-weight: bold;">{{app}}</span>
   </div>
   <div class="col-md-6">
-    <button class="btn btn-default-inverse" style="float: right; margin-right: 10px;" ng-click="addNewRule()">
-      <i class="fa fa-plus"></i>&nbsp;&nbsp;新增流控规则
-    </button>
-<!--    <a class="btn btn-default-inverse" style="float: right; margin-right: 10px;" ui-sref="dashboard.flowV1({app: app})">
-      回到单机页面
-    </a>-->
+    <button class="btn btn-default-inverse" style="float: right; margin-right: 10px;" ng-disabled="!macInputModel" ng-click="addNewRule()">
+      <i class="fa fa-plus"></i>&nbsp;&nbsp;新增降级规则</button>
   </div>
 </div>
 
@@ -19,7 +15,9 @@
     <div class="col-md-12">
       <div class="card">
         <div class="inputs-header">
-          <span class="brand" style="font-size: 13px;">流控规则</span>
+          <span class="brand" style="font-size: 13px;">降级规则</span>
+          <!--<button class="btn btn-danger" style="float: right;margin-right: 10px;height: 30px;font-size: 12px;" ng-click="disableAll()">全部禁用</button>-->
+          <button class="btn btn-primary" style="float: right; margin-right: 10px; height: 30px;font-size: 12px;" ng-click="getMachineRules()">刷新</button>
           <input class="form-control witdh-200" placeholder="关键字" ng-model="searchKey">
         </div>
 
@@ -31,54 +29,43 @@
                 <td style="width: 40%">
                   资源名
                 </td>
+                <!--<td style="width: 10%;">-->
+                  <!--降级应用-->
+                <!--</td>-->
                 <td style="width: 10%;">
-                  来源应用
+                  降级模式
                 </td>
-                <td style="width: 8%;">
-                  流控模式
-                </td>
-                <td style="width: 8%;">
-                  阈值类型
-                </td>
-                <td style="width: 8%;">
+                <td style="width: 10%;">
                   阈值
                 </td>
-                <td style="width: 8%;">
-                  阈值模式
+                <td style="width: 10%;">
+                  时间窗口(s)
                 </td>
-                <td style="width: 8%;">
-                  流控效果
-                </td>
+                <!--<td style="width: 8%;">-->
+                <!--状态-->
+                <!--</td>-->
                 <td style="width: 12%;">
                   操作
                 </td>
               </tr>
             </thead>
             <tbody>
-              <tr dir-paginate="rule in rules | filter: searchKey | itemsPerPage: rulesPageConfig.pageSize " current-page="rulesPageConfig.currentPageIndex"
+              <tr dir-paginate="rule in rules | filter : searchKey | itemsPerPage: rulesPageConfig.pageSize " current-page="rulesPageConfig.currentPageIndex"
                 pagination-id="entriesPagination">
                 <td style="word-wrap:break-word;word-break:break-all;">{{rule.resource}}</td>
-                <td style="word-wrap:break-word;word-break:break-all;">{{rule.limitApp }}</td>
+                <!--<td style="word-wrap:break-word;word-break:break-all;">{{rule.limitApp }}</td>-->
                 <td>
-                  <span ng-if="rule.strategy == 0">直接</span>
-                  <span ng-if="rule.strategy == 1">关联</span>
-                  <span ng-if="rule.strategy == 2">链路</span>
-                </td>
-                <td>
-                  {{rule.grade == 0 ? '线程数' : 'QPS'}}
+                  <span ng-if="rule.grade == 0">RT</span>
+                  <span ng-if="rule.grade == 1" title="秒级异常比例">异常比例</span>
+                  <span ng-if="rule.grade == 2" title="分钟级异常数">异常数</span>
                 </td>
                 <td style="word-wrap:break-word;word-break:break-all;">
                   {{rule.count}}
                 </td>
-                <td>
-                  <span>{{generateThresholdTypeShow(rule)}}</span>
+                <td style="word-wrap:break-word;word-break:break-all;">
+                  {{rule.timeWindow}}s
                 </td>
-                <td>
-                  <span ng-if="rule.controlBehavior == 0">快速失败</span>
-                  <span ng-if="rule.controlBehavior == 1">Warm Up</span>
-                  <span ng-if="rule.controlBehavior == 2">排队等待</span>
-                  <span ng-if="rule.controlBehavior == 3">预热排队</span>
-                </td>
+
                 <td>
                   <button class="btn btn-xs btn-default" type="button" ng-click="editRule(rule)" style="font-size: 12px; height:25px;">编辑</button>
                   <button class="btn btn-xs btn-default" type="button" ng-click="deleteRule(rule)" style="font-size: 12px; height:25px;">删除</button>
@@ -96,9 +83,9 @@
             <span>共 {{rulesPageConfig.totalCount}} 条记录, </span>
             <span>
               每页
-              <input class="form-control" ng-model="rulesPageConfig.pageSize"> 条记录
+              <input class="form-control" ng-model="rulesPageConfig.pageSize"> 条记录,
             </span>
-            <!--<span>第 {{rulesPageConfig.currentPageIndex}} / {{rulesPageConfig.totalPage}} 页</span>-->
+            <span>第 {{rulesPageConfig.currentPageIndex}} / {{rulesPageConfig.totalPage}} 页</span>
           </div>
           <!-- .tools -->
         </div>

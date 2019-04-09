@@ -98,7 +98,7 @@ angular
             }
         })
 
-      .state('dashboard.paramFlow', {
+      .state('dashboard.paramFlowV1', {
         templateUrl: 'app/views/param_flow.html',
         url: '/paramFlow/:app',
         controller: 'ParamFlowController',
@@ -113,6 +113,21 @@ angular
           }]
         }
       })
+        .state('dashboard.paramFlow', {
+            templateUrl: 'app/views/param_flow_v2.html',
+            url: '/v2/paramFlow/:app',
+            controller: 'ParamFlowControllerV2',
+            resolve: {
+                loadMyFiles: ['$ocLazyLoad', function ($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                        name: 'sentinelDashboardApp',
+                        files: [
+                            'app/scripts/controllers/param_flow_v2.js',
+                        ]
+                    });
+                }]
+            }
+        })
 
         .state('dashboard.clusterAppAssignManage', {
             templateUrl: 'app/views/cluster_app_assign_manage.html',
@@ -178,7 +193,7 @@ angular
             }
         })
 
-      .state('dashboard.authority', {
+      .state('dashboard.authorityV1', {
             templateUrl: 'app/views/authority.html',
             url: '/authority/:app',
             controller: 'AuthorityRuleController',
@@ -193,8 +208,22 @@ angular
                 }]
             }
        })
-
-      .state('dashboard.degrade', {
+        .state('dashboard.authority', {
+            templateUrl: 'app/views/authority_v2.html',
+            url: '/v2/authority/:app',
+            controller: 'AuthorityRuleControllerV2',
+            resolve: {
+                loadMyFiles: ['$ocLazyLoad', function ($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                        name: 'sentinelDashboardApp',
+                        files: [
+                            'app/scripts/controllers/authority_v2.js',
+                        ]
+                    });
+                }]
+            }
+        })
+      .state('dashboard.degradeV1', {
         templateUrl: 'app/views/degrade.html',
         url: '/degrade/:app',
         controller: 'DegradeCtl',
@@ -209,11 +238,25 @@ angular
           }]
         }
       })
-
-      .state('dashboard.system', {
+        .state('dashboard.degrade', {
+            templateUrl: 'app/views/degrade_v2.html',
+            url: '/degrade/:app',
+            controller: 'DegradeCtlV2',
+            resolve: {
+                loadMyFiles: ['$ocLazyLoad', function ($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                        name: 'sentinelDashboardApp',
+                        files: [
+                            'app/scripts/controllers/degrade_v2.js',
+                        ]
+                    });
+                }]
+            }
+        })
+      .state('dashboard.systemV1', {
         templateUrl: 'app/views/system.html',
         url: '/system/:app',
-        controller: 'SystemCtl',
+        controller: 'SystemCtlV1',
         resolve: {
           loadMyFiles: ['$ocLazyLoad', function ($ocLazyLoad) {
             return $ocLazyLoad.load({
@@ -225,6 +268,21 @@ angular
           }]
         }
       })
+        .state('dashboard.system', {
+            templateUrl: 'app/views/system_v2.html',
+            url: '/v2/system/:app',
+            controller: 'SystemCtlV2',
+            resolve: {
+                loadMyFiles: ['$ocLazyLoad', function ($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                        name: 'sentinelDashboardApp',
+                        files: [
+                            'app/scripts/controllers/system_v2.js',
+                        ]
+                    });
+                }]
+            }
+        })
 
       .state('dashboard.machine', {
         templateUrl: 'app/views/machine.html',
@@ -242,7 +300,7 @@ angular
         }
       })
 
-      .state('dashboard.identity', {
+      .state('dashboard.identityV1', {
         templateUrl: 'app/views/identity.html',
         url: '/identity/:app',
         controller: 'IdentityCtl',
@@ -257,6 +315,21 @@ angular
           }]
         }
       })
+        .state('dashboard.identity', {
+            templateUrl: 'app/views/identity_v2.html',
+            url: '/v2/identity/:app',
+            controller: 'IdentityCtlV2',
+            resolve: {
+                loadMyFiles: ['$ocLazyLoad', function ($ocLazyLoad) {
+                    return $ocLazyLoad.load({
+                        name: 'sentinelDashboardApp',
+                        files: [
+                            'app/scripts/controllers/identity_v2.js',
+                        ]
+                    });
+                }]
+            }
+        })
       .state('dashboard.metric', {
         templateUrl: 'app/views/metric.html',
         url: '/metric/:app',

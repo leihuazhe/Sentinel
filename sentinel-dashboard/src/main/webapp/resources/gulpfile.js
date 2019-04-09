@@ -52,12 +52,17 @@ const JS_APP = [
   'app/scripts/services/flow_service_v1.js',
   'app/scripts/services/flow_service_v2.js',
   'app/scripts/services/degradeservice.js',
+  'app/scripts/services/degradeservice_v2.js',
   'app/scripts/services/systemservice.js',
+  'app/scripts/services/systemservice_v2.js',
   'app/scripts/services/machineservice.js',
   'app/scripts/services/identityservice.js',
+  'app/scripts/services/identityservice_v2.js',
   'app/scripts/services/metricservice.js',
   'app/scripts/services/param_flow_service.js',
+  'app/scripts/services/param_flow_service_v2.js',
   'app/scripts/services/authority_service.js',
+  'app/scripts/services/authority_service_v2.js',
   'app/scripts/services/cluster_state_service.js',
 ];
 

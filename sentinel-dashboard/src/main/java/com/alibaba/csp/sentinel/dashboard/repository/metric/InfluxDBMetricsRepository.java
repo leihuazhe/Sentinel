@@ -329,7 +329,7 @@ public class InfluxDBMetricsRepository  {
 
         final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=";
         try {
-            String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\".sentinel_monitor where app='"+app+"' and resource='"+resource+"' and time >= now() - 5m group by time(1m) #query_select#"+app,"UTF-8");
+            String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\".sentinel_monitor where app='"+app+"' and resource='"+resource+"' and time >= now() - 1m group by time(5s) #query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
             logger.debug("listResourcesOfApp:{}",result);
 
@@ -378,6 +378,7 @@ public class InfluxDBMetricsRepository  {
 
 
     public List<NodeVo> fetchResourceOfMachine(String app){
+        List<NodeVo> list = new ArrayList<>();
         final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=";
         try {
             String q = URLEncoder.encode("select sum(successQps)/5 as successQps,sum(blockQps)/5 as blockQps,sum(exceptionQps)/5 as exceptionQps,sum(rt)/5 as rt,sum(passQps) as passQps  from \"1d\".sentinel_monitor where app='"+app+"' and time >= now() - 5m group by resource#query_select#"+app,"UTF-8");
@@ -389,7 +390,7 @@ public class InfluxDBMetricsRepository  {
 
             List<com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo> vos = new InfluxDBResultMapper().toPOJO(queryResult, com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo.class, "sentinel_monitor");
 
-            List<NodeVo> list = new ArrayList<>();
+
             for(com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo vo : vos){
                 NodeVo nodeVo = new NodeVo();
                 nodeVo.setResource(vo.getResource());
@@ -403,12 +404,11 @@ public class InfluxDBMetricsRepository  {
                 nodeVo.setOneMinuteException(NumberUtils.toLong(vo.getExceptionQps(),0));
                 list.add(nodeVo);
             }
-            return list;
 
         }catch (Exception ex){
             logger.warn("listResourcesOfApp",ex);
         }
-        return null;
+        return list;
     }
 
 

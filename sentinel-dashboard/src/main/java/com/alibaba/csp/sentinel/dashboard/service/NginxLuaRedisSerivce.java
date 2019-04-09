@@ -91,6 +91,7 @@ public class NginxLuaRedisSerivce {
             redisIps.put("insurance.yunjiglobal.com","172.21.200.184");
         }else if("dev".equals(env)){
             redisIps.put("m.yunjiglobal.com","172.30.220.215:14159");
+            redisIps.put("local.yunjiweidian.org","172.30.222.63:14159");
         }else if ("local".equals(env)){
             redisIps.put("m.yunjiglobal.com","172.16.0.2:7777");
         }
@@ -191,7 +192,7 @@ public class NginxLuaRedisSerivce {
             String url = NginxUtils.excludeHttpPre(flowRule.getResource());
             String key = MAX_STR + url;
             logger.warn("save nginx url:{},value:{},msg:{}",url,flowRule.getCount(),flowRule.getAdapterText());
-            stringRedisTemplate.opsForValue().set(key,String.valueOf(flowRule.getCount()));
+            stringRedisTemplate.opsForValue().set(key,String.valueOf(flowRule.getCount().intValue()));
             //HASH返回值
             if(StringUtils.isNotBlank(flowRule.getAdapterText())){
                 stringRedisTemplate.boundHashOps(MSG_LIST).put(url,flowRule.getAdapterText());

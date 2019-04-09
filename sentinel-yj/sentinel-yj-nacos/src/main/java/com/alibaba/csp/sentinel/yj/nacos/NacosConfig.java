@@ -1,5 +1,7 @@
 package com.alibaba.csp.sentinel.yj.nacos;
 
+import com.alibaba.csp.sentinel.util.StringUtil;
+
 import java.io.Serializable;
 
 public class NacosConfig implements Serializable {
@@ -13,10 +15,7 @@ public class NacosConfig implements Serializable {
     // fill your namespace id,if you want to use namespace. for example: 0f5c7314-4983-4022-ad5a-347de1d1057d,you can get it on nacos's console
     private   String namespaceId ;
 
-    /**
-     * 是否使用命名空间
-     */
-    private boolean namespace = false;
+
 
 
     public String getRemoteAddress() {
@@ -51,11 +50,12 @@ public class NacosConfig implements Serializable {
         this.namespaceId = namespaceId;
     }
 
+    /**
+     * 是否使用命名空间
+     */
     public boolean getNamespace() {
-        return namespace;
+        return StringUtil.isNotBlank(getNamespaceId());
     }
 
-    public void setNamespace(boolean namespace) {
-        this.namespace = namespace;
-    }
+
 }

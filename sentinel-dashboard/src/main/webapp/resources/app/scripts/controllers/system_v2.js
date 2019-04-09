@@ -1,6 +1,6 @@
 var app = angular.module('sentinelDashboardApp');
 
-app.controller('SystemCtlV1', ['$scope', '$stateParams', 'SystemServiceV1', 'ngDialog', 'MachineService',
+app.controller('SystemCtlV2', ['$scope', '$stateParams', 'SystemServiceV2', 'ngDialog', 'MachineService',
   function ($scope, $stateParams, SystemService,
     ngDialog, MachineService) {
     //初始化

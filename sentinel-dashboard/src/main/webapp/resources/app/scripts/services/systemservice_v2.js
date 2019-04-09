@@ -1,14 +1,12 @@
 var app = angular.module('sentinelDashboardApp');
 
-app.service('SystemServiceV1', ['$http', function ($http) {
-  this.queryMachineRules = function (app, ip, port) {
+app.service('SystemServiceV2', ['$http', function ($http) {
+  this.queryMachineRules = function (app) {
     var param = {
-      app: app,
-      ip: ip,
-      port: port
+      app: app
     };
     return $http({
-      url: '/system/rules.json',
+      url: '/v2/system/rules.json',
       params: param,
       method: 'GET'
     });
@@ -16,9 +14,7 @@ app.service('SystemServiceV1', ['$http', function ($http) {
 
   this.newRule = function (rule) {
     var param = {
-      app: rule.app,
-      ip: rule.ip,
-      port: rule.port
+      app: rule.app
     };
     if (rule.grade == 0) {// avgLoad
       param.avgLoad = rule.avgLoad;
@@ -31,7 +27,7 @@ app.service('SystemServiceV1', ['$http', function ($http) {
     }
 
     return $http({
-      url: '/system/new.json',
+      url: '/v2/system/new.json',
       params: param,
       method: 'GET'
     });
@@ -51,7 +47,7 @@ app.service('SystemServiceV1', ['$http', function ($http) {
       param.qps = rule.qps;
     }
     return $http({
-      url: '/system/save.json',
+      url: '/v2/system/save.json',
       params: param,
       method: 'GET'
     });
@@ -64,7 +60,7 @@ app.service('SystemServiceV1', ['$http', function ($http) {
     };
 
     return $http({
-      url: '/system/delete.json',
+      url: '/v2/system/delete.json',
       params: param,
       method: 'GET'
     });
