@@ -137,6 +137,7 @@
                   <input type="radio" name="adapterType" value="0" checked ng-model='currentRule.adapterType' />&nbsp;无&nbsp;&nbsp;
                   <input type="radio" name="adapterType" value="1" ng-model='currentRule.adapterType' />&nbsp;Dubbo(JSON)&nbsp;&nbsp;
                   <input type="radio" name="adapterType" value="2" ng-model='currentRule.adapterType' />&nbsp;Web
+                  <input type="radio" name="adapterType" value="3" ng-model='currentRule.adapterType' />Nginx
                 </div>
               </div>
             </div>
@@ -176,7 +177,7 @@
 
 
               </div>
-              <div class="col-sm-9" ng-if="currentRule.adapterWebType==1 || currentRule.adapterWebType==2">
+              <div class="col-sm-9" ng-if="currentRule.adapterWebType==1">
                 <!--
                <textarea name="adapterText" class="form-control highlight-border" placeholder="text输入框" ng-model='currentRule.adapterText'  style="margin: 0px -28.0938px 0px 0px; height: 214px; width: 478px;"/>
                -->
@@ -195,6 +196,18 @@
               </div>
             </div>
 
+            <div class="form-group" ng-if="currentRule.adapterType==3">
+              <label class="col-sm-2 control-label">返回信息</label>
+              <div class="col-sm-9">
+                <!--
+                <textarea name="adapterText" class="form-control highlight-border" placeholder="text输入框" ng-model='currentRule.adapterText'  style="margin: 0px -28.0938px 0px 0px; height: 214px; width: 478px;"/>
+                -->
+
+                <textarea ui-ace="{ theme: 'monokai',mode:'json',useWrapMode : true, }"  ng-class="{red: !itParsesForm}" name="adapterText" ng-model='currentRule.adapterText'></textarea>
+
+
+              </div>
+            </div>
 
 
           </div>

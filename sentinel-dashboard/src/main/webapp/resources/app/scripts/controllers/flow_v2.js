@@ -62,7 +62,7 @@ app.controller('FlowControllerV2', ['$scope', '$stateParams', 'FlowServiceV2', '
         title: '编辑流控规则',
         type: 'edit',
         confirmBtnText: '保存',
-        showAdvanceButton: rule.controlBehavior == 0 && rule.strategy == 0
+        showAdvanceButton: rule.controlBehavior == 0 && rule.strategy == 0 && !rule.adapterResultOn
       };
       flowRuleDialog = ngDialog.open({
         template: '/app/views/dialog/flow-rule-dialog.html',
