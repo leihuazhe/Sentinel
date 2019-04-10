@@ -10,8 +10,6 @@ public class NacosConfig implements Serializable {
     private   String remoteAddress ;
     // nacos group
     private   String groupId ;
-    // nacos dataId
-    private   String dataId ;
     // fill your namespace id,if you want to use namespace. for example: 0f5c7314-4983-4022-ad5a-347de1d1057d,you can get it on nacos's console
     private   String namespaceId ;
 
@@ -32,14 +30,6 @@ public class NacosConfig implements Serializable {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
-    }
-
-    public String getDataId() {
-        return dataId;
-    }
-
-    public void setDataId(String dataId) {
-        this.dataId = dataId;
     }
 
     public String getNamespaceId() {
