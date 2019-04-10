@@ -381,7 +381,7 @@ public class InfluxDBMetricsRepository  {
         List<NodeVo> list = new ArrayList<>();
         final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=";
         try {
-            String q = URLEncoder.encode("select sum(successQps)/5 as successQps,sum(blockQps)/5 as blockQps,sum(exceptionQps)/5 as exceptionQps,sum(rt)/5 as rt,sum(passQps) as passQps  from \"1d\".sentinel_monitor where app='"+app+"' and time >= now() - 5m group by resource#query_select#"+app,"UTF-8");
+            String q = URLEncoder.encode("select sum(successQps) as successQps,sum(blockQps) as blockQps,sum(exceptionQps) as exceptionQps,sum(rt) as rt,sum(passQps) as passQps  from \"1d\".sentinel_monitor where app='"+app+"' and time >= now() - 1m group by resource#query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
             logger.debug("listResourcesOfApp:{}",result);
 
@@ -397,11 +397,16 @@ public class InfluxDBMetricsRepository  {
                 nodeVo.setBlockQps(NumberUtils.toLong(vo.getBlockQps(),0));
                 nodeVo.setExceptionQps(NumberUtils.toLong(vo.getExceptionQps(),0));
                 nodeVo.setAverageRt(NumberUtils.toLong(vo.getAverageRt(),0));
-
+                nodeVo.setPassQps(NumberUtils.toLong(vo.getPassQps(),0));
 
                 nodeVo.setOneMinutePass(NumberUtils.toLong(vo.getSuccessQps(),0));
                 nodeVo.setOneMinuteBlock(NumberUtils.toLong(vo.getBlockQps(),0));
                 nodeVo.setOneMinuteException(NumberUtils.toLong(vo.getExceptionQps(),0));
+
+                nodeVo.setOneMinuteTotal(NumberUtils.toLong(vo.getAverageRt(),0));
+                nodeVo.setTotalQps(NumberUtils.toLong(vo.getAverageRt(),0));
+                nodeVo.setThreadNum(NumberUtils.toInt(vo.getAverageRt(),0));
+
                 list.add(nodeVo);
             }
 

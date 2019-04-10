@@ -1,7 +1,7 @@
 var app = angular.module('sentinelDashboardApp');
 
 app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
-  'ngDialog', 'FlowServiceV2', 'DegradeService', 'AuthorityRuleService', 'ParamFlowServiceV2', 'MachineService',
+  'ngDialog', 'FlowServiceV2', 'DegradeServiceV2', 'AuthorityRuleServiceV2', 'ParamFlowServiceV2', 'MachineService',
   '$interval', '$location', '$timeout',
   function ($scope, $stateParams, IdentityService, ngDialog,
     FlowService, DegradeService, AuthorityRuleService, ParamFlowService, MachineService, $interval, $location, $timeout) {
@@ -19,7 +19,7 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
     $scope.isExpand = true;
     $scope.searchKey = '';
     $scope.firstExpandAll = false;
-    $scope.isTreeView = true;
+    $scope.isTreeView = false;
 
     $scope.macsInputConfig = {
       searchField: ['text', 'value'],
@@ -40,9 +40,6 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
     var flowRuleDialog;
     var flowRuleDialogScope;
     $scope.addNewFlowRule = function (resource) {
-      if (!$scope.macInputModel) {
-        return;
-      }
       flowRuleDialogScope = $scope.$new(true);
       flowRuleDialogScope.currentRule = {
         enable: false,
@@ -120,9 +117,6 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
     var degradeRuleDialog;
     var degradeRuleDialogScope;
     $scope.addNewDegradeRule = function (resource) {
-      if (!$scope.macInputModel) {
-        return;
-      }
       degradeRuleDialogScope = $scope.$new(true);
       degradeRuleDialogScope.currentRule = {
         enable: false,
@@ -398,9 +392,9 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
     //queryAppMachines();
 
     $scope.$watch('macInputModel', function () {
-      if ($scope.macInputModel) {
+      //if ($scope.macInputModel) {
         reInitIdentityDatas();
-      }
+     // }
     });
 
     $scope.$on('$destroy', function () {
@@ -417,23 +411,6 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
     };
 
     function queryIdentities() {
-      /*var mac = $scope.macInputModel.split(':');
-      if (mac == null || mac.length < 2) {
-        return;
-      }*/
-      if ($scope.isTreeView) {
-        IdentityService.fetchIdentityOfMachine( $scope.searchKey,$scope.app).success(
-          function (data) {
-            if (data.code == 0 && data.data) {
-              $scope.identities = data.data;
-              $scope.totalCount = $scope.identities.length;
-            } else {
-              $scope.identities = [];
-              $scope.totalCount = 0;
-            }
-          }
-        );
-      } else {
         IdentityService.fetchClusterNodeOfMachine($scope.searchKey,$scope.app).success(
           function (data) {
             if (data.code == 0 && data.data) {
@@ -445,7 +422,7 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
             }
           }
         );
-      }
     };
+    queryIdentities();
     $scope.queryIdentities = queryIdentities;
   }]);
