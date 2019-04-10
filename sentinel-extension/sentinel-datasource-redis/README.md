@@ -12,7 +12,7 @@ To use Sentinel DataSource Redis, you should add the following dependency:
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.csp</groupId>
+    <groupId>com.yunji.csp</groupId>
     <artifactId>sentinel-datasource-redis</artifactId>
     <version>x.y.z</version>
 </dependency>

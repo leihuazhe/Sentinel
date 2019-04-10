@@ -12,7 +12,7 @@ To use Sentinel Dubbo Adapter, you can simply add the following dependency to yo
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.csp</groupId>
+    <groupId>com.yunji.csp</groupId>
     <artifactId>sentinel-dubbo-adapter</artifactId>
     <version>x.y.z</version>
 </dependency>

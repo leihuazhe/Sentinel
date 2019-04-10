@@ -8,7 +8,7 @@ To use Sentinel Parameter Flow Control, you need to add the following dependency
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.csp</groupId>
+    <groupId>com.yunji.csp</groupId>
     <artifactId>sentinel-parameter-flow-control</artifactId>
     <version>x.y.z</version>
 </dependency>

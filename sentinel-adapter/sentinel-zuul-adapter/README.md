@@ -10,7 +10,7 @@ Sentinel Zuul Adapter provides **ServiceId level** and **API Path level** flow c
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.csp</groupId>
+    <groupId>com.yunji.csp</groupId>
     <artifactId>sentinel-zuul-adapter</artifactId>
     <version>x.y.z</version>
 </dependency>

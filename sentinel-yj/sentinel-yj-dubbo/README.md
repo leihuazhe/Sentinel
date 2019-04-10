@@ -7,7 +7,7 @@ Sentinel 提供了与 Dubbo 整合的模块 - Sentinel Dubbo Adapter，主要包
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.csp</groupId>
+    <groupId>com.yunji.csp</groupId>
     <artifactId>sentinel-dubbo-adapter</artifactId>
     <version>x.y.z</version>
 </dependency>

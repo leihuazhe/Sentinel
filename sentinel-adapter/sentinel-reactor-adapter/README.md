@@ -8,7 +8,7 @@ Add the following dependency in `pom.xml` (if you are using Maven):
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.csp</groupId>
+    <groupId>com.yunji.csp</groupId>
     <artifactId>sentinel-reactor-adapter</artifactId>
     <version>x.y.z</version>
 </dependency>

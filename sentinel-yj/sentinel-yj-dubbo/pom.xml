@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>sentinel-yj</artifactId>
-        <groupId>com.alibaba.csp</groupId>
+        <groupId>com.yunji.csp</groupId>
         <version>1.5.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -41,18 +41,18 @@
 
         <!-- sentinel adapter and transport -->
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-yj-dubbo-adapter</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-transport-simple-http</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-yj-nacos</artifactId>
             <version>${project.version}</version>
         </dependency>

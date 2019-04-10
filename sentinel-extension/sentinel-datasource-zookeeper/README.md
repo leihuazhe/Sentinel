@@ -7,7 +7,7 @@ To use Sentinel DataSource ZooKeeper, you should add the following dependency:
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.csp</groupId>
+    <groupId>com.yunji.csp</groupId>
     <artifactId>sentinel-datasource-zookeeper</artifactId>
     <version>x.y.z</version>
 </dependency>

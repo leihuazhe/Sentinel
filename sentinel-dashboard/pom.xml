@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.alibaba.csp</groupId>
+        <groupId>com.yunji.csp</groupId>
         <artifactId>sentinel-parent</artifactId>
         <version>1.5.2-SNAPSHOT</version>
     </parent>
@@ -20,20 +20,20 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-web-servlet</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-transport-simple-http</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-parameter-flow-control</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -110,7 +110,7 @@
 
         <!-- for Nacos rule publisher sample -->
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-datasource-nacos</artifactId>
             <!--<scope>test</scope>-->
         </dependency>
@@ -160,7 +160,7 @@
 
 
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-yj-nacos</artifactId>
             <version>${project.version}</version>
         </dependency>

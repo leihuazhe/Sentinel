@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>com.alibaba.csp</groupId>
+        <groupId>com.yunji.csp</groupId>
         <artifactId>sentinel-transport</artifactId>
         <version>1.5.2-SNAPSHOT</version>
     </parent>
@@ -17,7 +17,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-transport-common</artifactId>
             <version>${project.version}</version>
         </dependency>

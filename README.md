@@ -50,7 +50,7 @@ If your application is build in Maven, just add the following dependency in `pom
 ```xml
 <!-- replace here with the latest version -->
 <dependency>
-    <groupId>com.alibaba.csp</groupId>
+    <groupId>com.yunji.csp</groupId>
     <artifactId>sentinel-core</artifactId>
     <version>1.5.0</version>
 </dependency>

@@ -4,7 +4,7 @@ Sentinel provides Servlet filter integration to enable flow control for web requ
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.csp</groupId>
+    <groupId>com.yunji.csp</groupId>
     <artifactId>sentinel-web-servlet</artifactId>
     <version>x.y.z</version>
 </dependency>
