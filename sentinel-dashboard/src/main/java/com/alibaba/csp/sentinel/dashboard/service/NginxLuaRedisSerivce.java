@@ -1,20 +1,19 @@
 package com.alibaba.csp.sentinel.dashboard.service;
 
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.discovery.AppInfo;
+import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemFlowRuleStore;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemoryRuleRepositoryAdapter;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.dashboard.util.NginxUtils;
-import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.util.AppNameUtil;
-import com.alibaba.csp.sentinel.util.StringUtil;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +42,7 @@ public class NginxLuaRedisSerivce {
 
     private static final String MAX_STR = "max_";
 
-    private static final String SENTINEL_NGINX_LIMIT = "sentinel_nginx_limit";
+    private static final String SENTINEL_NGINX = "sentinel:nginx:";
 
 
     @Autowired
@@ -56,6 +55,8 @@ public class NginxLuaRedisSerivce {
     @Autowired
     @Qualifier("flowRuleNacosPublisher")
     private DynamicRulePublisher<List<FlowRuleEntity>> rulePublisher;
+
+    private Map<String,String> redisIps = new HashMap<>();
 
     @PostConstruct
     public void init(){
@@ -85,7 +86,7 @@ public class NginxLuaRedisSerivce {
         String configKey = "config_env";
         String env = AppNameUtil.getEnvConfig(configKey);
         logger.warn("config_env:{}",env);
-        Map<String,String> redisIps = new HashMap<>();;
+
         if("idc".equals(env)){
             redisIps.put("m.yunjiglobal.com","172.22.14.91");
             redisIps.put("app.yunjiglobal.com","172.22.14.61");
@@ -110,49 +111,51 @@ public class NginxLuaRedisSerivce {
             redisIps.put("m.yunjiglobal.com","172.16.0.2:7777");
         }
 
-
-
-
-
-        String val = stringRedisTemplate.opsForValue().get(SENTINEL_NGINX_LIMIT);
-        if(SENTINEL_NGINX_LIMIT.equals(val)){
-            logger.warn(SENTINEL_NGINX_LIMIT + " has exits");
-            //测试注释
-            //return;
-        }
-
-        clear();
-
         new Thread(()->{
             Set<Map.Entry<String, String>> set =  redisIps.entrySet();
             for(Map.Entry<String, String> e:set){
                 transform(e.getKey(),e.getValue());
             }
-            try{
-                publishRules("nginx");
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
 
         }).start();
 
 
-        //做事并且写入
-        stringRedisTemplate.opsForValue().set(SENTINEL_NGINX_LIMIT,SENTINEL_NGINX_LIMIT);
-        val = stringRedisTemplate.opsForValue().get(SENTINEL_NGINX_LIMIT);
-        logger.warn("val:{}",val);
+
     }
 
 
+    public List<AppInfo> getNginxAppInfo(){
+        List<AppInfo> appInfoList = new ArrayList<>();
+
+        Set<Map.Entry<String, String>> set =  redisIps.entrySet();
+        for(Map.Entry<String, String> e:set){
+            AppInfo appInfo = new AppInfo();
+            appInfo.setApp(e.getKey());
+
+            MachineInfo machineInfo = new MachineInfo();
+            machineInfo.setApp(e.getKey());
+            machineInfo.setIp("127.0.0.1");
+            machineInfo.setPort(80);
+            machineInfo.setVersion("1.5.1");
+            machineInfo.setHostname("nginx-pc");
+            machineInfo.setLastHeartbeat(System.currentTimeMillis());
+            machineInfo.setHeartbeatVersion(System.currentTimeMillis()-10);
+
+            appInfo.addMachine(machineInfo);
+            appInfoList.add(appInfo);
+        }
+
+        return appInfoList;
+
+    }
     /**
      * 清空原有数据
      */
-    public void clear(){
+    public void clear(String prefix){
         logger.warn("begin clear old redis data");
-        stringRedisTemplate.keys(MAX_STR + "*").stream().forEach((key)->{
+        stringRedisTemplate.keys(MAX_STR +prefix+ "*").stream().forEach((key)->{
             stringRedisTemplate.delete(key);
         });
-        stringRedisTemplate.delete(MSG_LIST);
     }
 
 
@@ -162,6 +165,13 @@ public class NginxLuaRedisSerivce {
      * @param redis
      */
     public void transform(String prefix,String redis){
+        String redisInitKey = SENTINEL_NGINX + prefix;
+        String val = stringRedisTemplate.opsForValue().get(redisInitKey);
+        if(SENTINEL_NGINX.equals(val)){
+            logger.warn(prefix + " " + SENTINEL_NGINX + " has exits");
+            return;
+        }
+
 
         if(redis.split(":").length==1){
             redis +=":6379";
@@ -169,6 +179,8 @@ public class NginxLuaRedisSerivce {
         logger.warn("transform prefix:{},redis:{}",prefix,redis);
         RedisClient redisClient = RedisClient.create("redis://@"+redis);
 
+
+        clear(prefix);
         try(StatefulRedisConnection<String, String> connection = redisClient.connect()){
             RedisCommands<String, String> syncCommands = connection.sync();
             List<String> keys = syncCommands.keys(MAX_STR + "*");
@@ -179,19 +191,25 @@ public class NginxLuaRedisSerivce {
                 String msg = syncCommands.hget(MSG_LIST,newKey);
                 String value = syncCommands.get(MAX_STR + newKey);
                 FlowRuleEntity flowRuleEntity = new FlowRuleEntity();
-                flowRuleEntity.setApp("nginx");
+                flowRuleEntity.setApp(prefix);
                 flowRuleEntity.setResource(redisKey);
                 flowRuleEntity.setCount(NumberUtils.toDouble(value,0));
                 flowRuleEntity.setAdapterText(msg);
+                flowRuleEntity.setAdapterResultOn(true);
+                flowRuleEntity.setAdapterType(3);
                 flowRuleEntity.setGrade(1);//1为qps
                 flowRuleEntity.setStrategy(0);
                 flowRuleEntity.setControlBehavior(0);
                 flowRuleEntity.setGmtCreate(new Date());
                 flowRuleEntity.setGmtModified(flowRuleEntity.getGmtCreate());
+                flowRuleEntity.setLimitApp("default");
 
 
                 inMemFlowRuleStore.save(flowRuleEntity);
             });
+
+
+            publishRules(prefix);
         }catch (Exception ex){
             logger.error("操作redis",ex);
         }finally {
@@ -199,7 +217,10 @@ public class NginxLuaRedisSerivce {
         }
 
 
-
+        //做事并且写入
+        stringRedisTemplate.opsForValue().set(redisInitKey,SENTINEL_NGINX);
+        val = stringRedisTemplate.opsForValue().get(SENTINEL_NGINX);
+        logger.warn("read:{},val:{}",prefix,val);
 
     }
 
@@ -208,6 +229,9 @@ public class NginxLuaRedisSerivce {
             FlowRuleEntity flowRule = (FlowRuleEntity) entity;
             //先写在这
             //key限流
+            flowRule.setLimitApp("default");
+            flowRule.setAdapterType(3);
+            flowRule.setAdapterResultOn(true);
 
             String url = NginxUtils.excludeHttpPre(flowRule.getResource());
             String key = MAX_STR + url;
@@ -231,7 +255,6 @@ public class NginxLuaRedisSerivce {
 
         stringRedisTemplate.delete(key);
         //HASH返回值
-
         stringRedisTemplate.boundHashOps(MSG_LIST).delete(url);
 
     }
@@ -241,15 +264,5 @@ public class NginxLuaRedisSerivce {
         List<FlowRuleEntity> rules = repository.findAllByApp(app);
         rulePublisher.publish(app, rules);
     }
-
-
-
-
-
-
-
-
-
-
 
 }

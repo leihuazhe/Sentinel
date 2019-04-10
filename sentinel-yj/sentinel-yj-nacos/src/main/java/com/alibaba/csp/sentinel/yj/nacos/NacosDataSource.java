@@ -1,5 +1,6 @@
 package com.alibaba.csp.sentinel.yj.nacos;
 
+import com.alibaba.csp.sentinel.datasource.Converter;
 import com.alibaba.csp.sentinel.datasource.ReadableDataSource;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
@@ -62,14 +63,23 @@ public class NacosDataSource {
 
         //限流
         ReadableDataSource<String, List<FlowRule>> flowRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(nacosConfig.getRemoteAddress(), nacosConfig.getGroupId(), flowDataId,
-                source -> JSON.parseObject(source, new TypeReference<List<FlowRule>>() {
-                }));
+                new Converter<String, List<FlowRule>>() {
+            @Override
+            public List<FlowRule> convert(String source) {
+                return JSON.parseObject(source, new TypeReference<List<FlowRule>>() {});
+            }
+        });
+
         FlowRuleManager.register2Property(flowRuleDataSource.getProperty());
 
         //系统
         ReadableDataSource<String, List<SystemRule>> systemRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(nacosConfig.getRemoteAddress(), nacosConfig.getGroupId(), systemDataId,
-                source -> JSON.parseObject(source, new TypeReference<List<SystemRule>>() {
-                }));
+                new Converter<String, List<SystemRule>>() {
+                    @Override
+                    public List<SystemRule> convert(String source) {
+                        return JSON.parseObject(source, new TypeReference<List<SystemRule>>() {});
+                    }
+                });
         SystemRuleManager.register2Property(systemRuleDataSource.getProperty());
     }
 
@@ -84,14 +94,22 @@ public class NacosDataSource {
 
         //限流
         ReadableDataSource<String, List<FlowRule>> flowRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(properties, nacosConfig.getGroupId(), flowDataId,
-                source -> JSON.parseObject(source, new TypeReference<List<FlowRule>>() {
-                }));
+                new Converter<String, List<FlowRule>>() {
+                    @Override
+                    public List<FlowRule> convert(String source) {
+                        return JSON.parseObject(source, new TypeReference<List<FlowRule>>() {});
+                    }
+                });
         FlowRuleManager.register2Property(flowRuleDataSource.getProperty());
 
         //系统
         ReadableDataSource<String, List<SystemRule>> systemRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(properties, nacosConfig.getGroupId(), systemDataId,
-                source -> JSON.parseObject(source, new TypeReference<List<SystemRule>>() {
-                }));
+                new Converter<String, List<SystemRule>>() {
+                    @Override
+                    public List<SystemRule> convert(String source) {
+                        return JSON.parseObject(source, new TypeReference<List<SystemRule>>() {});
+                    }
+                });
         SystemRuleManager.register2Property(systemRuleDataSource.getProperty());
 
 

@@ -88,23 +88,13 @@ public class ParamFlowRuleControllerV2 {
 
     @GetMapping("/rules")
     public Result<List<ParamFlowRuleEntity>> apiQueryAllRulesForMachine(HttpServletRequest request,
-                                                                        @RequestParam String app,
-                                                                        @RequestParam String ip,
-                                                                        @RequestParam Integer port) {
+                                                                        @RequestParam String app) {
         AuthUser authUser = authService.getAuthUser(request);
         authUser.authTarget(app, PrivilegeType.READ_RULE);
         if (StringUtil.isEmpty(app)) {
             return Result.ofFail(-1, "app cannot be null or empty");
         }
-        if (StringUtil.isEmpty(ip)) {
-            return Result.ofFail(-1, "ip cannot be null or empty");
-        }
-        if (port == null || port <= 0) {
-            return Result.ofFail(-1, "Invalid parameter: port");
-        }
-        if (!checkIfSupported(app, ip, port)) {
-            return unsupportedVersion();
-        }
+
         try {
 
             List<ParamFlowRuleEntity> rules = ruleProvider.getRules(app);

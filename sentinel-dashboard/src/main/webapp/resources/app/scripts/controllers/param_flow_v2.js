@@ -99,11 +99,7 @@ angular.module('sentinelDashboardApp').controller('ParamFlowControllerV2', ['$sc
       };
 
     function getMachineRules() {
-      if (!$scope.macInputModel) {
-        return;
-      }
-      let mac = $scope.macInputModel.split(':');
-      ParamFlowService.queryMachineRules($scope.app, mac[0], mac[1])
+      ParamFlowService.queryMachineRules($scope.app)
         .success(function (data) {
           if (data.code === 0 && data.data) {
             $scope.loadError = undefined;
@@ -147,11 +143,8 @@ angular.module('sentinelDashboardApp').controller('ParamFlowControllerV2', ['$sc
     };
 
     $scope.addNewRule = function () {
-      var mac = $scope.macInputModel.split(':');
       $scope.currentRule = {
         app: $scope.app,
-        ip: mac[0],
-        port: mac[1],
         rule: {
           grade: 1,
           paramFlowItemList: [],
@@ -283,7 +276,7 @@ angular.module('sentinelDashboardApp').controller('ParamFlowControllerV2', ['$sc
       }
     };
 
-    queryAppMachines();
+    //queryAppMachines();
 
     function queryAppMachines() {
       MachineService.getAppMachines($scope.app).success(

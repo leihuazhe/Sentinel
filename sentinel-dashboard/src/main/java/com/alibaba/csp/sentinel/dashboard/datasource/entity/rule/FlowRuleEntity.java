@@ -62,7 +62,7 @@ public class FlowRuleEntity implements RuleEntity {
     private Date gmtModified;
 
     /**
-     * 适配器类型(默认=0|dubbo=1|WebFilter=2)
+     * 适配器类型(默认=0|dubbo=1|WebFilter=2|nginx=3)
      */
     private int adapterType;
 

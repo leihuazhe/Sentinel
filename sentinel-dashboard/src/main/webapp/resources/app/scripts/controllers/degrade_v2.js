@@ -26,11 +26,7 @@ app.controller('DegradeCtlV2', ['$scope', '$stateParams', 'DegradeServiceV2', 'n
     };
     getMachineRules();
     function getMachineRules() {
-      if (!$scope.macInputModel) {
-        return;
-      }
-      var mac = $scope.macInputModel.split(':');
-      DegradeService.queryMachineRules($scope.app, mac[0], mac[1]).success(
+      DegradeService.queryMachineRules($scope.app).success(
         function (data) {
           if (data.code == 0 && data.data) {
             $scope.rules = data.data;
@@ -60,12 +56,9 @@ app.controller('DegradeCtlV2', ['$scope', '$stateParams', 'DegradeServiceV2', 'n
     };
 
     $scope.addNewRule = function () {
-      var mac = $scope.macInputModel.split(':');
       $scope.currentRule = {
         grade: 0,
         app: $scope.app,
-        ip: mac[0],
-        port: mac[1],
         limitApp: 'default'
       };
       $scope.degradeRuleDialog = {
@@ -167,7 +160,7 @@ app.controller('DegradeCtlV2', ['$scope', '$stateParams', 'DegradeServiceV2', 'n
         }
       });
     }
-    queryAppMachines();
+    //queryAppMachines();
     function queryAppMachines() {
       MachineService.getAppMachines($scope.app).success(
         function (data) {

@@ -29,11 +29,11 @@ angular.module('sentinelDashboardApp').controller('AuthorityRuleControllerV2', [
         };
 
         function getMachineRules() {
-            if (!$scope.macInputModel) {
+           /* if (!$scope.macInputModel) {
                 return;
             }
-            let mac = $scope.macInputModel.split(':');
-            AuthorityRuleService.queryMachineRules($scope.app, mac[0], mac[1])
+            let mac = $scope.macInputModel.split(':');*/
+            AuthorityRuleService.queryMachineRules($scope.app)
                 .success(function (data) {
                     if (data.code === 0 && data.data) {
                         $scope.loadError = undefined;
@@ -70,11 +70,9 @@ angular.module('sentinelDashboardApp').controller('AuthorityRuleControllerV2', [
         };
 
         $scope.addNewRule = function () {
-            var mac = $scope.macInputModel.split(':');
+
             $scope.currentRule = {
                 app: $scope.app,
-                ip: mac[0],
-                port: mac[1],
                 rule: {
                     strategy: 0,
                     limitApp: '',
@@ -191,7 +189,7 @@ angular.module('sentinelDashboardApp').controller('AuthorityRuleControllerV2', [
             }
         };
 
-        queryAppMachines();
+        //queryAppMachines();
 
         function queryAppMachines() {
             MachineService.getAppMachines($scope.app).success(

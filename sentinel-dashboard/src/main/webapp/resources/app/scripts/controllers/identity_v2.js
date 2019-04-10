@@ -43,7 +43,6 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
       if (!$scope.macInputModel) {
         return;
       }
-      var mac = $scope.macInputModel.split(':');
       flowRuleDialogScope = $scope.$new(true);
       flowRuleDialogScope.currentRule = {
         enable: false,
@@ -57,8 +56,6 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
             thresholdType: 0
         },
         app: $scope.app,
-        ip: mac[0],
-        port: mac[1],
         adapterType:0,
         adapterWebType:0
       };
@@ -126,7 +123,6 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
       if (!$scope.macInputModel) {
         return;
       }
-      var mac = $scope.macInputModel.split(':');
       degradeRuleDialogScope = $scope.$new(true);
       degradeRuleDialogScope.currentRule = {
         enable: false,
@@ -135,8 +131,6 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
         resource: resource,
         limitApp: 'default',
         app: $scope.app,
-        ip: mac[0],
-        port: mac[1]
       };
 
       degradeRuleDialogScope.degradeRuleDialog = {
@@ -230,15 +224,9 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
       }
 
       $scope.addNewAuthorityRule = function (resource) {
-          if (!$scope.macInputModel) {
-              return;
-          }
-          let mac = $scope.macInputModel.split(':');
           authorityRuleDialogScope = $scope.$new(true);
           authorityRuleDialogScope.currentRule = {
               app: $scope.app,
-              ip: mac[0],
-              port: mac[1],
               rule: {
                   resource: resource,
                   strategy: 0,
@@ -309,15 +297,9 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
       }
 
       $scope.addNewParamFlowRule = function (resource) {
-          if (!$scope.macInputModel) {
-              return;
-          }
-          let mac = $scope.macInputModel.split(':');
           paramFlowRuleDialogScope = $scope.$new(true);
           paramFlowRuleDialogScope.currentRule = {
               app: $scope.app,
-              ip: mac[0],
-              port: mac[1],
               rule: {
                   resource: resource,
                   grade: 1,
@@ -413,7 +395,7 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
     }
 
     // Fetch all machines by current app name.
-    queryAppMachines();
+    //queryAppMachines();
 
     $scope.$watch('macInputModel', function () {
       if ($scope.macInputModel) {
@@ -435,12 +417,12 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
     };
 
     function queryIdentities() {
-      var mac = $scope.macInputModel.split(':');
+      /*var mac = $scope.macInputModel.split(':');
       if (mac == null || mac.length < 2) {
         return;
-      }
+      }*/
       if ($scope.isTreeView) {
-        IdentityService.fetchIdentityOfMachine(mac[0], mac[1], $scope.searchKey,$scope.app).success(
+        IdentityService.fetchIdentityOfMachine( $scope.searchKey,$scope.app).success(
           function (data) {
             if (data.code == 0 && data.data) {
               $scope.identities = data.data;
@@ -452,7 +434,7 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
           }
         );
       } else {
-        IdentityService.fetchClusterNodeOfMachine(mac[0], mac[1], $scope.searchKey,$scope.app).success(
+        IdentityService.fetchClusterNodeOfMachine($scope.searchKey,$scope.app).success(
           function (data) {
             if (data.code == 0 && data.data) {
               $scope.identities = data.data;

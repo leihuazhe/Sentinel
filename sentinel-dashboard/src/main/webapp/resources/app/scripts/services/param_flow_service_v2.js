@@ -4,14 +4,12 @@
  * @author Eric Zhao
  */
 angular.module('sentinelDashboardApp').service('ParamFlowServiceV2', ['$http', function ($http) {
-  this.queryMachineRules = function(app, ip, port) {
+  this.queryMachineRules = function(app) {
     var param = {
-      app: app,
-      ip: ip,
-      port: port
+      app: app
     };
     return $http({
-      url: '/paramFlow/rules',
+      url: '/v2/paramFlow/rules',
       params: param,
       method: 'GET'
     });
@@ -19,7 +17,7 @@ angular.module('sentinelDashboardApp').service('ParamFlowServiceV2', ['$http', f
 
   this.addNewRule = function(rule) {
     return $http({
-      url: '/paramFlow/rule',
+      url: '/v2/paramFlow/rule',
       data: rule,
       method: 'POST'
     });
@@ -27,7 +25,7 @@ angular.module('sentinelDashboardApp').service('ParamFlowServiceV2', ['$http', f
 
   this.saveRule = function (entity) {
     return $http({
-      url: '/paramFlow/rule/' + entity.id,
+      url: '/v2/paramFlow/rule/' + entity.id,
       data: entity,
       method: 'PUT'
     });
@@ -35,7 +33,7 @@ angular.module('sentinelDashboardApp').service('ParamFlowServiceV2', ['$http', f
 
   this.deleteRule = function (entity) {
     return $http({
-      url: '/paramFlow/rule/' + entity.id,
+      url: '/v2/paramFlow/rule/' + entity.id,
       method: 'DELETE'
     });
   };

@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
 
+import com.alibaba.csp.sentinel.dashboard.service.NginxLuaRedisSerivce;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -33,44 +34,19 @@ public class AppManagement implements MachineDiscovery {
 
     private MachineDiscovery machineDiscovery;
 
+    @Autowired
+    private NginxLuaRedisSerivce nginxLuaRedisSerivce;
+
     @PostConstruct
     public void init() {
         machineDiscovery = context.getBean(SimpleMachineDiscovery.class);
-
-//        //自动加入nginx
-//        MachineInfo machineInfo = new MachineInfo();
-//        machineInfo.setApp("nginx");
-//        machineInfo.setIp("127.0.0.1");
-//        machineInfo.setPort(80);
-//        machineInfo.setVersion("0.0.1");
-//
-//        addMachine(machineInfo);
     }
 
     @Override
     public Set<AppInfo> getBriefApps() {
         Set<AppInfo> appInfos = machineDiscovery.getBriefApps();
-        appInfos.add(getNginxAppInfo());
+        appInfos.addAll(nginxLuaRedisSerivce.getNginxAppInfo());
         return appInfos;
-    }
-
-    private AppInfo getNginxAppInfo(){
-        AppInfo appInfo = new AppInfo();
-        appInfo.setApp("nginx");
-
-        MachineInfo machineInfo = new MachineInfo();
-        machineInfo.setApp("nginx");
-        machineInfo.setIp("127.0.0.1");
-        machineInfo.setPort(80);
-        machineInfo.setVersion("1.5.1");
-        machineInfo.setHostname("nginx-pc");
-        machineInfo.setLastHeartbeat(System.currentTimeMillis());
-        machineInfo.setHeartbeatVersion(System.currentTimeMillis()-10);
-
-
-        appInfo.addMachine(machineInfo);
-
-        return appInfo;
     }
 
     @Override
@@ -90,8 +66,13 @@ public class AppManagement implements MachineDiscovery {
 
     @Override
     public AppInfo getDetailApp(String app) {
-        if("nginx".equals(app)){
-            return getNginxAppInfo();
+        List<AppInfo> nginxAppInfo = nginxLuaRedisSerivce.getNginxAppInfo();
+        if(nginxAppInfo!=null && nginxAppInfo.size()>0){
+            for(AppInfo appInfo:nginxAppInfo){
+                if(appInfo.getApp().equals(app)){
+                    return appInfo;
+                }
+            }
         }
         return machineDiscovery.getDetailApp(app);
     }

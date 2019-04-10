@@ -43,7 +43,7 @@ public abstract class AbstractRule implements Rule {
 
 
     /**
-     * 适配器类型适配器类型(默认=0|dubbo=1|WebFilter=2)
+     * 适配器类型适配器类型(默认=0|dubbo=1|WebFilter=2|nginx=3)
      */
     private int adapterType = 0;
 

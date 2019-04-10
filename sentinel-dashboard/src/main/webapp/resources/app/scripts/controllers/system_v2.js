@@ -28,11 +28,7 @@ app.controller('SystemCtlV2', ['$scope', '$stateParams', 'SystemServiceV2', 'ngD
 
     getMachineRules();
     function getMachineRules() {
-      if (!$scope.macInputModel) {
-        return;
-      }
-      var mac = $scope.macInputModel.split(':');
-      SystemService.queryMachineRules($scope.app, mac[0], mac[1]).success(
+      SystemService.queryMachineRules($scope.app).success(
         function (data) {
           if (data.code == 0 && data.data) {
             $scope.rules = data.data;
@@ -73,12 +69,11 @@ app.controller('SystemCtlV2', ['$scope', '$stateParams', 'SystemServiceV2', 'ngD
     };
 
     $scope.addNewRule = function () {
-      var mac = $scope.macInputModel.split(':');
+
       $scope.currentRule = {
         grade: 0,
         app: $scope.app,
-        ip: mac[0],
-        port: mac[1],
+
       };
       $scope.systemRuleDialog = {
         title: '新增系统保护规则',
@@ -195,7 +190,7 @@ app.controller('SystemCtlV2', ['$scope', '$stateParams', 'SystemServiceV2', 'ngD
         }
       });
     }
-    queryAppMachines();
+    //queryAppMachines();
     function queryAppMachines() {
       MachineService.getAppMachines($scope.app).success(
         function (data) {
