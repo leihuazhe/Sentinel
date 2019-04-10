@@ -1,7 +1,5 @@
 package com.alibaba.csp.sentinel.dashboard.config;
 
-import com.alibaba.csp.sentinel.dashboard.repository.rule.nacos.NacosConfigUtil;
-import com.alibaba.csp.sentinel.util.AppNameUtil;
 import com.alibaba.csp.sentinel.yj.nacos.NacosConfig;
 import com.alibaba.csp.sentinel.yj.nacos.NacosDataSource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,7 +13,6 @@ public class NacosDataSourceConfig {
     @ConfigurationProperties("sentinel.nacos")
     public NacosConfig getNacosConfig(){
         NacosConfig nacosConfig = new NacosConfig();
-        nacosConfig.setDataId(AppNameUtil.getAppName() + NacosConfigUtil.FLOW_DATA_ID_POSTFIX);
         return nacosConfig;
     }
 
