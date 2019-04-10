@@ -3,6 +3,8 @@ package com.alibaba.csp.sentinel.dashboard.service;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemFlowRuleStore;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemoryRuleRepositoryAdapter;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.dashboard.util.NginxUtils;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.util.AppNameUtil;
@@ -16,6 +18,7 @@ import org.apache.kafka.common.protocol.types.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +45,17 @@ public class NginxLuaRedisSerivce {
 
     private static final String SENTINEL_NGINX_LIMIT = "sentinel_nginx_limit";
 
+
+    @Autowired
+    private InMemoryRuleRepositoryAdapter<FlowRuleEntity> repository;
+
+    @Autowired
+    @Qualifier("flowRuleNacosProvider")
+    private DynamicRuleProvider<List<FlowRuleEntity>> ruleProvider;
+
+    @Autowired
+    @Qualifier("flowRuleNacosPublisher")
+    private DynamicRulePublisher<List<FlowRuleEntity>> rulePublisher;
 
     @PostConstruct
     public void init(){
@@ -114,6 +128,12 @@ public class NginxLuaRedisSerivce {
             for(Map.Entry<String, String> e:set){
                 transform(e.getKey(),e.getValue());
             }
+            try{
+                publishRules("nginx");
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+
         }).start();
 
 
@@ -216,6 +236,11 @@ public class NginxLuaRedisSerivce {
 
     }
 
+
+    private void publishRules(/*@NonNull*/ String app) throws Exception {
+        List<FlowRuleEntity> rules = repository.findAllByApp(app);
+        rulePublisher.publish(app, rules);
+    }
 
 
 
