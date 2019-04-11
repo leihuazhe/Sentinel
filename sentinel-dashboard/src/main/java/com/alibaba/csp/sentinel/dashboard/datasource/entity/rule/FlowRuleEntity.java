@@ -20,6 +20,7 @@ import java.util.Date;
 import com.alibaba.csp.sentinel.slots.block.flow.ClusterFlowConfig;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author leyou
@@ -100,7 +101,10 @@ public class FlowRuleEntity implements RuleEntity {
 
         entity.setAdapterText(rule.getAdapterText());
         entity.setAdapterType(rule.getAdapterType());
-        entity.setAdapterResultOn(rule.getAdapterResultOn());
+        if(StringUtils.isNoneBlank(rule.getAdapterText())){
+            entity.setAdapterResultOn(true);
+        }
+
         entity.setAdapterWebType(rule.getAdapterWebType());
         if(rule.getAdapterType() == 2){ //web
 

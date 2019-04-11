@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.PrivilegeType;
+import com.alibaba.csp.sentinel.dashboard.repository.rule.nacos.NacosConfigUtil;
 import com.alibaba.csp.sentinel.util.StringUtil;
 
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
@@ -31,6 +32,7 @@ import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,6 +158,9 @@ public class FlowControllerV2 {
         entity.setGmtModified(date);
         entity.setLimitApp(entity.getLimitApp().trim());
         entity.setResource(entity.getResource().trim());
+        if(StringUtils.isNoneBlank(entity.getAdapterText())){
+            entity.setAdapterResultOn(true);
+        }
         try {
             entity = repository.save(entity);
             publishRules(entity.getApp());
@@ -195,6 +200,9 @@ public class FlowControllerV2 {
         Date date = new Date();
         entity.setGmtCreate(oldEntity.getGmtCreate());
         entity.setGmtModified(date);
+        if(StringUtils.isNoneBlank(entity.getAdapterText())){
+            entity.setAdapterResultOn(true);
+        }
         try {
             entity = repository.save(entity);
             if (entity == null) {
@@ -231,5 +239,6 @@ public class FlowControllerV2 {
     private void publishRules(/*@NonNull*/ String app) throws Exception {
         List<FlowRuleEntity> rules = repository.findAllByApp(app);
         rulePublisher.publish(app, rules);
+        Thread.sleep(NacosConfigUtil.SLEEP_AFTER_UP);//解决未及时问题
     }
 }

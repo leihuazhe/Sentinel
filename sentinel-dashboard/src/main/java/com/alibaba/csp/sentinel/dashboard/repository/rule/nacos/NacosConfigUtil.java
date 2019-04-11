@@ -41,5 +41,8 @@ public final class NacosConfigUtil {
     public static final String SERVER_FLOW_CONFIG_DATA_ID_POSTFIX = "-cs-flow-config";
     public static final String SERVER_NAMESPACE_SET_DATA_ID_POSTFIX = "-cs-namespace-set";
 
+
+    public static final long SLEEP_AFTER_UP = 300;
+
     private NacosConfigUtil() {}
 }

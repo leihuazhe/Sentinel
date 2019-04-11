@@ -365,8 +365,75 @@
                 </repository>
             </distributionManagement>
         </profile>
+        <profile>
+            <id>yj</id>
+            <build>
+                <plugins>
+                    <!-- Source -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${maven.source.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven.javadoc.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <locale>en_US</locale>
+                                    <encoding>UTF-8</encoding>
+                                    <charset>UTF-8</charset>
+                                    <doclint>none</doclint>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- GPG
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven.gpg.version}</version>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                     -->
+                </plugins>
+            </build>
+            <distributionManagement>
+                <repository>
+                    <id>nexus-releases</id>
+                    <name>yunji-releases</name>
+                    <url>http://nexus.yunjiglobal.com/repository/yunji-releases/</url>
+                </repository>
+                <snapshotRepository>
+                    <id>nexus-snapshots</id>
+                    <name>yunji-snapshots</name>
+                    <url>http://nexus.yunjiglobal.com/repository/yunji-snapshots/</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
     </profiles>
-
 
     <distributionManagement>
         <repository>
@@ -381,18 +448,7 @@
         </snapshotRepository>
     </distributionManagement>
 
-    <repositories>
-        <repository>
-            <id>nexus-releases</id>
-            <name>yunji-releases</name>
-            <url>http://nexus.yunjiglobal.com/repository/yunji-releases/</url>
-        </repository>
-        <repository>
-            <id>nexus-snapshots</id>
-            <name>yunji-snapshots</name>
-            <url>http://nexus.yunjiglobal.com/repository/yunji-snapshots/</url>
-        </repository>
-    </repositories>
+
 
 
 </project>

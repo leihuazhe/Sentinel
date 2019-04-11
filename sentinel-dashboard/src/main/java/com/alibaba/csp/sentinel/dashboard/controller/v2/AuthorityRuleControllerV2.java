@@ -24,6 +24,7 @@ import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.RuleRepository;
+import com.alibaba.csp.sentinel.dashboard.repository.rule.nacos.NacosConfigUtil;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
@@ -182,5 +183,6 @@ public class AuthorityRuleControllerV2 {
     private void publishRules(/*@NonNull*/ String app) throws Exception {
         List<AuthorityRuleEntity> rules = repository.findAllByApp(app);
         rulePublisher.publish(app, rules);
+        Thread.sleep(NacosConfigUtil.SLEEP_AFTER_UP);//解决未及时问题
     }
 }

@@ -24,6 +24,7 @@ import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.SystemRuleEntit
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemSystemRuleStore;
+import com.alibaba.csp.sentinel.dashboard.repository.rule.nacos.NacosConfigUtil;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.util.StringUtil;
@@ -228,5 +229,6 @@ public class SystemControllerV2 {
     private void publishRules(/*@NonNull*/ String app) throws Exception {
         List<SystemRuleEntity> rules = repository.findAllByApp(app);
         rulePublisher.publish(app, rules);
+        Thread.sleep(NacosConfigUtil.SLEEP_AFTER_UP);//解决未及时问题
     }
 }
