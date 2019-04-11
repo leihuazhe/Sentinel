@@ -214,6 +214,8 @@
                 <directory>src/main/webapp/</directory>
                 <excludes>
                     <exclude>resources/node_modules/**</exclude>
+                    <exclude>resources/bower_components/**</exclude>
+                    <exclude>resources/tmp/**</exclude>
                 </excludes>
             </resource>
         </resources>

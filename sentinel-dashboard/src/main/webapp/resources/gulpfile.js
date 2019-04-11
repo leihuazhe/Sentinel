@@ -25,9 +25,14 @@ const JS_LIBS = [
   'node_modules/angular-ui-notification/dist/angular-ui-notification.min.js',
   'node_modules/angular-utils-pagination/dirPagination.js',
   'app/scripts/libs/treeTable.js',
-  'node_modules/ace-builds/src-min-noconflict/ace.js',
+  /*'node_modules/ace-builds/src-min-noconflict/ace.js',
   'node_modules/ace-builds/src-min-noconflict/theme-monokai.js',
-  'node_modules/ace-builds/src-min-noconflict/mode-json.js',
+  'node_modules/ace-builds/src-min-noconflict/work-json.js',
+  'node_modules/ace-builds/src-min-noconflict/work-xml.js',
+  'node_modules/ace-builds/src-min-noconflict/work-html.js',
+  'node_modules/ace-builds/src-min-noconflict/mode-html.js',
+  'node_modules/ace-builds/src-min-noconflict/mode-xml.js',
+  'node_modules/ace-builds/src-min-noconflict/mode-json.js',*/
   'node_modules/angular-ui-ace/src/ui-ace.js'
 ];
 
