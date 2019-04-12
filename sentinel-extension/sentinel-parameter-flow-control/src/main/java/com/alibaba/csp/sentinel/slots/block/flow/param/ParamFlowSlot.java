@@ -38,8 +38,7 @@ import com.alibaba.csp.sentinel.util.StringUtil;
  */
 public class ParamFlowSlot extends AbstractLinkedProcessorSlot<DefaultNode> {
 
-    private static final Map<ResourceWrapper, ParameterMetric> metricsMap
-        = new ConcurrentHashMap<ResourceWrapper, ParameterMetric>();
+    private static final Map<ResourceWrapper, ParameterMetric> metricsMap = new ConcurrentHashMap<>();
 
     /**
      * Lock for a specific resource.
