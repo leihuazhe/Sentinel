@@ -329,7 +329,7 @@ public class InfluxDBMetricsRepository  {
 
         final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=";
         try {
-            String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\".sentinel_monitor where app='"+app+"' and resource='"+resource+"' and time >= now() - 1m group by time(5s) #query_select#"+app,"UTF-8");
+            String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\".sentinel_monitor where app='"+app+"' and resource='"+resource+"' and time >= now() - 1m group by time(10s) #query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
             logger.debug("listResourcesOfApp:{}",result);
 
