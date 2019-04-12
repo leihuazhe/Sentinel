@@ -368,7 +368,7 @@ public class InfluxDBMetricsRepository  {
 
     //@Override
     public List<String> listResourcesOfApp(String app) {
-        List<NodeVo> list = fetchResourceOfMachine(app);
+        List<NodeVo> list = fetchResourceOfMachine(app,0);
         List<String> lst = new ArrayList<>();
         for(NodeVo node:list){
             lst.add(node.getResource());
@@ -376,42 +376,75 @@ public class InfluxDBMetricsRepository  {
         return lst;
     }
 
-
     public List<NodeVo> fetchResourceOfMachine(String app){
+        Map<String,NodeVo> map = new HashMap<>();
+        List<NodeVo> list =  fetchResourceOfMachine(app,10);
+        for(NodeVo nodeVo:list){
+            map.put(nodeVo.getResource(),nodeVo);
+        }
+        List<NodeVo> listOne =  fetchResourceOfMachine(app,0);
+        for(NodeVo nodeVo:listOne){
+            NodeVo oNodeVo = map.get(nodeVo.getResource());
+            if(oNodeVo!=null){
+                nodeVo.setBlockQps(oNodeVo.getBlockQps());
+                nodeVo.setExceptionQps(oNodeVo.getExceptionQps());
+                nodeVo.setAverageRt(oNodeVo.getAverageRt());
+                nodeVo.setPassQps(oNodeVo.getPassQps());
+                nodeVo.setTotalQps(oNodeVo.getTotalQps());
+            }else{
+                nodeVo.setBlockQps(0L);
+                nodeVo.setExceptionQps(0L);
+                nodeVo.setAverageRt(0L);
+                nodeVo.setPassQps(0L);
+                nodeVo.setTotalQps(0L);
+            }
+
+        }
+        return listOne;
+    }
+
+    /**
+     * 获取监控
+     * @param app
+     * @param type 0:当前一分钟 1：当前几秒平均
+     * @return
+     */
+    public List<NodeVo> fetchResourceOfMachine(String app,int type){
+        String time = type==0?"1m":(type+"s");
         List<NodeVo> list = new ArrayList<>();
         final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=";
         try {
-            String q = URLEncoder.encode("select sum(successQps) as successQps,sum(blockQps) as blockQps,sum(exceptionQps) as exceptionQps,sum(rt) as rt,sum(passQps) as passQps  from \"1d\".sentinel_monitor where app='"+app+"' and time >= now() - 1m group by resource#query_select#"+app,"UTF-8");
+            String q = URLEncoder.encode("select sum(successQps) as successQps,sum(blockQps) as blockQps,sum(exceptionQps) as exceptionQps,sum(rt) as rt,sum(passQps) as passQps  from \"1d\".sentinel_monitor where app='"+app+"' and time >= now() - "+time+" group by resource#query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
             logger.debug("listResourcesOfApp:{}",result);
 
             QueryResult queryResult = JSON.parseObject(result,QueryResult.class);
-            System.out.println("listResourcesOfApp:"+queryResult);
-
             List<com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo> vos = new InfluxDBResultMapper().toPOJO(queryResult, com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo.class, "sentinel_monitor");
 
 
             for(com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo vo : vos){
                 NodeVo nodeVo = new NodeVo();
                 nodeVo.setResource(vo.getResource());
-                nodeVo.setBlockQps(NumberUtils.toLong(vo.getBlockQps(),0));
-                nodeVo.setExceptionQps(NumberUtils.toLong(vo.getExceptionQps(),0));
-                nodeVo.setAverageRt(NumberUtils.toLong(vo.getAverageRt(),0));
-                nodeVo.setPassQps(NumberUtils.toLong(vo.getPassQps(),0));
 
-                nodeVo.setOneMinutePass(NumberUtils.toLong(vo.getSuccessQps(),0));
-                nodeVo.setOneMinuteBlock(NumberUtils.toLong(vo.getBlockQps(),0));
-                nodeVo.setOneMinuteException(NumberUtils.toLong(vo.getExceptionQps(),0));
+                if(type==0){
+                    nodeVo.setOneMinutePass(NumberUtils.toLong(vo.getSuccessQps(),0));
+                    nodeVo.setOneMinuteBlock(NumberUtils.toLong(vo.getBlockQps(),0));
+                    nodeVo.setOneMinuteException(NumberUtils.toLong(vo.getExceptionQps(),0));
+                    nodeVo.setOneMinuteTotal(nodeVo.getOneMinuteBlock() + nodeVo.getOneMinuteException() + nodeVo.getOneMinutePass());
 
-                nodeVo.setOneMinuteTotal(NumberUtils.toLong(vo.getAverageRt(),0));
-                nodeVo.setTotalQps(NumberUtils.toLong(vo.getAverageRt(),0));
-                nodeVo.setThreadNum(NumberUtils.toInt(vo.getAverageRt(),0));
-
+                }else {
+                    nodeVo.setBlockQps(NumberUtils.toLong(vo.getBlockQps(),0)/type);
+                    nodeVo.setExceptionQps(NumberUtils.toLong(vo.getExceptionQps(),0)/type);
+                    nodeVo.setAverageRt(NumberUtils.toLong(vo.getAverageRt(),0)/type);
+                    nodeVo.setPassQps(NumberUtils.toLong(vo.getPassQps(),0)/type);
+                    nodeVo.setTotalQps(nodeVo.getBlockQps() + nodeVo.getExceptionQps() + nodeVo.getPassQps());
+                }
+                nodeVo.setThreadNum(0);
                 list.add(nodeVo);
             }
 
         }catch (Exception ex){
-            logger.warn("listResourcesOfApp",ex);
+            logger.warn("listResourcesOfApp error:",ex);
         }
         return list;
     }
