@@ -74,6 +74,10 @@ public class SentinelConfig {
 //            String fileName = LogBase.getLogBaseDir() + appName + ".properties";
             String fileName = "/usr/local/yunji/config/" + appName +"/"+appName+"_sentinel_"+AppNameUtil.getEnvConfig("config_env")+ ".properties";
             File file = new File(fileName);
+            if(!file.exists()){
+                fileName = "/usr/local/yunji/config/" + appName +"-assembly/"+appName+"_sentinel_"+AppNameUtil.getEnvConfig("config_env")+ ".properties";
+                file = new File(fileName);
+            }
             if (file.exists()) {
                 RecordLog.info("[SentinelConfig] Reading config from " + fileName);
                 FileInputStream fis = new FileInputStream(fileName);
