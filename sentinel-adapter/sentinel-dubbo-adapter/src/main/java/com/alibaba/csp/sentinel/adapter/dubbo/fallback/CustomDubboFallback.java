@@ -3,6 +3,7 @@ package com.alibaba.csp.sentinel.adapter.dubbo.fallback;
 import com.alibaba.csp.sentinel.slots.block.AbstractRule;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.SentinelRpcException;
+import com.alibaba.csp.sentinel.slots.block.flow.FlowException;
 import com.alibaba.dubbo.rpc.Invocation;
 import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
@@ -26,21 +27,22 @@ public class CustomDubboFallback implements DubboFallback{
 
     public static Result returnAdapterResult(Invoker<?> invoker, Invocation invocation, BlockException ex){
 
-        //判断异常中Rule是否支持可定义返回
-        AbstractRule abstractRule = ex.getRule();
-        if(abstractRule.getAdapterResultOn() && abstractRule.getAdapterType() == 1){
-            if(abstractRule.getAdapterResult()==null){
-                synchronized (abstractRule){
-                    if(abstractRule.getAdapterResult()==null){
-                        try {
-                            //TDTD
-                            Method method = invoker.getInterface().getMethod(invocation.getMethodName(),invocation.getParameterTypes());
-                            Type type = method.getGenericReturnType();
+        if(ex instanceof FlowException) {
+            //判断异常中Rule是否支持可定义返回
+            AbstractRule abstractRule = ex.getRule();
+            if (abstractRule.getAdapterResultOn() && abstractRule.getAdapterType() == 1) {
+                if (abstractRule.getAdapterResult() == null) {
+                    synchronized (abstractRule) {
+                        if (abstractRule.getAdapterResult() == null) {
+                            try {
+                                //TDTD
+                                Method method = invoker.getInterface().getMethod(invocation.getMethodName(), invocation.getParameterTypes());
+                                Type type = method.getGenericReturnType();
 
 
-                            Gson gson = new Gson();
-                            Object result = gson.fromJson(abstractRule.getAdapterText(),type);
-                            abstractRule.setAdapterResult(result);
+                                Gson gson = new Gson();
+                                Object result = gson.fromJson(abstractRule.getAdapterText(), type);
+                                abstractRule.setAdapterResult(result);
 
 /*
 //fastjson
@@ -59,16 +61,16 @@ public class CustomDubboFallback implements DubboFallback{
 
                             abstractRule.setAdapterResult(null);
 */
-                        }catch (Exception e){
-                            e.printStackTrace();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+
                         }
-
-
-
                     }
                 }
+                return new RpcResult(abstractRule.getAdapterResult());
             }
-            return new RpcResult(abstractRule.getAdapterResult());
         }
 
         // Just wrap and throw the exception.
