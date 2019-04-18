@@ -131,10 +131,10 @@ public class InfluxDBMetricsRepository  {
             final String data = JSON.toJSONString(list);
 
 
-            if(kafkaReport!=null){
+            if(monitorReportHttp==null &&kafkaReport!=null){
                 kafkaReport.report(data);
                 //方便调试
-                //return;
+                return;
             }
             final String url = monitorReportHttp + "/writeV2";
             final HttpPost httpPost = new HttpPost(url);

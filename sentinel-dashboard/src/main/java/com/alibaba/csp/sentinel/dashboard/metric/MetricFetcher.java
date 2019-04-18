@@ -44,6 +44,7 @@ import com.alibaba.csp.sentinel.node.metric.MetricNode;
 import com.alibaba.csp.sentinel.util.StringUtil;
 
 import com.alibaba.csp.sentinel.dashboard.repository.metric.MetricsRepository;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.concurrent.FutureCallback;
@@ -57,6 +58,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -82,6 +84,12 @@ public class MetricFetcher {
     private MetricsRepository<MetricEntity> metricStore;
     @Autowired
     private AppManagement appManagement;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    private final String FETCHER_KEY = "fetcher:key";
+    private final String FETCHER_LOCK_KEY = "fetcher:lock";
 
     private CloseableHttpAsyncClient httpclient;
 
@@ -265,7 +273,13 @@ public class MetricFetcher {
         long lastFetchMs = now - MAX_LAST_FETCH_INTERVAL_MS;
         if (appLastFetchTime.containsKey(app)) {
             lastFetchMs = Math.max(lastFetchMs, appLastFetchTime.get(app).get() + 1000);
+        }else {
+            Object obj = stringRedisTemplate.opsForHash().get(FETCHER_KEY,app);
+            if (obj!=null) {
+                lastFetchMs = Math.max(lastFetchMs, NumberUtils.toLong(obj.toString()) + 1000);
+            }
         }
+
         // trim milliseconds
         lastFetchMs = lastFetchMs / 1000 * 1000;
         long endTime = lastFetchMs + FETCH_INTERVAL_SECOND * 1000;
@@ -274,7 +288,12 @@ public class MetricFetcher {
             return;
         }
         // update last_fetch in advance.
+        if(!lock(FETCHER_KEY+ app,String.valueOf(endTime))){
+            appLastFetchTime.computeIfAbsent(app, a -> new AtomicLong()).set(endTime);
+            return;
+        }
         appLastFetchTime.computeIfAbsent(app, a -> new AtomicLong()).set(endTime);
+        stringRedisTemplate.opsForHash().put(FETCHER_KEY,app,String.valueOf(endTime));
         final long finalLastFetchMs = lastFetchMs;
         final long finalEndTime = endTime;
         try {
@@ -289,6 +308,31 @@ public class MetricFetcher {
         } catch (Exception e) {
             logger.info("submit fetchOnce(" + app + ") fail, intervalMs [" + lastFetchMs + ", " + endTime + "]", e);
         }
+    }
+
+    /**
+     * 加锁
+     * @param key
+     * @param value 当前时间+超时时间
+     * @return
+     */
+    public boolean lock(String key, String value) {
+        if(stringRedisTemplate.opsForValue().setIfAbsent(key, value)) {
+            return true;
+        }
+        //currentValue=A   这两个线程的value都是B  其中一个线程拿到锁
+        String currentValue = stringRedisTemplate.opsForValue().get(key);
+        //如果锁过期
+        if (!StringUtil.isEmpty(currentValue)
+                && Long.parseLong(currentValue) < System.currentTimeMillis()) {
+            //获取上一个锁的时间
+            String oldValue = stringRedisTemplate.opsForValue().getAndSet(key, value);
+            if (!StringUtil.isEmpty(oldValue) && oldValue.equals(currentValue)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void handleResponse(final HttpResponse response, MachineInfo machine,

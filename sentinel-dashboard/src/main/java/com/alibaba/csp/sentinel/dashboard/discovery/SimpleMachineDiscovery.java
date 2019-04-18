@@ -15,16 +15,18 @@
  */
 package com.alibaba.csp.sentinel.dashboard.discovery;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.alibaba.csp.sentinel.util.AssertUtil;
 
+import com.alibaba.fastjson.JSON;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author leyou
@@ -32,46 +34,70 @@ import org.springframework.stereotype.Component;
 @Component
 public class SimpleMachineDiscovery implements MachineDiscovery {
 
-    private final ConcurrentMap<String, AppInfo> apps = new ConcurrentHashMap<>();
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    private final String SENTINEL_APPS = "sentinel:apps:";
 
     @Override
     public long addMachine(MachineInfo machineInfo) {
         AssertUtil.notNull(machineInfo, "machineInfo cannot be null");
-        AppInfo appInfo = apps.computeIfAbsent(machineInfo.getApp(), AppInfo::new);
-        appInfo.addMachine(machineInfo);
+        String appKey = SENTINEL_APPS + machineInfo.getApp();
+        String key = machineInfo.getIp() + ":" + machineInfo.getPort();
+        stringRedisTemplate.boundHashOps(appKey).put(key, JSON.toJSONString(machineInfo));
         return 1;
     }
 
     @Override
     public boolean removeMachine(String app, String ip, int port) {
         AssertUtil.assertNotBlank(app, "app name cannot be blank");
-        AppInfo appInfo = apps.get(app);
-        if (appInfo != null) {
-            return appInfo.removeMachine(ip, port);
-        }
-        return false;
+        String appKey = SENTINEL_APPS + app;
+        String key = ip + ":" + port;
+        stringRedisTemplate.boundHashOps(appKey).delete(key);
+        return true;
     }
 
     @Override
     public List<String> getAppNames() {
-        return new ArrayList<>(apps.keySet());
+        Set<String> set = stringRedisTemplate.keys(SENTINEL_APPS + "*");
+        return set.stream().map(str-> str.replaceAll(SENTINEL_APPS,"")).collect(toList());
     }
 
     @Override
     public AppInfo getDetailApp(String app) {
         AssertUtil.assertNotBlank(app, "app name cannot be blank");
-        return apps.get(app);
+        String appKey = SENTINEL_APPS + app;
+        AppInfo appInfo = new AppInfo();
+        appInfo.setApp(app);
+        Map<Object,Object> maps = stringRedisTemplate.opsForHash().entries(appKey);
+        if(maps!=null){
+            Set<Map.Entry<Object, Object>> entrySet = maps.entrySet();
+            for (Map.Entry<Object, Object> entry : entrySet) {
+                MachineInfo machineInfo = JSON.parseObject(entry.getValue().toString(),MachineInfo.class);
+                if(machineInfo!=null){
+                    appInfo.addMachine(machineInfo);
+                }
+            }
+        }
+        return appInfo;
     }
 
     @Override
     public Set<AppInfo> getBriefApps() {
-        return new HashSet<>(apps.values());
+        Set<AppInfo> appInfoSet = new HashSet<>();
+        List<String> appNames = getAppNames();
+        for (String str:appNames) {
+            appInfoSet.add(getDetailApp(str));
+        }
+        return appInfoSet;
     }
 
     @Override
     public void removeApp(String app) {
         AssertUtil.assertNotBlank(app, "app name cannot be blank");
-        apps.remove(app);
+        //apps.remove(app);
+        stringRedisTemplate.delete(SENTINEL_APPS + app);
     }
 
 }
