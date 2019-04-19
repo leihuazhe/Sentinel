@@ -22,5 +22,23 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.taobao.diamond</groupId>
+            <artifactId>diamondx-client</artifactId>
+            <version>3.0.2</version>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>nexus-releases</id>
+            <name>yunji-releases</name>
+            <url>http://nexus.yunjiglobal.com/repository/yunji-releases/</url>
+        </repository>
+        <repository>
+            <id>nexus-snapshots</id>
+            <name>yunji-snapshots</name>
+            <url>http://nexus.yunjiglobal.com/repository/yunji-snapshots/</url>
+        </repository>
+    </repositories>
 </project>

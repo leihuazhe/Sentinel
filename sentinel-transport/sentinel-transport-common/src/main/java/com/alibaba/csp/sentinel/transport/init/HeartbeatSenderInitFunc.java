@@ -45,7 +45,8 @@ public class HeartbeatSenderInitFunc implements InitFunc {
 
     @Override
     public void init() {
-        ServiceLoader<HeartbeatSender> loader = ServiceLoader.load(HeartbeatSender.class);
+        System.out.println("HeartbeatSender:"+HeartbeatSender.class.getClassLoader().toString());
+        ServiceLoader<HeartbeatSender> loader = ServiceLoader.load(HeartbeatSender.class,HeartbeatSender.class.getClassLoader());
         Iterator<HeartbeatSender> iterator = loader.iterator();
         if (iterator.hasNext()) {
             final HeartbeatSender sender = iterator.next();

@@ -30,7 +30,7 @@ import com.alibaba.csp.sentinel.util.StringUtil;
  */
 public class CommandHandlerProvider implements Iterable<CommandHandler> {
 
-    private final ServiceLoader<CommandHandler> serviceLoader = ServiceLoader.load(CommandHandler.class);
+    private final ServiceLoader<CommandHandler> serviceLoader = ServiceLoader.load(CommandHandler.class,CommandHandler.class.getClassLoader());
 
     /**
      * Get all command handlers annotated with {@link CommandMapping} with command name.

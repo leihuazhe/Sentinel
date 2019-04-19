@@ -31,7 +31,7 @@ public final class TokenServiceProvider {
 
     private static TokenService service = null;
 
-    private static final ServiceLoader<TokenService> LOADER = ServiceLoader.load(TokenService.class);
+    private static final ServiceLoader<TokenService> LOADER = ServiceLoader.load(TokenService.class,TokenService.class.getClassLoader());
 
     static {
         resolveTokenServiceSpi();

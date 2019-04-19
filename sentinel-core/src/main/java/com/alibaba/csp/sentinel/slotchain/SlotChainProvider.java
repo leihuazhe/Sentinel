@@ -32,7 +32,7 @@ public final class SlotChainProvider {
 
     private static volatile SlotChainBuilder builder = null;
 
-    private static final ServiceLoader<SlotChainBuilder> LOADER = ServiceLoader.load(SlotChainBuilder.class);
+    private static final ServiceLoader<SlotChainBuilder> LOADER = ServiceLoader.load(SlotChainBuilder.class,SlotChainBuilder.class.getClassLoader());
 
     /**
      * The load and pick process is not thread-safe, but it's okay since the method should be only invoked

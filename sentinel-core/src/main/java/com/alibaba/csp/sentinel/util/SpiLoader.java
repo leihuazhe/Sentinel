@@ -33,7 +33,7 @@ public final class SpiLoader {
         // Not thread-safe, as it's expected to be resolved in a thread-safe context.
         ServiceLoader<T> serviceLoader = SERVICE_LOADER_MAP.get(key);
         if (serviceLoader == null) {
-            serviceLoader = ServiceLoader.load(clazz);
+            serviceLoader = ServiceLoader.load(clazz,clazz.getClassLoader());
             SERVICE_LOADER_MAP.put(key, serviceLoader);
         }
 

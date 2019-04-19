@@ -30,7 +30,7 @@ public final class RequestProcessorProvider {
 
     private static final Map<Integer, RequestProcessor> PROCESSOR_MAP = new ConcurrentHashMap<>();
 
-    private static final ServiceLoader<RequestProcessor> SERVICE_LOADER = ServiceLoader.load(RequestProcessor.class);
+    private static final ServiceLoader<RequestProcessor> SERVICE_LOADER = ServiceLoader.load(RequestProcessor.class,RequestProcessor.class.getClassLoader());
 
     static {
         loadAndInit();

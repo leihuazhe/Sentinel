@@ -37,12 +37,12 @@ public final class InitExecutor {
      *
      * The initialization will be executed only once.
      */
-    public static void doInit() {
+    public static void doInit(ClassLoader classLoader) {
         if (!initialized.compareAndSet(false, true)) {
             return;
         }
         try {
-            ServiceLoader<InitFunc> loader = ServiceLoader.load(InitFunc.class);
+            ServiceLoader<InitFunc> loader = ServiceLoader.load(InitFunc.class,classLoader);
             List<OrderWrapper> initList = new ArrayList<OrderWrapper>();
             for (InitFunc initFunc : loader) {
                 RecordLog.info("[InitExecutor] Found init func: " + initFunc.getClass().getCanonicalName());
@@ -60,6 +60,10 @@ public final class InitExecutor {
             RecordLog.warn("[InitExecutor] ERROR: Initialization failed with fatal error", error);
             error.printStackTrace();
         }
+    }
+
+    public static void doInit(){
+        doInit(null);
     }
 
     private static void insertSorted(List<OrderWrapper> list, InitFunc func) {
