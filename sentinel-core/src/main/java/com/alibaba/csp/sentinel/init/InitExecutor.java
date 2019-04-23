@@ -42,7 +42,12 @@ public final class InitExecutor {
             return;
         }
         try {
-            ServiceLoader<InitFunc> loader = ServiceLoader.load(InitFunc.class,classLoader);
+            ServiceLoader<InitFunc> loader = null;
+            if(classLoader==null){
+                loader = ServiceLoader.load(InitFunc.class);
+            }else{
+                loader = ServiceLoader.load(InitFunc.class,classLoader);
+            }
             List<OrderWrapper> initList = new ArrayList<OrderWrapper>();
             for (InitFunc initFunc : loader) {
                 RecordLog.info("[InitExecutor] Found init func: " + initFunc.getClass().getCanonicalName());
