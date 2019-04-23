@@ -58,7 +58,7 @@ public class NginxLuaRedisSerivce {
 
     private Map<String,String> redisIps = new HashMap<>();
 
-    @PostConstruct
+    //@PostConstruct
     public void init(){
         //判断redis中是否有 标识位
 
@@ -88,6 +88,7 @@ public class NginxLuaRedisSerivce {
         logger.warn("config_env:{}",env);
 
         if("idc".equals(env)){
+            /*
             redisIps.put("m.yunjiglobal.com","172.22.14.91");
             redisIps.put("app.yunjiglobal.com","172.22.14.61");
             redisIps.put("vipapp.yunjiglobal.com","172.22.14.159");
@@ -104,6 +105,8 @@ public class NginxLuaRedisSerivce {
             redisIps.put("sc.yunjiglobal.com","172.21.154.162");
             redisIps.put("chicken.yunjiglobal.com","172.21.154.165");
             redisIps.put("insurance.yunjiglobal.com","172.21.200.184");
+
+             */
         }else if("dev".equals(env)){
             redisIps.put("m.yunjiglobal.com","172.30.220.215:14159");
             redisIps.put("local.yunjiweidian.org","172.30.222.63:14159");

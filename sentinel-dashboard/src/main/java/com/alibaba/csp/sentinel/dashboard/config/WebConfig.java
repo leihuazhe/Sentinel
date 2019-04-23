@@ -15,21 +15,9 @@
  */
 package com.alibaba.csp.sentinel.dashboard.config;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-
 import com.alibaba.csp.sentinel.adapter.servlet.CommonFilter;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +27,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 /**
  * @author leyou
@@ -61,7 +54,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addViewController("/").setViewName("forward:/index.htm");
     }
 
-    /**
+/**
      * Add {@link CommonFilter} to the server, this is the simplest way to use Sentinel
      * for Web application.
      */

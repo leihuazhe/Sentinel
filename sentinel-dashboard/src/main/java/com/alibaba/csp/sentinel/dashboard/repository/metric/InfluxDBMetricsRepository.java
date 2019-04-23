@@ -416,6 +416,7 @@ public class InfluxDBMetricsRepository  {
         try {
             String q = URLEncoder.encode("select sum(successQps) as successQps,sum(blockQps) as blockQps,sum(exceptionQps) as exceptionQps,sum(rt) as rt,sum(passQps) as passQps  from \"1d\".sentinel_monitor where app='"+app+"' and time >= now() - "+time+" group by resource#query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
+
             logger.debug("listResourcesOfApp:{}",result);
 
             QueryResult queryResult = JSON.parseObject(result,QueryResult.class);

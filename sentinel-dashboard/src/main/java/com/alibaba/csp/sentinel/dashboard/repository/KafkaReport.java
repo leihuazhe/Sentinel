@@ -1,5 +1,6 @@
 package com.alibaba.csp.sentinel.dashboard.repository;
 
+import com.alibaba.csp.sentinel.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -26,6 +27,9 @@ public class KafkaReport {
     @PostConstruct
     public void init(){
 
+        if(StringUtil.isNotBlank(topic) || StringUtil.isBlank(servers)){
+            return;
+        }
         String acks = "0";
         int retries = NumberUtils.toInt("0",0);
         int batch_size = NumberUtils.toInt("",16384);

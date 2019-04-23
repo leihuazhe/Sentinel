@@ -3,6 +3,7 @@ package com.alibaba.csp.sentinel.yj.nacos;
 import com.alibaba.csp.sentinel.config.SentinelConfig;
 import com.alibaba.csp.sentinel.init.InitFunc;
 import com.alibaba.csp.sentinel.init.InitOrder;
+import com.alibaba.csp.sentinel.util.StringUtil;
 import com.taobao.diamond.manager.ManagerListener;
 import com.yunji.diamond.client.api.DiamondClient;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -42,8 +43,10 @@ public class NacosInit implements InitFunc {
         System.out.println("nacosDiamondClient:"+nacosDiamondClient.getConfig());
         try (StringReader stringReader = new StringReader(nacosDiamondClient.getConfig())){
             properties.load(stringReader);
+            if(StringUtil.isNotBlank(properties.getProperty("csp.sentinel.dashboard.server"))){
+                SentinelConfig.setConfigIfAbsent("csp.sentinel.dashboard.server",properties.getProperty("csp.sentinel.dashboard.server"));
+            }
 
-            SentinelConfig.setConfig("csp.sentinel.dashboard.server",properties.getProperty("csp.sentinel.dashboard.server"));
             int heartbeat = NumberUtils.toInt(properties.getProperty("csp.sentinel.heartbeat.interval.ms"),-1);
             if(heartbeat>0){
                 SentinelConfig.setConfig("csp.sentinel.heartbeat.interval.ms",properties.getProperty("csp.sentinel.heartbeat.interval.ms"));

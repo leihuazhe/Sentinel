@@ -40,12 +40,20 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
 
     private final String SENTINEL_APPS = "sentinel:apps:";
 
+    private final String SENTINEL_APPS_KEYS= "k:"+SENTINEL_APPS;
+
+
+
     @Override
     public long addMachine(MachineInfo machineInfo) {
         AssertUtil.notNull(machineInfo, "machineInfo cannot be null");
         String appKey = SENTINEL_APPS + machineInfo.getApp();
         String key = machineInfo.getIp() + ":" + machineInfo.getPort();
         stringRedisTemplate.boundHashOps(appKey).put(key, JSON.toJSONString(machineInfo));
+
+        if(!stringRedisTemplate.boundSetOps(SENTINEL_APPS_KEYS).isMember(machineInfo.getApp())){
+            stringRedisTemplate.boundSetOps(SENTINEL_APPS_KEYS).add(machineInfo.getApp());
+        }
         return 1;
     }
 
@@ -60,7 +68,8 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
 
     @Override
     public List<String> getAppNames() {
-        Set<String> set = stringRedisTemplate.keys(SENTINEL_APPS + "*");
+//        Set<String> set = stringRedisTemplate.keys(SENTINEL_APPS + "*");
+        Set<String> set = stringRedisTemplate.boundSetOps(SENTINEL_APPS_KEYS).members();
         return set.stream().map(str-> str.replaceAll(SENTINEL_APPS,"")).collect(toList());
     }
 
@@ -98,6 +107,7 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
         AssertUtil.assertNotBlank(app, "app name cannot be blank");
         //apps.remove(app);
         stringRedisTemplate.delete(SENTINEL_APPS + app);
+        stringRedisTemplate.boundSetOps(SENTINEL_APPS_KEYS).remove(app);
     }
 
 }
