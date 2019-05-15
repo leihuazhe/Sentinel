@@ -46,6 +46,7 @@ import com.alibaba.csp.sentinel.log.RecordLog;
 public final class AppNameUtil {
 
     public static final String APP_NAME = "project.name";
+    public static final String APP_NAME_EX= "applicationName";
     public static final String SUN_JAVA_COMMAND = "sun.java.command";
     private static final String JAR_SUFFIX_LOWER = ".jar";
     private static final String JAR_SUFFIX_UPPER = ".JAR";
@@ -65,6 +66,12 @@ public final class AppNameUtil {
         // use -Dproject.name first
         if (!isEmpty(app)) {
             appName = app;
+            return;
+        }
+        app = System.getProperty(APP_NAME_EX);
+        if (!isEmpty(app)) {
+            appName = app;
+            System.setProperty(APP_NAME,appName);
             return;
         }
 

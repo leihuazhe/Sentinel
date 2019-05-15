@@ -121,6 +121,9 @@ public final class EagleEye {
 
     private static String locateAppLogPath() {
         String appName = EagleEyeCoreUtils.getSystemProperty("project.name");
+        if(EagleEyeCoreUtils.isBlank(appName)){
+            appName = EagleEyeCoreUtils.getSystemProperty("applicationName");
+        }
         if (EagleEyeCoreUtils.isNotBlank(appName)) {
             return USER_HOME + appName + File.separator + "logs" + File.separator;
         } else {
