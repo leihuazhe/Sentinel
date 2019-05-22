@@ -19,6 +19,7 @@
 
     <modules>
         <module>sentinel-yj-nacos</module>
+        <module>sentinel-yj-report</module>
         <!--
         <module>sentinel-yj-dubbo</module>
         <module>sentinel-yj-web</module>s

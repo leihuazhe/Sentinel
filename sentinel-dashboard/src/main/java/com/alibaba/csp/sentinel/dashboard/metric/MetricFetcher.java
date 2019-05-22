@@ -127,7 +127,8 @@ public class MetricFetcher {
             .setDefaultIOReactorConfig(ioConfig)
             .build();
         httpclient.start();
-        start();
+
+        //start();
     }
 
     private void start() {

@@ -40,7 +40,7 @@ public class NacosInit implements InitFunc {
         nacosDiamondClient = getDiamondClient("buriedpoint_nacos_config",null);
 
         Properties properties = new Properties();
-        System.out.println("nacosDiamondClient:"+nacosDiamondClient.getConfig());
+
         try (StringReader stringReader = new StringReader(nacosDiamondClient.getConfig())){
             properties.load(stringReader);
             if(StringUtil.isNotBlank(properties.getProperty("csp.sentinel.dashboard.server"))){
