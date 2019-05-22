@@ -58,8 +58,11 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Fetch metric of machines.
@@ -99,36 +102,41 @@ public class MetricFetcher {
     private ExecutorService fetchService;
     private ExecutorService fetchWorker;
 
-    public MetricFetcher() {
-        int cores = Runtime.getRuntime().availableProcessors() * 2;
-        long keepAliveTime = 0;
-        int queueSize = 2048;
-        RejectedExecutionHandler handler = new DiscardPolicy();
-        fetchService = new ThreadPoolExecutor(cores, cores,
-            keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(queueSize),
-            new NamedThreadFactory("sentinel-dashboard-metrics-fetchService"), handler);
-        fetchWorker = new ThreadPoolExecutor(cores, cores,
-            keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(queueSize),
-            new NamedThreadFactory("sentinel-dashboard-metrics-fetchWorker"), handler);
-        IOReactorConfig ioConfig = IOReactorConfig.custom()
-            .setConnectTimeout(3000)
-            .setSoTimeout(3000)
-            .setIoThreadCount(Runtime.getRuntime().availableProcessors() * 2)
-            .build();
+    @Value("${monitor.report.enable}")
+    private String monitorEnableReport = "false";
 
-        httpclient = HttpAsyncClients.custom()
-            .setRedirectStrategy(new DefaultRedirectStrategy() {
-                @Override
-                protected boolean isRedirectable(final String method) {
-                    return false;
-                }
-            }).setMaxConnTotal(4000)
-            .setMaxConnPerRoute(1000)
-            .setDefaultIOReactorConfig(ioConfig)
-            .build();
-        httpclient.start();
+    @PostConstruct
+    public void init(){
+        if("true".equals(monitorEnableReport)){
+            int cores = Runtime.getRuntime().availableProcessors() * 2;
+            long keepAliveTime = 0;
+            int queueSize = 2048;
+            RejectedExecutionHandler handler = new DiscardPolicy();
+            fetchService = new ThreadPoolExecutor(cores, cores,
+                    keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(queueSize),
+                    new NamedThreadFactory("sentinel-dashboard-metrics-fetchService"), handler);
+            fetchWorker = new ThreadPoolExecutor(cores, cores,
+                    keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(queueSize),
+                    new NamedThreadFactory("sentinel-dashboard-metrics-fetchWorker"), handler);
+            IOReactorConfig ioConfig = IOReactorConfig.custom()
+                    .setConnectTimeout(3000)
+                    .setSoTimeout(3000)
+                    .setIoThreadCount(Runtime.getRuntime().availableProcessors() * 2)
+                    .build();
 
-        //start();
+            httpclient = HttpAsyncClients.custom()
+                    .setRedirectStrategy(new DefaultRedirectStrategy() {
+                        @Override
+                        protected boolean isRedirectable(final String method) {
+                            return false;
+                        }
+                    }).setMaxConnTotal(4000)
+                    .setMaxConnPerRoute(1000)
+                    .setDefaultIOReactorConfig(ioConfig)
+                    .build();
+            httpclient.start();
+            start();
+        }
     }
 
     private void start() {

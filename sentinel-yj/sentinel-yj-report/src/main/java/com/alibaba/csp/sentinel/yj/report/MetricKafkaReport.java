@@ -54,7 +54,7 @@ public class MetricKafkaReport {
 
 
     private void start(Properties props) {
-        long intervalSecond = NumberUtils.toLong(props.getProperty(""),DEFAULT_INTERVALSECOND);
+        long intervalSecond = NumberUtils.toLong(props.getProperty("intervalSecond"),DEFAULT_INTERVALSECOND);
         scheduledFuture = fetchScheduleService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -126,6 +126,7 @@ public class MetricKafkaReport {
                 try{
                     Thread.currentThread().setContextClassLoader(null);
                     init(props);
+                    start(properties);
                 }catch (Exception ex2){
                     logger.warn("初始化kafka失败：",ex2);
                 }finally {
@@ -140,10 +141,9 @@ public class MetricKafkaReport {
 
     }
 
-    private void init(Properties props ){
+    private void init(Properties props){
         producer = new KafkaProducer<>(props);
         logger.warn("kafka producer对象正在初始化完成");
-        start(props);
         START.compareAndSet(false,true);
     }
 
@@ -165,7 +165,7 @@ public class MetricKafkaReport {
      * @param metrics
      */
     private void report(List<MetricNode> metrics){
-        if(producer==null || metrics!=null || metrics.isEmpty()) {
+        if(producer==null || metrics==null || metrics.isEmpty()) {
             return;
         }
 

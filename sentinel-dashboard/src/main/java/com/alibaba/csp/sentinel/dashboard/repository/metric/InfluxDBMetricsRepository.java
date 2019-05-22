@@ -5,8 +5,6 @@ import com.alibaba.csp.sentinel.config.SentinelConfig;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.MetricEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.metric.InfluxDBMetric;
-import com.alibaba.csp.sentinel.dashboard.repository.KafkaReport;
-import com.alibaba.csp.sentinel.node.Node;
 import com.alibaba.csp.sentinel.node.metric.MetricNode;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.fastjson.JSON;
@@ -30,7 +28,6 @@ import org.influxdb.dto.QueryResult;
 import org.influxdb.impl.InfluxDBResultMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -65,8 +62,6 @@ public class InfluxDBMetricsRepository  {
     @Value("${monitor.influxdb.http}")
     private String monitorInfluxdbHttp;
 
-    @Autowired
-    private KafkaReport kafkaReport;
 
 
     @PostConstruct
@@ -131,8 +126,7 @@ public class InfluxDBMetricsRepository  {
             final String data = JSON.toJSONString(list);
 
 
-            if(monitorReportHttp==null &&kafkaReport!=null){
-                kafkaReport.report(data);
+            if(monitorReportHttp==null){
                 //方便调试
                 return;
             }
@@ -145,7 +139,7 @@ public class InfluxDBMetricsRepository  {
             NameValuePair pair1 = new BasicNameValuePair("data", data);
             pairs.add(pair1);
 
-            httpPost.setEntity(new UrlEncodedFormEntity(pairs, HTTP.UTF_8));
+            httpPost.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
 
             logger.info("url:{} ,data:{}",url,data);
 
