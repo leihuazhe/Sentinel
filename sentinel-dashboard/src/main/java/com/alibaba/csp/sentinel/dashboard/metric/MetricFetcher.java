@@ -15,13 +15,11 @@
  */
 package com.alibaba.csp.sentinel.dashboard.metric;
 
+import java.io.StringReader;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -44,6 +42,9 @@ import com.alibaba.csp.sentinel.node.metric.MetricNode;
 import com.alibaba.csp.sentinel.util.StringUtil;
 
 import com.alibaba.csp.sentinel.dashboard.repository.metric.MetricsRepository;
+import com.taobao.diamond.manager.ManagerListener;
+import com.taobao.diamond.manager.ManagerListenerAdapter;
+import com.yunji.diamond.client.api.DiamondClient;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -102,45 +103,77 @@ public class MetricFetcher {
     private ExecutorService fetchService;
     private ExecutorService fetchWorker;
 
-    @Value("${monitor.report.enable}")
-    private String monitorEnableReport = "false";
 
-    @PostConstruct
-    public void init(){
-        if("true".equals(monitorEnableReport)){
-            int cores = Runtime.getRuntime().availableProcessors() * 2;
-            long keepAliveTime = 0;
-            int queueSize = 2048;
-            RejectedExecutionHandler handler = new DiscardPolicy();
-            fetchService = new ThreadPoolExecutor(cores, cores,
-                    keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(queueSize),
-                    new NamedThreadFactory("sentinel-dashboard-metrics-fetchService"), handler);
-            fetchWorker = new ThreadPoolExecutor(cores, cores,
-                    keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(queueSize),
-                    new NamedThreadFactory("sentinel-dashboard-metrics-fetchWorker"), handler);
-            IOReactorConfig ioConfig = IOReactorConfig.custom()
-                    .setConnectTimeout(3000)
-                    .setSoTimeout(3000)
-                    .setIoThreadCount(Runtime.getRuntime().availableProcessors() * 2)
-                    .build();
+    private boolean monitorEnableReport = false;
 
-            httpclient = HttpAsyncClients.custom()
-                    .setRedirectStrategy(new DefaultRedirectStrategy() {
-                        @Override
-                        protected boolean isRedirectable(final String method) {
-                            return false;
-                        }
-                    }).setMaxConnTotal(4000)
-                    .setMaxConnPerRoute(1000)
-                    .setDefaultIOReactorConfig(ioConfig)
-                    .build();
-            httpclient.start();
-            start();
+    private DiamondClient nacosDiamondClient = null;
+
+    public MetricFetcher(){
+        int cores = Runtime.getRuntime().availableProcessors() * 2;
+        long keepAliveTime = 0;
+        int queueSize = 2048;
+        RejectedExecutionHandler handler = new DiscardPolicy();
+        fetchService = new ThreadPoolExecutor(cores, cores,
+                keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(queueSize),
+                new NamedThreadFactory("sentinel-dashboard-metrics-fetchService"), handler);
+        fetchWorker = new ThreadPoolExecutor(cores, cores,
+                keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(queueSize),
+                new NamedThreadFactory("sentinel-dashboard-metrics-fetchWorker"), handler);
+        IOReactorConfig ioConfig = IOReactorConfig.custom()
+                .setConnectTimeout(3000)
+                .setSoTimeout(3000)
+                .setIoThreadCount(Runtime.getRuntime().availableProcessors() * 2)
+                .build();
+
+        httpclient = HttpAsyncClients.custom()
+                .setRedirectStrategy(new DefaultRedirectStrategy() {
+                    @Override
+                    protected boolean isRedirectable(final String method) {
+                        return false;
+                    }
+                }).setMaxConnTotal(4000)
+                .setMaxConnPerRoute(1000)
+                .setDefaultIOReactorConfig(ioConfig)
+                .build();
+        httpclient.start();
+
+        nacosDiamondClient = getDiamondClient("sentinel_kafka_config", new ManagerListenerAdapter() {
+            @Override
+            public void receiveConfigInfo(String s) {
+                managerListerner(s,true);
+            }
+        });
+        managerListerner(nacosDiamondClient.getConfig(),false);
+
+        start();
+    }
+
+    private void managerListerner(String config,boolean reload){
+        Properties properties = new Properties();
+
+        try (StringReader stringReader = new StringReader(config)) {
+            properties.load(stringReader);
+            monitorEnableReport = "false".equals(properties.getProperty("enableClientReport"));
+        }catch (Exception ex){
+            logger.error("init sentinel kafka fail",ex);
         }
+    }
+
+
+    private DiamondClient getDiamondClient(String dataId, ManagerListener managerListener){
+        DiamondClient diamondClient = new DiamondClient();
+        diamondClient.setDataId(dataId);
+        diamondClient.setPollingIntervalTime(10);
+        diamondClient.setTimeout(2000L);
+        diamondClient.setManagerListener(managerListener);
+        /* 初始化diamond */
+        diamondClient.init();
+        return diamondClient;
     }
 
     private void start() {
         fetchScheduleService.scheduleAtFixedRate(() -> {
+            if(!monitorEnableReport)return;
             try {
                 fetchAllApp();
             } catch (Exception e) {

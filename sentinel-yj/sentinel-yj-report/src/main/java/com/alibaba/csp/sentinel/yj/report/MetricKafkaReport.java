@@ -41,7 +41,7 @@ public class MetricKafkaReport {
     private KafkaConfig kafkaConfig;
 
     private ScheduledExecutorService fetchScheduleService = Executors.newScheduledThreadPool(1,
-            new NamedThreadFactory("sentinel-dashboard-metrics-fetch-task"));;
+            new NamedThreadFactory("sentinel-client-metrics-fetch-task"));;
 
     private ScheduledFuture scheduledFuture = null;
 
@@ -51,7 +51,7 @@ public class MetricKafkaReport {
     private long DEFAULT_INTERVALSECOND = 5;
 
     private long lastFetchMetricTime = 0L;
-
+    private long intervalSecond = 5;
 
     private void start(Properties props) {
         long intervalSecond = NumberUtils.toLong(props.getProperty("intervalSecond"),DEFAULT_INTERVALSECOND);
@@ -67,11 +67,16 @@ public class MetricKafkaReport {
         }, intervalSecond, intervalSecond, TimeUnit.SECONDS);
 
         lastFetchMetricTime = System.currentTimeMillis();
+        this.intervalSecond = intervalSecond;
     }
 
     private void fetchMetric(){
+        long nowTime = System.currentTimeMillis();
+        if(nowTime - lastFetchMetricTime < intervalSecond*1000  ){
+            return;
+        }
         long startTime = lastFetchMetricTime;
-        long endTime   = lastFetchMetricTime = System.currentTimeMillis();
+        long endTime   = lastFetchMetricTime = nowTime;
 
         List<MetricNode> list =  findByTimeAndResource(startTime,endTime,null);
         report(list);
@@ -79,6 +84,10 @@ public class MetricKafkaReport {
 
     public void start(final Properties properties, final boolean restart){
         stop();
+        boolean enableClientReport = !"false".equals(properties.getProperty("enableClientReport"));
+        if(!enableClientReport){
+            return;
+        }
         //kafka
         String servers = properties.getProperty("kafka.servers");
         String topic = properties.getProperty("tracemq.topic");

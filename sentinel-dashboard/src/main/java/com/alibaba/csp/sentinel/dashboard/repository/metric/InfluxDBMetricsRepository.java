@@ -141,7 +141,7 @@ public class InfluxDBMetricsRepository  {
 
             httpPost.setEntity(new UrlEncodedFormEntity(pairs, "UTF-8"));
 
-            logger.info("url:{} ,data:{}",url,data);
+            logger.debug("url:{} ,data:{}",url,data);
 
             httpclient.execute(httpPost, new FutureCallback<HttpResponse>() {
                 @Override
@@ -162,7 +162,7 @@ public class InfluxDBMetricsRepository  {
                         } catch (Exception ignore) {
                         }
                         String body = EntityUtils.toString(response.getEntity(), charset != null ? charset : DEFAULT_CHARSET);
-                        logger.info("body:{}",body);
+                        logger.debug("body:{}",body);
                     }catch (Exception ex){
                         ex.printStackTrace();
                     }
@@ -328,7 +328,7 @@ public class InfluxDBMetricsRepository  {
             logger.debug("listResourcesOfApp:{}",result);
 
             QueryResult queryResult = JSON.parseObject(result,QueryResult.class);
-            System.out.println("listResourcesOfApp:"+queryResult);
+            logger.debug("listResourcesOfApp:{}",queryResult);
 
             List<NodeVo2> vos = new InfluxDBResultMapper().toPOJO(queryResult, NodeVo2.class, "sentinel_monitor");
 
