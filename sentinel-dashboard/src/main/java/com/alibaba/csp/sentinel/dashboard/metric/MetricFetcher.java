@@ -173,7 +173,9 @@ public class MetricFetcher {
 
     private void start() {
         fetchScheduleService.scheduleAtFixedRate(() -> {
-            if(!monitorEnableReport)return;
+            if(!monitorEnableReport){
+                return;
+            }
             try {
                 fetchAllApp();
             } catch (Exception e) {
