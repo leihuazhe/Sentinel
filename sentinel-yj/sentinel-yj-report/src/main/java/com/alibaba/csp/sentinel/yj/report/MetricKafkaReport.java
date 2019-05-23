@@ -51,7 +51,7 @@ public class MetricKafkaReport {
     private long DEFAULT_INTERVALSECOND = 5;
 
     private long lastFetchMetricTime = 0L;
-    private long intervalSecond = 5;
+    private long intervalSecond = DEFAULT_INTERVALSECOND;
 
     private void start(Properties props) {
         long intervalSecond = NumberUtils.toLong(props.getProperty("intervalSecond"),DEFAULT_INTERVALSECOND);
@@ -139,6 +139,7 @@ public class MetricKafkaReport {
                 }catch (Exception ex2){
                     logger.warn("初始化kafka失败：",ex2);
                 }finally {
+                    START.compareAndSet(false,true);
                     //还原
                     Thread.currentThread().setContextClassLoader(classLoader);
                 }
@@ -153,20 +154,29 @@ public class MetricKafkaReport {
     private void init(Properties props){
         producer = new KafkaProducer<>(props);
         logger.warn("kafka producer对象正在初始化完成");
-        START.compareAndSet(false,true);
     }
 
 
     public void stop(){
         if( producer!=null ){
-            logger.warn("kafka producer对象close...");
-            producer.close();
-            producer = null;
-            START.compareAndSet(true,false);
+            try{
+                logger.warn("kafka producer对象close...");
+                producer.close();
+                producer = null;
+            }catch (Exception ex){
+                logger.warn("kafka close",ex);
+            }
+
         }
         if( scheduledFuture!=null ){
-            scheduledFuture.cancel(false);
+            try{
+                scheduledFuture.cancel(true);
+            }catch (Exception ex){
+                logger.warn("cancel scheduledFuture",ex);
+            }
+
         }
+        START.compareAndSet(true,false);
     }
 
     /**
