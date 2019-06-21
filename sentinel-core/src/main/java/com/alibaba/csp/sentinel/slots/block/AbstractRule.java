@@ -98,12 +98,22 @@ public abstract class AbstractRule implements Rule {
 
         AbstractRule that = (AbstractRule)o;
 
-        if (resource != null ? !resource.equals(that.resource) : that.resource != null) {
+        if (resource == null ? that.resource != null : resource.equals(that.resource) ) {
             return false;
         }
         if (!limitAppEquals(limitApp, that.limitApp)) {
             return false;
         }
+        if(adapterType!= that.adapterType || adapterWebType != that.adapterWebType || adapterResultOn != that.adapterResultOn){
+            return false;
+        }
+        if(adapterText==null ? that.adapterText != null :adapterText.equals(that.adapterText) ){
+            return false;
+        }
+        if(adapterProperties==null ? that.adapterProperties != null : adapterProperties.equals(that.adapterProperties) ){
+            return false;
+        }
+
         return true;
     }
 
