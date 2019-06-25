@@ -65,7 +65,7 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
                 .put(processedEntity.getId(), processedEntity);
         }
 
-        if("nginx".equals(entity.getApp()) && entity instanceof FlowRuleEntity){
+        if( entity instanceof FlowRuleEntity && ((FlowRuleEntity) entity).getAdapterType() == 3){
             nginxLuaRedisSerivce.save(entity);
         }
         return processedEntity;

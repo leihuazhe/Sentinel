@@ -58,7 +58,7 @@ public class NginxLuaRedisSerivce {
 
     private Map<String,String> redisIps = new HashMap<>();
 
-    //@PostConstruct
+    @PostConstruct
     public void init(){
         //判断redis中是否有 标识位
 
@@ -108,8 +108,9 @@ public class NginxLuaRedisSerivce {
 
              */
         }else if("dev".equals(env)){
-            redisIps.put("m.yunjiglobal.com","172.30.220.215:14159");
-            redisIps.put("local.yunjiweidian.org","172.30.222.63:14159");
+            redisIps.put("t.yunjiglobal.com","172.30.220.215:14159");
+            //redisIps.put("m.yunjiglobal.com","172.30.220.215:14159");
+            //redisIps.put("local.yunjiweidian.org","172.30.222.63:14159");
         }else if ("local".equals(env)){
             redisIps.put("m.yunjiglobal.com","172.16.0.2:7777");
         }
@@ -206,7 +207,6 @@ public class NginxLuaRedisSerivce {
                 flowRuleEntity.setGmtCreate(new Date());
                 flowRuleEntity.setGmtModified(flowRuleEntity.getGmtCreate());
                 flowRuleEntity.setLimitApp("default");
-
 
                 inMemFlowRuleStore.save(flowRuleEntity);
             });
