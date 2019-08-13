@@ -393,7 +393,7 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
 
     $scope.$watch('macInputModel', function () {
       //if ($scope.macInputModel) {
-        reInitIdentityDatas();
+      //  reInitIdentityDatas();
      // }
     });
 

@@ -62,7 +62,11 @@ public class InfluxDBMetricsRepository  {
     @Value("${monitor.influxdb.http}")
     private String monitorInfluxdbHttp;
 
+    @Value("${monitor.influxdb.user}")
+    private String monitorInfluxdbUser;
 
+    @Value("${monitor.influxdb.pwd}")
+    private String monitorInfluxdbPwd;
 
     @PostConstruct
     public void init(){
@@ -321,7 +325,7 @@ public class InfluxDBMetricsRepository  {
     // @Override
     public List<MetricEntity> queryByAppAndResourceBetween(String app, String resource, long startTime, long endTime) {
 
-        final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=";
+        final String url = getInfluxdbHttpUrl();
         try {
             String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\".sentinel_monitor where app='"+app+"' and resource='"+resource+"' and time >= now() - 1m group by time(10s) #query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
@@ -397,6 +401,10 @@ public class InfluxDBMetricsRepository  {
         return listOne;
     }
 
+    private String getInfluxdbHttpUrl(){
+        return  monitorInfluxdbHttp +"/query?u="+monitorInfluxdbUser+"&p="+monitorInfluxdbPwd+"&db=monitor&q=";
+    }
+
     /**
      * 获取监控
      * @param app
@@ -406,7 +414,7 @@ public class InfluxDBMetricsRepository  {
     public List<NodeVo> fetchResourceOfMachine(String app,int type){
         String time = type==0?"1m":(type+"s");
         List<NodeVo> list = new ArrayList<>();
-        final String url = monitorInfluxdbHttp +"/query?u=admin&p=admin&db=monitor&q=";
+        final String url = getInfluxdbHttpUrl();
         try {
             String q = URLEncoder.encode("select sum(successQps) as successQps,sum(blockQps) as blockQps,sum(exceptionQps) as exceptionQps,sum(rt) as rt,sum(passQps) as passQps  from \"1d\".sentinel_monitor where app='"+app+"' and time >= now() - "+time+" group by resource#query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
