@@ -8,6 +8,7 @@ import com.alibaba.csp.sentinel.dashboard.metric.InfluxDBMetric;
 import com.alibaba.csp.sentinel.node.metric.MetricNode;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpResponse;
@@ -366,7 +367,7 @@ public class InfluxDBMetricsRepository  {
 
     //@Override
     public List<String> listResourcesOfApp(String app) {
-        List<NodeVo> list = fetchResourceOfMachine(app,0);
+        List<NodeVo> list = fetchResourceOfMachine(app,120);
         List<String> lst = new ArrayList<>();
         for(NodeVo node:list){
             lst.add(node.getResource());
@@ -375,34 +376,60 @@ public class InfluxDBMetricsRepository  {
     }
 
     public List<NodeVo> fetchResourceOfMachine(String app){
-        Map<String,NodeVo> map = new HashMap<>();
-        List<NodeVo> list =  fetchResourceOfMachine(app,10);
-        for(NodeVo nodeVo:list){
-            map.put(nodeVo.getResource(),nodeVo);
-        }
-        List<NodeVo> listOne =  fetchResourceOfMachine(app,0);
+        //解决不显示情况，由于上报根据flink1分钟聚合并且有延迟
+        //取两分钟内数据
+        List<NodeVo> listOne =  fetchResourceOfMachine(app,120);
         for(NodeVo nodeVo:listOne){
-            NodeVo oNodeVo = map.get(nodeVo.getResource());
-            if(oNodeVo!=null){
-                nodeVo.setBlockQps(oNodeVo.getBlockQps());
-                nodeVo.setExceptionQps(oNodeVo.getExceptionQps());
-                nodeVo.setAverageRt(oNodeVo.getAverageRt());
-                nodeVo.setPassQps(oNodeVo.getPassQps());
-                nodeVo.setTotalQps(oNodeVo.getTotalQps());
-            }else{
-                nodeVo.setBlockQps(0L);
-                nodeVo.setExceptionQps(0L);
-                nodeVo.setAverageRt(0L);
-                nodeVo.setPassQps(0L);
-                nodeVo.setTotalQps(0L);
-            }
-
+            nodeVo.setBlockQps(nodeVo.getBlockQps());
+            nodeVo.setExceptionQps(nodeVo.getExceptionQps());
+            nodeVo.setAverageRt(nodeVo.getAverageRt());
+            nodeVo.setPassQps(nodeVo.getPassQps());
+            nodeVo.setTotalQps(nodeVo.getTotalQps());
+            nodeVo.setOneMinuteBlock(nodeVo.getBlockQps() );
         }
+//精确监控
+//        Map<String,NodeVo> map = new HashMap<>();
+//        List<NodeVo> list =  fetchResourceOfMachine(app,10);
+//        for(NodeVo nodeVo:list){
+//            map.put(nodeVo.getResource(),nodeVo);
+//        }
+//        List<NodeVo> listOne =  fetchResourceOfMachine(app,0);
+//        for(NodeVo nodeVo:listOne){
+//            NodeVo oNodeVo = map.get(nodeVo.getResource());
+//            if(oNodeVo!=null){
+//                nodeVo.setBlockQps(oNodeVo.getBlockQps());
+//                nodeVo.setExceptionQps(oNodeVo.getExceptionQps());
+//                nodeVo.setAverageRt(oNodeVo.getAverageRt());
+//                nodeVo.setPassQps(oNodeVo.getPassQps());
+//                nodeVo.setTotalQps(oNodeVo.getTotalQps());
+//            }else{
+//                nodeVo.setBlockQps(0L);
+//                nodeVo.setExceptionQps(0L);
+//                nodeVo.setAverageRt(0L);
+//                nodeVo.setPassQps(0L);
+//                nodeVo.setTotalQps(0L);
+//            }
+//
+//        }
         return listOne;
     }
 
     private String getInfluxdbHttpUrl(){
-        return  monitorInfluxdbHttp +"/query?u="+monitorInfluxdbUser+"&p="+monitorInfluxdbPwd+"&db=monitor&q=";
+        //解决新旧grafam兼容性
+       // return  monitorInfluxdbHttp +"/query?u="+monitorInfluxdbUser+"&p="+monitorInfluxdbPwd+"&db=monitor&q=";
+        StringBuilder sb = new StringBuilder();
+        sb.append(monitorInfluxdbHttp);
+        sb.append("/query?db=monitor");
+        if(StringUtils.isNotBlank(monitorInfluxdbUser)){
+            sb.append("&u=");
+            sb.append(monitorInfluxdbUser);
+        }
+        if(StringUtils.isNotBlank(monitorInfluxdbPwd)){
+            sb.append("&p=");
+            sb.append(monitorInfluxdbPwd);
+        }
+        sb.append("&q=");
+        return sb.toString();
     }
 
     /**
@@ -436,11 +463,20 @@ public class InfluxDBMetricsRepository  {
                     nodeVo.setOneMinuteTotal(nodeVo.getOneMinuteBlock() + nodeVo.getOneMinuteException() + nodeVo.getOneMinutePass());
 
                 }else {
+                    if(type>60){
+                        nodeVo.setOneMinuteBlock(NumberUtils.toLong(vo.getBlockQps(),0)/(type/60));
+                        nodeVo.setOneMinutePass(NumberUtils.toLong(vo.getPassQps(),0)/(type/60));
+                    }else{
+                        nodeVo.setOneMinuteBlock(NumberUtils.toLong(vo.getBlockQps(),0));
+                        nodeVo.setOneMinutePass(NumberUtils.toLong(vo.getPassQps(),0));
+                    }
                     nodeVo.setBlockQps(NumberUtils.toLong(vo.getBlockQps(),0)/type);
                     nodeVo.setExceptionQps(NumberUtils.toLong(vo.getExceptionQps(),0)/type);
                     nodeVo.setAverageRt(NumberUtils.toLong(vo.getAverageRt(),0)/type);
                     nodeVo.setPassQps(NumberUtils.toLong(vo.getPassQps(),0)/type);
                     nodeVo.setTotalQps(nodeVo.getBlockQps() + nodeVo.getExceptionQps() + nodeVo.getPassQps());
+
+
                 }
                 nodeVo.setThreadNum(0);
                 list.add(nodeVo);

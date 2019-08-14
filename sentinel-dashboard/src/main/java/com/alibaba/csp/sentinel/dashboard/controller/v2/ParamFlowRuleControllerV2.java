@@ -133,9 +133,9 @@ public class ParamFlowRuleControllerV2 {
         if (checkResult != null) {
             return checkResult;
         }
-        if (!checkIfSupported(entity.getApp(), entity.getIp(), entity.getPort())) {
-            return unsupportedVersion();
-        }
+//        if (!checkIfSupported(entity.getApp(), entity.getIp(), entity.getPort())) {
+//            return unsupportedVersion();
+//        }
         entity.setId(null);
         entity.getRule().setResource(entity.getResource().trim());
         Date date = new Date();
