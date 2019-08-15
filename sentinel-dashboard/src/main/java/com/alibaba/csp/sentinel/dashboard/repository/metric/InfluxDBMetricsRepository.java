@@ -328,7 +328,7 @@ public class InfluxDBMetricsRepository  {
 
         final String url = getInfluxdbHttpUrl();
         try {
-            String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\".sentinel_monitor where app='"+app+"' and resource='"+resource+"' and time >= now() - 1m group by time(10s) #query_select#"+app,"UTF-8");
+            String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\".sentinel_monitor where app='"+app+"' and resource='"+resource+"' and time >= now() - 5m group by time(1m) #query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
             logger.debug("listResourcesOfApp:{}",result);
 
@@ -454,6 +454,7 @@ public class InfluxDBMetricsRepository  {
 
             for(com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo vo : vos){
                 NodeVo nodeVo = new NodeVo();
+                if("__total_inbound_traffic__".equals(vo.getResource()))continue;
                 nodeVo.setResource(vo.getResource());
 
                 if(type==0){
