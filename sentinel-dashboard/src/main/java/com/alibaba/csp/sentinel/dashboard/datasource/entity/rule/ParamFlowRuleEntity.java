@@ -22,6 +22,7 @@ import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowItem;
 import com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRule;
 import com.alibaba.csp.sentinel.util.AssertUtil;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -45,41 +46,49 @@ public class ParamFlowRuleEntity extends AbstractRuleEntity<ParamFlowRule> {
         return entity;
     }
 
+    @JSONField(serialize = false)
     @JsonIgnore
     public String getLimitApp() {
         return rule.getLimitApp();
     }
 
+    @JSONField(serialize = false)
     @JsonIgnore
     public String getResource() {
         return rule.getResource();
     }
 
+    @JSONField(serialize = false)
     @JsonIgnore
     public int getGrade() {
         return rule.getGrade();
     }
 
+    @JSONField(serialize = false)
     @JsonIgnore
     public Integer getParamIdx() {
         return rule.getParamIdx();
     }
 
+    @JSONField(serialize = false)
     @JsonIgnore
     public double getCount() {
         return rule.getCount();
     }
 
+    @JSONField(serialize = false)
     @JsonIgnore
     public List<ParamFlowItem> getParamFlowItemList() {
         return rule.getParamFlowItemList();
     }
 
+    @JSONField(serialize = false)
     @JsonIgnore
     public boolean isClusterMode() {
         return rule.isClusterMode();
     }
 
+    @JSONField(serialize = false)
     @JsonIgnore
     public ParamFlowClusterConfig getClusterConfig() {
         return rule.getClusterConfig();
