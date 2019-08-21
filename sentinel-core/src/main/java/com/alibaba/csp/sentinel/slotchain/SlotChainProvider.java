@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 
+import com.alibaba.csp.sentinel.init.InitExecutor;
 import com.alibaba.csp.sentinel.log.RecordLog;
 import com.alibaba.csp.sentinel.slots.DefaultSlotChainBuilder;
 
@@ -32,7 +33,7 @@ public final class SlotChainProvider {
 
     private static volatile SlotChainBuilder builder = null;
 
-    private static final ServiceLoader<SlotChainBuilder> LOADER = ServiceLoader.load(SlotChainBuilder.class,SlotChainBuilder.class.getClassLoader());
+    private static final ServiceLoader<SlotChainBuilder> LOADER = ServiceLoader.load(SlotChainBuilder.class, InitExecutor.getInitClassLoader());
 
     /**
      * The load and pick process is not thread-safe, but it's okay since the method should be only invoked

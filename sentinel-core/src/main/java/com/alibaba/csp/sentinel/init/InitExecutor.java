@@ -31,6 +31,12 @@ public final class InitExecutor {
 
     private static AtomicBoolean initialized = new AtomicBoolean(false);
 
+    private static ClassLoader initClassLoader = null;
+
+    public static ClassLoader getInitClassLoader(){
+        return initClassLoader;
+    }
+
     /**
      * If one {@link InitFunc} throws an exception, the init process
      * will immediately be interrupted and the application will exit.
@@ -46,6 +52,7 @@ public final class InitExecutor {
             if(classLoader==null){
                 loader = ServiceLoader.load(InitFunc.class);
             }else{
+                initClassLoader = classLoader;
                 loader = ServiceLoader.load(InitFunc.class,classLoader);
             }
             List<OrderWrapper> initList = new ArrayList<OrderWrapper>();
