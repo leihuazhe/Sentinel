@@ -69,6 +69,8 @@ public class InfluxDBMetricsRepository  {
     @Value("${monitor.influxdb.pwd}")
     private String monitorInfluxdbPwd;
 
+    private String infuxdbUserName = "sentinel_data";
+
     @PostConstruct
     public void init(){
         try{
@@ -328,14 +330,14 @@ public class InfluxDBMetricsRepository  {
 
         final String url = getInfluxdbHttpUrl();
         try {
-            String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\".sentinel_monitor where app='"+app+"' and resource='"+resource+"' and time >= now() - 5m group by time(1m) #query_select#"+app,"UTF-8");
+            String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\"."+infuxdbUserName+" where app='"+app+"' and resource='"+resource+"' and time >= now() - 5m group by time(1m) #query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
             logger.debug("listResourcesOfApp:{}",result);
 
             QueryResult queryResult = JSON.parseObject(result,QueryResult.class);
             logger.debug("listResourcesOfApp:{}",queryResult);
 
-            List<NodeVo2> vos = new InfluxDBResultMapper().toPOJO(queryResult, NodeVo2.class, "sentinel_monitor");
+            List<NodeVo2> vos = new InfluxDBResultMapper().toPOJO(queryResult, NodeVo2.class, infuxdbUserName);
 
             List<MetricEntity> list = new ArrayList<>();
             try{
@@ -443,13 +445,13 @@ public class InfluxDBMetricsRepository  {
         List<NodeVo> list = new ArrayList<>();
         final String url = getInfluxdbHttpUrl();
         try {
-            String q = URLEncoder.encode("select sum(successQps) as successQps,sum(blockQps) as blockQps,sum(exceptionQps) as exceptionQps,sum(rt) as rt,sum(passQps) as passQps  from \"1d\".sentinel_monitor where app='"+app+"' and time >= now() - "+time+" group by resource#query_select#"+app,"UTF-8");
+            String q = URLEncoder.encode("select sum(successQps) as successQps,sum(blockQps) as blockQps,sum(exceptionQps) as exceptionQps,sum(rt) as rt,sum(passQps) as passQps  from \"1d\"."+infuxdbUserName+" where app='"+app+"' and time >= now() - "+time+" group by resource#query_select#"+app,"UTF-8");
             String result = httpGetContent(url + q);
 
             logger.debug("listResourcesOfApp:{}",result);
 
             QueryResult queryResult = JSON.parseObject(result,QueryResult.class);
-            List<com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo> vos = new InfluxDBResultMapper().toPOJO(queryResult, com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo.class, "sentinel_monitor");
+            List<com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo> vos = new InfluxDBResultMapper().toPOJO(queryResult, com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo.class, infuxdbUserName);
 
 
             for(com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo vo : vos){
