@@ -18,12 +18,15 @@ package com.alibaba.csp.sentinel.dashboard.config;
 import com.alibaba.csp.sentinel.adapter.servlet.CommonFilter;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
+import com.yunji.sso.client.interceptor.LoginInterceptor;
+import com.yunji.sso.client.interceptor.PermissionInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -101,5 +104,19 @@ public class WebConfig implements WebMvcConfigurer {
         registration.setName("authenticationFilter");
         registration.setOrder(0);
         return registration;
+    }
+
+
+
+    @Autowired
+    private LoginInterceptor loginInterceptor;
+
+    @Autowired
+    private PermissionInterceptor permissionInterceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(loginInterceptor);
+        registry.addInterceptor(permissionInterceptor);
     }
 }

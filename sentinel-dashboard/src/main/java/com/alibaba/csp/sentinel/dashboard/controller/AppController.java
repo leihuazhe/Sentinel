@@ -15,10 +15,7 @@
  */
 package com.alibaba.csp.sentinel.dashboard.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -27,6 +24,8 @@ import com.alibaba.csp.sentinel.dashboard.discovery.AppManagement;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
 import com.alibaba.csp.sentinel.dashboard.domain.vo.MachineInfoVo;
+import com.yunji.auth.entity.func.FuncVo;
+import com.yunji.sso.client.util.ThreadContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,7 +50,23 @@ public class AppController {
 
     @GetMapping("/briefinfos.json")
     public Result<List<AppInfo>> queryAppInfos(HttpServletRequest request) {
-        List<AppInfo> list = new ArrayList<>(appManagement.getBriefApps());
+        //TOTO 此处需要获取用户权限
+        List<FuncVo> funcVos = (List<FuncVo>) ThreadContextUtil.get(com.yunji.sso.client.util.Constants.FUNCTION_KEY);
+
+        List<AppInfo> list = new ArrayList<>();
+        if(funcVos!=null){
+            Set<AppInfo> appInfoSet =  appManagement.getBriefApps();
+            Map<String,FuncVo> funcVoMap = new HashMap();
+            for(FuncVo funcVo:funcVos){
+                funcVoMap.put(funcVo.getFunctionUrl(),funcVo);
+            }
+            for(AppInfo appInfo:appInfoSet){
+                if(funcVoMap.containsKey(appInfo.getApp())){
+                    list.add(appInfo);
+                }
+            }
+        }
+
 
         Collections.sort(list, Comparator.comparing(AppInfo::getApp));
         return Result.ofSuccess(list);

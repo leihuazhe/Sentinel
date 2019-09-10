@@ -164,6 +164,132 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.alibaba.boot</groupId>
+            <artifactId>dubbo-spring-boot-starter</artifactId>
+            <version>0.2.0</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.6</version>
+        </dependency>
+
+        <!-- yunji sso begin -->
+        <dependency>
+            <groupId>yunji</groupId>
+            <artifactId>yunji-ssoclient</artifactId>
+            <version>3.1.2-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-test</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>javax.servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-context</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-web</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-webmvc</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.alibaba</groupId>
+                    <artifactId>fastjson</artifactId>
+                </exclusion>
+                <!-- spring aspects -->
+                <exclusion>
+                    <groupId>org.aspectj</groupId>
+                    <artifactId>aspectjweaver</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>yunji</groupId>
+                    <artifactId>oms-common</artifactId>
+                </exclusion>
+<!--                <exclusion>-->
+<!--                    <groupId>yunji</groupId>-->
+<!--                    <artifactId>yunji-authapi</artifactId>-->
+<!--                </exclusion>-->
+                <exclusion>
+                    <groupId>javax.servlet.jsp</groupId>
+                    <artifactId>jsp-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>yunji</groupId>
+            <artifactId>oms-common</artifactId>
+            <version>0.0.17-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.yunji.solr</groupId>
+                    <artifactId>solr-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.yunji</groupId>
+                    <artifactId>localCache</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.yunji</groupId>
+                    <artifactId>rocketmq</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>yunji</groupId>
+                    <artifactId>yunji-framework</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mybatis</groupId>
+                    <artifactId>mybatis</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.yunji</groupId>
+                    <artifactId>monitor-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.poi</groupId>
+                    <artifactId>poi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>freemarker</groupId>
+                    <artifactId>freemarker</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.yunji.hdfs</groupId>
+                    <artifactId>hdfs-api</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-common</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-hdfs</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.quartz-scheduler</groupId>
+                    <artifactId>quartz</artifactId>
+                </exclusion>
+
+            </exclusions>
+        </dependency>
+
+        <!-- yunji sso end -->
+
+
     </dependencies>
 
     <build>
