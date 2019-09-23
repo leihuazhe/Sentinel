@@ -23,9 +23,11 @@ import com.yunji.sso.client.interceptor.PermissionInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -33,6 +35,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -86,12 +89,12 @@ public class WebConfig implements WebMvcConfigurer {
             public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
                                  FilterChain filterChain) throws IOException, ServletException {
                 HttpServletRequest request = (HttpServletRequest)servletRequest;
+
+                HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
                 AuthUser authUser = authService.getAuthUser(request);
                 // authentication fail
                 if (authUser == null) {
-                    PrintWriter writer = servletResponse.getWriter();
-                    writer.append("login needed");
-                    writer.flush();
+                    httpResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
                 } else {
                     filterChain.doFilter(servletRequest, servletResponse);
                 }
@@ -114,9 +117,15 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private PermissionInterceptor permissionInterceptor;
 
+    @Value("${auth.enabled}")
+    private String ssoDebug;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(loginInterceptor);
-        registry.addInterceptor(permissionInterceptor);
+        if(!"true".equals(ssoDebug)){
+            registry.addInterceptor(loginInterceptor);
+            registry.addInterceptor(permissionInterceptor);
+        }
+
     }
 }

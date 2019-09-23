@@ -27,6 +27,7 @@ import com.alibaba.csp.sentinel.dashboard.domain.vo.MachineInfoVo;
 import com.yunji.auth.entity.func.FuncVo;
 import com.yunji.sso.client.util.ThreadContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +44,9 @@ public class AppController {
     @Autowired
     private AppManagement appManagement;
 
+    @Value("${sso.allappinfo.debug}")
+    private String ssoDebug;
+
     @GetMapping("/names.json")
     public Result<List<String>> queryApps(HttpServletRequest request) {
         return Result.ofSuccess(appManagement.getAppNames());
@@ -50,22 +54,32 @@ public class AppController {
 
     @GetMapping("/briefinfos.json")
     public Result<List<AppInfo>> queryAppInfos(HttpServletRequest request) {
-        //TOTO 此处需要获取用户权限
-        List<FuncVo> funcVos = (List<FuncVo>) ThreadContextUtil.get(com.yunji.sso.client.util.Constants.FUNCTION_KEY);
-
+        boolean debug = "true".equals(ssoDebug);
         List<AppInfo> list = new ArrayList<>();
-        if(funcVos!=null){
+        if(debug){
             Set<AppInfo> appInfoSet =  appManagement.getBriefApps();
-            Map<String,FuncVo> funcVoMap = new HashMap();
-            for(FuncVo funcVo:funcVos){
-                funcVoMap.put(funcVo.getFunctionUrl(),funcVo);
-            }
+
             for(AppInfo appInfo:appInfoSet){
-                if(funcVoMap.containsKey(appInfo.getApp())){
-                    list.add(appInfo);
+                list.add(appInfo);
+            }
+        }else{
+            //TOTO 此处需要获取用户权限
+            List<FuncVo> funcVos = (List<FuncVo>) ThreadContextUtil.get(com.yunji.sso.client.util.Constants.FUNCTION_KEY);
+
+            if(funcVos!=null){
+                Set<AppInfo> appInfoSet =  appManagement.getBriefApps();
+                Map<String,FuncVo> funcVoMap = new HashMap();
+                for(FuncVo funcVo:funcVos){
+                    funcVoMap.put(funcVo.getFunctionUrl(),funcVo);
+                }
+                for(AppInfo appInfo:appInfoSet){
+                    if(funcVoMap.containsKey(appInfo.getApp())){
+                        list.add(appInfo);
+                    }
                 }
             }
         }
+
 
 
         Collections.sort(list, Comparator.comparing(AppInfo::getApp));

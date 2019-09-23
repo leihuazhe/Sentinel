@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 处理从Redis初始化数据
@@ -56,6 +58,9 @@ public class NginxLuaRedisSerivce {
     @Qualifier("flowRuleNacosPublisher")
     private DynamicRulePublisher<List<FlowRuleEntity>> rulePublisher;
 
+    /**
+     * nginx 与 redis对应关系
+     */
     private Map<String,String> redisIps = new HashMap<>();
 
     @PostConstruct
@@ -115,17 +120,23 @@ public class NginxLuaRedisSerivce {
             redisIps.put("m.yunjiglobal.com","172.16.0.2:7777");
         }
 
-        new Thread(()->{
-            Set<Map.Entry<String, String>> set =  redisIps.entrySet();
-            for(Map.Entry<String, String> e:set){
-                transform(e.getKey(),e.getValue());
-            }
-
-        }).start();
+//        new Thread(()->{
+//            Set<Map.Entry<String, String>> set =  redisIps.entrySet();
+//            for(Map.Entry<String, String> e:set){
+//                transform(e.getKey(),e.getValue());
+//            }
+//
+//        }).start();
 
 
 
     }
+
+
+    public Map<String,String> getRedisIps(){
+        return redisIps;
+    }
+
 
 
     public List<AppInfo> getNginxAppInfo(){
@@ -164,18 +175,31 @@ public class NginxLuaRedisSerivce {
 
 
     /**
-     * 转换
+     * 转换 暂时没有处理同一nginx多个domain问题
      * @param prefix
-     * @param redis
      */
-    public void transform(String prefix,String redis){
-        String redisInitKey = SENTINEL_NGINX + prefix;
-        String val = stringRedisTemplate.opsForValue().get(redisInitKey);
-        if(SENTINEL_NGINX.equals(val)){
-            logger.warn(prefix + " " + SENTINEL_NGINX + " has exits");
-            return;
+    public String transform(String prefix){
+        String redis = redisIps.get(prefix);
+        //判断是否存在
+        if(StringUtils.isBlank(redis)){
+            return prefix + " 不在对应redis列表中";
         }
-
+        String redisInitKey = SENTINEL_NGINX + prefix;
+        //说明有任务在执行，或者 执行过
+        String status = stringRedisTemplate.opsForValue().get(redisInitKey);
+        if("runned".equals(status)){
+            return prefix + "此域名下迁移配置已操作过";
+        }
+        if("running".equals(status)){
+            //同一域名下2分钟内不允许重复操作
+            String cache = stringRedisTemplate.opsForValue().get(prefix);
+            if(StringUtils.isNoneBlank(cache));{
+                return "5分钟内同一域名不允许重复操作";
+            }
+        }
+        //开始操作
+        stringRedisTemplate.opsForValue().set(redisInitKey,"running");
+        stringRedisTemplate.opsForValue().set(prefix,redis,5, TimeUnit.MINUTES);
 
         if(redis.split(":").length==1){
             redis +=":6379";
@@ -221,10 +245,10 @@ public class NginxLuaRedisSerivce {
 
 
         //做事并且写入
-        stringRedisTemplate.opsForValue().set(redisInitKey,SENTINEL_NGINX);
-        val = stringRedisTemplate.opsForValue().get(SENTINEL_NGINX);
+        stringRedisTemplate.opsForValue().set(redisInitKey,"runned");
+        String val = stringRedisTemplate.opsForValue().get(SENTINEL_NGINX);
         logger.warn("read:{},val:{}",prefix,val);
-
+        return "执行迁移 doamin:" + prefix +" 下redis:"+ redis + " to  sentinel success!!";
     }
 
     public void save(Object entity){
