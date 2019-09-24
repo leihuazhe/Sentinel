@@ -25,6 +25,7 @@ import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
 import com.alibaba.csp.sentinel.dashboard.domain.vo.MachineInfoVo;
 import com.yunji.auth.entity.func.FuncVo;
+import com.yunji.sso.client.entity.SsoUser;
 import com.yunji.sso.client.util.ThreadContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +46,10 @@ public class AppController {
     private AppManagement appManagement;
 
     @Value("${sso.allappinfo.debug}")
-    private String ssoDebug;
+    private String ssoShowAllDebug;
+
+    @Value("#{'${sso.allappinfo.ids}'.split(',')}")
+    private List<String> ssoAllappInfoIds;
 
     @GetMapping("/names.json")
     public Result<List<String>> queryApps(HttpServletRequest request) {
@@ -54,11 +58,17 @@ public class AppController {
 
     @GetMapping("/briefinfos.json")
     public Result<List<AppInfo>> queryAppInfos(HttpServletRequest request) {
-        boolean debug = "true".equals(ssoDebug);
+        boolean debug = "true".equals(ssoShowAllDebug);
         List<AppInfo> list = new ArrayList<>();
-        if(debug){
-            Set<AppInfo> appInfoSet =  appManagement.getBriefApps();
 
+        SsoUser ssoUser=((SsoUser)ThreadContextUtil.get(com.yunji.sso.client.util.Constants.LOGIN_ACCOUNT));
+        if(!debug && ssoUser!=null){
+            if(ssoAllappInfoIds.contains(ssoUser.getId().toString())){
+                debug = true;
+            }
+        }
+        Set<AppInfo> appInfoSet =  appManagement.getBriefApps();
+        if(debug){
             for(AppInfo appInfo:appInfoSet){
                 list.add(appInfo);
             }
@@ -66,12 +76,12 @@ public class AppController {
             //TOTO 此处需要获取用户权限
             List<FuncVo> funcVos = (List<FuncVo>) ThreadContextUtil.get(com.yunji.sso.client.util.Constants.FUNCTION_KEY);
 
-            if(funcVos!=null){
-                Set<AppInfo> appInfoSet =  appManagement.getBriefApps();
+            if(funcVos!=null && funcVos.isEmpty()){
                 Map<String,FuncVo> funcVoMap = new HashMap();
                 for(FuncVo funcVo:funcVos){
                     funcVoMap.put(funcVo.getFunctionUrl(),funcVo);
                 }
+
                 for(AppInfo appInfo:appInfoSet){
                     if(funcVoMap.containsKey(appInfo.getApp())){
                         list.add(appInfo);

@@ -16,15 +16,18 @@
 package com.alibaba.csp.sentinel.dashboard.discovery;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.*;
 
+import com.alibaba.csp.sentinel.dashboard.config.DashboardConfig;
 import com.alibaba.csp.sentinel.util.AssertUtil;
 
+import com.alibaba.dubbo.common.utils.NamedThreadFactory;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 import static java.util.stream.Collectors.toList;
 
@@ -43,6 +46,47 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
     private final String SENTINEL_APPS_KEYS= "k:"+SENTINEL_APPS;
 
 
+    private static final ScheduledExecutorService deleteExpireAppExecutor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("deleteExpireAppExecutor", true));
+
+    @PostConstruct
+    public void init(){
+        //剔除不健康app
+        deleteExpireAppExecutor.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                deleteExpireApp();
+            }
+        },10, 10, TimeUnit.SECONDS);
+    }
+
+    public void deleteExpireApp(){
+        try{
+            //加锁
+            List<String> apps = getAppNames();
+            for(String app:apps){
+                AppInfo appInfo = getDetailApp(app);
+                Iterator<MachineInfo> machineInfos = appInfo.getMachines().iterator();
+                while(machineInfos.hasNext()){
+                    MachineInfo machineInfo = machineInfos.next();
+                    long delta = System.currentTimeMillis() - machineInfo.getLastHeartbeat();
+                    if(delta > 1000 * 60 * 20 ){ //二十分钟内不可用
+                        removeMachine(machineInfo.getApp(),machineInfo.getIp(),machineInfo.getPort());
+                        machineInfos.remove();
+                    }
+                }
+
+                if(appInfo.getMachines().isEmpty()){
+                    removeApp(appInfo.getApp());
+                }
+
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }finally {
+            //解锁
+        }
+
+    }
 
     @Override
     public long addMachine(MachineInfo machineInfo) {
