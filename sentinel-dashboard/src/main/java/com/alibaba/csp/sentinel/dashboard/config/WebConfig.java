@@ -20,6 +20,7 @@ import com.alibaba.csp.sentinel.dashboard.auth.AuthService;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
 import com.yunji.sso.client.interceptor.LoginInterceptor;
 import com.yunji.sso.client.interceptor.PermissionInterceptor;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,16 +29,14 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.*;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * @author leyou
@@ -77,52 +76,110 @@ public class WebConfig implements WebMvcConfigurer {
         return registration;
     }
 
-    @Bean
-    public FilterRegistrationBean authenticationFilterRegistration() {
-        FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new Filter() {
+    /**Some urls which needn't auth, such as /auth/login,/registry/machine and so on*/
+    @Value("#{'${auth.filter.exclude-urls}'.split(',')}")
+    private List<String> authFilterExcludeUrls;
 
-            @Override
-            public void init(FilterConfig filterConfig) throws ServletException { }
+    /**Some urls with suffixes which needn't auth, such as htm,html,js and so on*/
+    @Value("#{'${auth.filter.exclude-url-suffixes}'.split(',')}")
+    private List<String> authFilterExcludeUrlSuffixes;
 
-            @Override
-            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-                                 FilterChain filterChain) throws IOException, ServletException {
-                HttpServletRequest request = (HttpServletRequest)servletRequest;
+    @Value("${sso.loginUrl}")
+    private String loginUrl;
 
-                HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
-                AuthUser authUser = authService.getAuthUser(request);
-                // authentication fail
-                if (authUser == null) {
-                    httpResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
-                } else {
-                    filterChain.doFilter(servletRequest, servletResponse);
-                }
-            }
+    @Value("${sso.loginSuccessUrl}")
+    private String loginSuccessUrl;
 
-            @Override
-            public void destroy() { }
-        });
-        registration.addUrlPatterns("/*");
-        registration.setName("authenticationFilter");
-        registration.setOrder(0);
-        return registration;
+
+    private static final String URL_SUFFIX_DOT = ".";
+
+//    @Bean
+//    public FilterRegistrationBean authenticationFilterRegistration() {
+//        FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
+//        registration.setFilter(new Filter() {
+//
+//            @Override
+//            public void init(FilterConfig filterConfig) throws ServletException { }
+//
+//            @Override
+//            public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
+//                                 FilterChain chain) throws IOException, ServletException {
+//                HttpServletRequest request = (HttpServletRequest)servletRequest;
+//                HttpServletResponse response = (HttpServletResponse) servletResponse;
+//
+//                String servletPath = request.getServletPath();
+//
+//                // Exclude the urls which needn't auth
+//                if (authFilterExcludeUrls.contains(servletPath)) {
+//                    chain.doFilter(request, response);
+//                    return;
+//                }
+//
+//                // Exclude the urls with suffixes which needn't auth
+//                for (String authFilterExcludeUrlSuffix : authFilterExcludeUrlSuffixes) {
+//                    if (StringUtils.isBlank(authFilterExcludeUrlSuffix)) {
+//                        continue;
+//                    }
+//
+//                    // Add . for url suffix so that we needn't add . in property file
+//                    if (!authFilterExcludeUrlSuffix.startsWith(URL_SUFFIX_DOT)) {
+//                        authFilterExcludeUrlSuffix = URL_SUFFIX_DOT + authFilterExcludeUrlSuffix;
+//                    }
+//
+//                    if (servletPath.endsWith(authFilterExcludeUrlSuffix)) {
+//                        chain.doFilter(request, response);
+//                        return;
+//                    }
+//                }
+//
+//                //目录只对 "/" 进行判断
+////                if("/".equals(servletPath) && !"true".equals(ssoDebug)){
+//                if(!"true".equals(ssoDebug)){
+//                    AuthUser authUser = authService.getAuthUser(request);
+//                    // authentication fail
+//                    if (authUser == null) {
+//                        response.setStatus(302);
+//                        response.setContentType("application/json");
+//                        response.sendRedirect(loginUrl + "?backUrl=" + loginSuccessUrl);
+//                        return;
+//                    }
+//                }
+//
+//                chain.doFilter(servletRequest, servletResponse);
+//            }
+//
+//            @Override
+//            public void destroy() { }
+//        });
+//        registration.addUrlPatterns("/*");
+//        registration.setName("authenticationFilter");
+//        registration.setOrder(0);
+//        return registration;
+//    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("*")
+                .allowedMethods("GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "TRACE");
     }
 
 
-
     @Autowired
-    private LoginInterceptor loginInterceptor;
+    private NewLoginInterceptor loginInterceptor;
 
     @Autowired
     private PermissionInterceptor permissionInterceptor;
 
-    @Value("${auth.enabled}")
+    @Value("${sso.debug}")
     private String ssoDebug;
+
+    @Value("${auth.enabled}")
+    private String authEnabled;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        if(!"true".equals(ssoDebug)){
+        if("true".equals(authEnabled)){
             registry.addInterceptor(loginInterceptor);
             registry.addInterceptor(permissionInterceptor);
         }

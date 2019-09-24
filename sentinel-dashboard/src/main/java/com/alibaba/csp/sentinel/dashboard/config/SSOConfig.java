@@ -6,11 +6,11 @@ import com.yunji.oms.common.service.cache.LocalCacheServiceImpl;
 import com.yunji.sso.client.interceptor.LoginInterceptor;
 import com.yunji.sso.client.interceptor.PermissionInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
@@ -24,32 +24,21 @@ public class SSOConfig {
     @Autowired
     private SSOProperties ssoProperties;
 
-//    @Bean
-//    public ICacheService getLocalCacheService(){
-//        return new LocalCacheServiceImpl();
-//    }
-//
-//
-//    @Bean
-//    public IFuncService getFuncService(){
-//        return funcService;
-//    }
 
-    private static final List<String> uncheckUrls = new ArrayList<>();
-    static {
-//        uncheckUrls.add("");
-    }
+    /**Some urls which needn't auth, such as /auth/login,/registry/machine and so on*/
+    @Value("#{'${auth.filter.exclude-urls}'.split(',')}")
+    private List<String> authFilterExcludeUrls;
 
 
     @Bean
-    public LoginInterceptor getLoginInterceptor(){
-        LoginInterceptor loginInterceptor = new LoginInterceptor();
+    public NewLoginInterceptor getLoginInterceptor(){
+        NewLoginInterceptor loginInterceptor = new NewLoginInterceptor();
         loginInterceptor.setTokenValidUrl(ssoProperties.getTokenValidUrl());
         loginInterceptor.setDebug("true".equals(ssoProperties.getDebug()));
         loginInterceptor.setLoginSuccessUrl(ssoProperties.getLoginSuccessUrl());
         loginInterceptor.setLoginUrl(ssoProperties.getLoginUrl());
         loginInterceptor.setTokenName(ssoProperties.getTokenName());
-        loginInterceptor.setUncheckUrls(uncheckUrls);
+        loginInterceptor.setUncheckUrls(authFilterExcludeUrls);
 
         return loginInterceptor;
     }
@@ -61,7 +50,7 @@ public class SSOConfig {
         permissionInterceptor.setAppKey(ssoProperties.getAppKey());
         permissionInterceptor.setFuncService(funcService);
         permissionInterceptor.setCacheService(new LocalCacheServiceImpl());
-        permissionInterceptor.setUncheckUrls(uncheckUrls);
+        permissionInterceptor.setUncheckUrls(authFilterExcludeUrls);
         return permissionInterceptor;
     }
 

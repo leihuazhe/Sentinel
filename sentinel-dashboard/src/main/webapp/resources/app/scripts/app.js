@@ -23,8 +23,36 @@ angular
     'selectize',
     'angularUtils.directives.dirPagination','ui.ace'
   ])
-  .config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider',
-    function ($stateProvider, $urlRouterProvider, $ocLazyLoadProvider) {
+    .factory('AuthInterceptor', ['$window', '$state', function ($window, $state) {
+        var authInterceptor = {
+            'responseError' : function(response) {
+                if (response.status === 302 || response.status === -1) {
+                    // If not auth, clear session in localStorage and jump to the login page
+                    $window.location.replace(response.headers['Location']);
+                    // $window.location.href = "/auth/redirect";
+                }
+
+                return response;
+            },
+            'response' : function(response) {
+                return response;
+            },
+            'request' : function(config) {
+                config.headers = config.headers || {};
+                config.headers['X-Requested-With'] = 'XMLHttpRequest';
+                return config;
+            },
+            'requestError' : function(config){
+                return config;
+            }
+        };
+        return authInterceptor;
+    }])
+  .config(['$stateProvider', '$urlRouterProvider', '$ocLazyLoadProvider', '$httpProvider',
+    function ($stateProvider, $urlRouterProvider, $ocLazyLoadProvider, $httpProvider) {
+
+    $httpProvider.interceptors.push('AuthInterceptor');
+    $httpProvider.defaults.headers.common = { 'X-Requested-With' : 'XMLHttpRequest' };
     $ocLazyLoadProvider.config({
       debug: false,
       events: true,

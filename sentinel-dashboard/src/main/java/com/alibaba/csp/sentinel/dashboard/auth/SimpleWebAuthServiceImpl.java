@@ -23,7 +23,7 @@ public class SimpleWebAuthServiceImpl implements AuthService<HttpServletRequest>
     public AuthUser getAuthUser(HttpServletRequest request) {
         HttpSession session = request.getSession();
 
-        SsoUser ssoUser=((SsoUser) ThreadContextUtil.get(com.yunji.sso.client.util.Constants.LOGIN_ACCOUNT));
+        SsoUser ssoUser  = (SsoUser) request.getAttribute(com.yunji.sso.client.util.Constants.LOGIN_ACCOUNT);
 
         if (ssoUser != null) {
             AuthUser authUser = new SimpleWebAuthUserImpl(ssoUser.getUserName());
