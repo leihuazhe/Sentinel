@@ -16,6 +16,8 @@
 package com.alibaba.csp.sentinel.dashboard.controller;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -59,7 +61,7 @@ public class AppController {
     @GetMapping("/briefinfos.json")
     public Result<List<AppInfo>> queryAppInfos(HttpServletRequest request) {
         boolean debug = "true".equals(ssoShowAllDebug);
-        List<AppInfo> list = new ArrayList<>();
+        List<AppInfo> list = null;
 
         SsoUser ssoUser=((SsoUser)ThreadContextUtil.get(com.yunji.sso.client.util.Constants.LOGIN_ACCOUNT));
         if(!debug && ssoUser!=null){
@@ -68,29 +70,18 @@ public class AppController {
             }
         }
         Set<AppInfo> appInfoSet =  appManagement.getBriefApps();
-        if(debug){
-            for(AppInfo appInfo:appInfoSet){
-                list.add(appInfo);
-            }
-        }else{
+        List<FuncVo> funcVos = null;
+        if(!debug){
             //TOTO 此处需要获取用户权限
-            List<FuncVo> funcVos = (List<FuncVo>) ThreadContextUtil.get(com.yunji.sso.client.util.Constants.FUNCTION_KEY);
-
-            if(funcVos!=null && funcVos.isEmpty()){
-                Map<String,FuncVo> funcVoMap = new HashMap();
-                for(FuncVo funcVo:funcVos){
-                    funcVoMap.put(funcVo.getFunctionUrl(),funcVo);
-                }
-
-                for(AppInfo appInfo:appInfoSet){
-                    if(funcVoMap.containsKey(appInfo.getApp())){
-                        list.add(appInfo);
-                    }
-                }
-            }
+            funcVos = (List<FuncVo>) ThreadContextUtil.get(com.yunji.sso.client.util.Constants.FUNCTION_KEY);
         }
 
-
+        if(funcVos!=null && funcVos.isEmpty()){
+            Set<String> funcVoMap = funcVos.stream().map(vo->vo.getFunctionUrl()).collect(Collectors.toSet());
+            list = appInfoSet.stream().filter(appInfo -> funcVoMap.contains(appInfo.getApp())).collect(Collectors.toList());
+        }else{
+            list = new ArrayList<>(appInfoSet);
+        }
 
         Collections.sort(list, Comparator.comparing(AppInfo::getApp));
         return Result.ofSuccess(list);

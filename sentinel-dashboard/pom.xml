@@ -162,6 +162,13 @@
         <dependency>
             <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-yj-report</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.xerial.snappy</groupId>
+                    <artifactId>snappy-java</artifactId>
+                </exclusion>
+
+            </exclusions>
             <version>${project.version}</version>
         </dependency>
 
@@ -284,7 +291,26 @@
                     <groupId>org.quartz-scheduler</groupId>
                     <artifactId>quartz</artifactId>
                 </exclusion>
-
+                <exclusion>
+                    <groupId>org.apache.poi</groupId>
+                    <artifactId>poi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.poi</groupId>
+                    <artifactId>poi-ooxml</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.axis</groupId>
+                    <artifactId>axis</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>axis</groupId>
+                    <artifactId>axis-wsdl4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 

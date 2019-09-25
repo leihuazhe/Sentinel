@@ -17,13 +17,18 @@ package com.alibaba.csp.sentinel.dashboard.discovery;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.alibaba.csp.sentinel.dashboard.config.DashboardConfig;
 import com.alibaba.csp.sentinel.util.AssertUtil;
 
+import com.alibaba.dubbo.common.utils.ConcurrentHashSet;
 import com.alibaba.dubbo.common.utils.NamedThreadFactory;
 import com.alibaba.fastjson.JSON;
+import io.netty.util.internal.ConcurrentSet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +45,7 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-
+    
     private final String SENTINEL_APPS = "sentinel:apps:";
 
     private final String SENTINEL_APPS_KEYS= "k:"+SENTINEL_APPS;
@@ -51,12 +56,7 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
     @PostConstruct
     public void init(){
         //剔除不健康app
-        deleteExpireAppExecutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                deleteExpireApp();
-            }
-        },10, 10, TimeUnit.SECONDS);
+        deleteExpireAppExecutor.scheduleAtFixedRate(() -> deleteExpireApp(),10, 10, TimeUnit.SECONDS);
     }
 
     public void deleteExpireApp(){
@@ -125,25 +125,41 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
         appInfo.setApp(app);
         Map<Object,Object> maps = stringRedisTemplate.opsForHash().entries(appKey);
         if(maps!=null){
-            Set<Map.Entry<Object, Object>> entrySet = maps.entrySet();
-            for (Map.Entry<Object, Object> entry : entrySet) {
-                MachineInfo machineInfo = JSON.parseObject(entry.getValue().toString(),MachineInfo.class);
-                if(machineInfo!=null){
-                    appInfo.addMachine(machineInfo);
-                }
-            }
+//            Set<Map.Entry<Object, Object>> entrySet = maps.entrySet();
+//            for (Map.Entry<Object, Object> entry : entrySet) {
+//                MachineInfo machineInfo = JSON.parseObject(entry.getValue().toString(),MachineInfo.class);
+//                if(machineInfo!=null){
+//                    appInfo.addMachine(machineInfo);
+//                }
+//            }
+
+            maps.entrySet().parallelStream().forEach(
+                    entry-> {
+                        MachineInfo machineInfo = JSON.parseObject(entry.getValue().toString(),MachineInfo.class);
+                        if(machineInfo!=null){
+                            appInfo.addMachine(machineInfo);
+                        }
+                    }
+              );
         }
         return appInfo;
     }
 
     @Override
     public Set<AppInfo> getBriefApps() {
-        Set<AppInfo> appInfoSet = new HashSet<>();
+        //199.5 216 201 194 188
         List<String> appNames = getAppNames();
-        for (String str:appNames) {
-            appInfoSet.add(getDetailApp(str));
-        }
-        return appInfoSet;
+        //优化展示,由于redis是单线程，所以并发下性能更差
+        return appNames.stream().map(
+                appname-> getDetailApp(appname)
+        ).collect(Collectors.toSet());
+
+//        Set<AppInfo> appInfoSet = new HashSet<>();
+//        List<String> appNames = getAppNames();
+//        for (String str:appNames) {
+//            appInfoSet.add(getDetailApp(str));
+//        }
+//        return appInfoSet;
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.alibaba.csp.sentinel.dashboard.config;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.yunji.auth.api.fun.IFuncService;
+import com.yunji.oms.common.service.ICacheService;
 import com.yunji.oms.common.service.cache.LocalCacheServiceImpl;
 import com.yunji.sso.client.interceptor.LoginInterceptor;
 import com.yunji.sso.client.interceptor.PermissionInterceptor;
@@ -50,7 +51,10 @@ public class SSOConfig {
         permissionInterceptor.setAppKey(ssoProperties.getAppKey());
         permissionInterceptor.setFuncService(funcService);
         permissionInterceptor.setCacheService(new LocalCacheServiceImpl());
+        //设置缓存
+        permissionInterceptor.setExpireTime(2 * 60);
         permissionInterceptor.setUncheckUrls(authFilterExcludeUrls);
+
         return permissionInterceptor;
     }
 
