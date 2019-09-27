@@ -50,13 +50,20 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
 
     private final String SENTINEL_APPS_KEYS= "k:"+SENTINEL_APPS;
 
+    @Value("${monitor.show.detail}")
+    private boolean monitorShowDetail;
 
     private static final ScheduledExecutorService deleteExpireAppExecutor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("deleteExpireAppExecutor", true));
+
+    /**
+     * 不能并发操作
+     */
+    private Map<String,AppInfo> cacheAppInfo = new HashMap<>();
 
     @PostConstruct
     public void init(){
         //剔除不健康app
-        deleteExpireAppExecutor.scheduleAtFixedRate(() -> deleteExpireApp(),10, 10, TimeUnit.SECONDS);
+        deleteExpireAppExecutor.scheduleAtFixedRate(() -> deleteExpireApp(),0, 5 * 60, TimeUnit.SECONDS);
     }
 
     public void deleteExpireApp(){
@@ -78,6 +85,10 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
                 if(appInfo.getMachines().isEmpty()){
                     removeApp(appInfo.getApp());
                 }
+                AppInfo appInfo1 = new AppInfo();
+                appInfo1.setMachinesSize(appInfo.getMachines().size());
+                appInfo1.setApp(appInfo.getApp());
+                cacheAppInfo.put(appInfo.getApp(),appInfo1);
 
             }
         }catch (Exception ex){
@@ -150,10 +161,13 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
         //199.5 216 201 194 188
         List<String> appNames = getAppNames();
         //优化展示,由于redis是单线程，所以并发下性能更差
+        if(!monitorShowDetail){
+            return new HashSet<>(cacheAppInfo.values());
+        }
+
         return appNames.stream().map(
                 appname-> getDetailApp(appname)
         ).collect(Collectors.toSet());
-
 //        Set<AppInfo> appInfoSet = new HashSet<>();
 //        List<String> appNames = getAppNames();
 //        for (String str:appNames) {

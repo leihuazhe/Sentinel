@@ -3,11 +3,14 @@ package com.alibaba.csp.sentinel.dashboard.repository.metric;
 import com.alibaba.csp.sentinel.command.vo.NodeVo;
 import com.alibaba.csp.sentinel.config.SentinelConfig;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.MetricEntity;
+import com.alibaba.csp.sentinel.dashboard.discovery.AppInfo;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.metric.InfluxDBMetric;
 import com.alibaba.csp.sentinel.node.metric.MetricNode;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.fastjson.JSON;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -69,7 +72,20 @@ public class InfluxDBMetricsRepository  {
     @Value("${monitor.influxdb.pwd}")
     private String monitorInfluxdbPwd;
 
+    /**
+     * 默认5分钟
+     */
+    @Value("${monitor.influxdb.query.time}")
+    private int influxdbQueryTime ;
+
     private String infuxdbUserName = "sentinel_data";
+
+    private Cache<String, List<NodeVo>> cacheAppMetrics = CacheBuilder.newBuilder()
+            .maximumSize(3000)
+            .expireAfterWrite(1, TimeUnit.MINUTES)
+            .recordStats()
+            .build();
+
 
     @PostConstruct
     public void init(){
@@ -369,7 +385,7 @@ public class InfluxDBMetricsRepository  {
 
     //@Override
     public List<String> listResourcesOfApp(String app) {
-        List<NodeVo> list = fetchResourceOfMachine(app,120);
+        List<NodeVo> list = fetchResourceOfMachineFromCache(app,influxdbQueryTime);
         List<String> lst = new ArrayList<>();
         for(NodeVo node:list){
             lst.add(node.getResource());
@@ -379,8 +395,8 @@ public class InfluxDBMetricsRepository  {
 
     public List<NodeVo> fetchResourceOfMachine(String app){
         //解决不显示情况，由于上报根据flink1分钟聚合并且有延迟
-        //取两分钟内数据
-        List<NodeVo> listOne =  fetchResourceOfMachine(app,120);
+        //取一定分钟内数据
+        List<NodeVo> listOne =  fetchResourceOfMachineFromCache(app,influxdbQueryTime);
         for(NodeVo nodeVo:listOne){
             nodeVo.setBlockQps(nodeVo.getBlockQps());
             nodeVo.setExceptionQps(nodeVo.getExceptionQps());
@@ -434,6 +450,26 @@ public class InfluxDBMetricsRepository  {
         return sb.toString();
     }
 
+    public List<NodeVo> fetchResourceOfMachineFromCache(String app,int type){
+        String cacheKey = app  + ":" + type;
+        List<NodeVo> nodeVoList = cacheAppMetrics.getIfPresent(cacheKey);
+        if(nodeVoList == null) {
+            synchronized (cacheKey) {
+                nodeVoList = cacheAppMetrics.getIfPresent(cacheKey);
+                if (nodeVoList == null) {
+                    List<NodeVo> nodeVoListTemp = fetchResourceOfMachine(app, type);
+                    if (nodeVoListTemp != null) {
+                        cacheAppMetrics.put(cacheKey, nodeVoListTemp);
+                        nodeVoList = nodeVoListTemp;
+                    }
+                }
+            }
+        }
+        return nodeVoList;
+    }
+
+
+
     /**
      * 获取监控
      * @param app
@@ -442,6 +478,8 @@ public class InfluxDBMetricsRepository  {
      */
     public List<NodeVo> fetchResourceOfMachine(String app,int type){
         String time = type==0?"1m":(type+"s");
+
+
         List<NodeVo> list = new ArrayList<>();
         final String url = getInfluxdbHttpUrl();
         try {

@@ -28,6 +28,11 @@ public class AppInfo {
 
     private String app = "";
 
+    /**
+     * 新增解决，启动页响应慢问题
+     */
+    private int machinesSize = 0;
+
     private Set<MachineInfo> machines = ConcurrentHashMap.newKeySet();
 
     public AppInfo() {}
@@ -116,5 +121,13 @@ public class AppInfo {
      */
     public boolean isDead() {
         return !heartbeatJudge(DashboardConfig.getRemoveAppNoMachineMillis());
+    }
+
+    public int getMachinesSize() {
+        return machinesSize;
+    }
+
+    public void setMachinesSize(int machinesSize) {
+        this.machinesSize = machinesSize;
     }
 }

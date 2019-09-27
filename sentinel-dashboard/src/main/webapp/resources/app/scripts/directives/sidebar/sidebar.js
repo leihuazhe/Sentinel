@@ -26,6 +26,11 @@ angular.module('sentinelDashboardApp')
                 if (item.app === initHashApp) {
                   item.active = true;
                 }
+                if(item.machinesSize >0){
+                  item.heathyCount = item.machinesSize;
+                  return item;
+                }
+
                 var heathyCount = 0;
                 for (var i in item.machines) {
                   if (item.machines[i].healthy) {
