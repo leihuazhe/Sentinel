@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.csp.sentinel.cluster.annotation.RequestType;
 import com.alibaba.csp.sentinel.util.AssertUtil;
+import com.alibaba.csp.sentinel.util.SpiLoader;
 
 /**
  * @author Eric Zhao
@@ -30,7 +31,7 @@ public final class RequestProcessorProvider {
 
     private static final Map<Integer, RequestProcessor> PROCESSOR_MAP = new ConcurrentHashMap<>();
 
-    private static final ServiceLoader<RequestProcessor> SERVICE_LOADER = ServiceLoader.load(RequestProcessor.class,RequestProcessor.class.getClassLoader());
+    private static final ServiceLoader<RequestProcessor> SERVICE_LOADER = SpiLoader.getFirstLoad(RequestProcessor.class);
 
     static {
         loadAndInit();

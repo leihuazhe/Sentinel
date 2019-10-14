@@ -22,8 +22,10 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.alibaba.csp.sentinel.init.InitExecutor;
 import com.alibaba.csp.sentinel.log.RecordLog;
 import com.alibaba.csp.sentinel.spi.SpiOrder;
+import org.omg.CORBA.INITIALIZE;
 
 /**
  * @author Eric Zhao
@@ -33,13 +35,21 @@ public final class SpiLoader {
 
     private static final Map<String, ServiceLoader> SERVICE_LOADER_MAP = new ConcurrentHashMap<String, ServiceLoader>();
 
+    public static <T>  ServiceLoader<T> getFirstLoad(Class<T> clazz){
+        if(InitExecutor.getInitClassLoader()!=null){
+            return ServiceLoader.load(clazz, InitExecutor.getInitClassLoader());
+        }else{
+            return ServiceLoader.load(clazz);
+        }
+    }
+
     public static <T> T loadFirstInstance(Class<T> clazz) {
         try {
             String key = clazz.getName();
             // Not thread-safe, as it's expected to be resolved in a thread-safe context.
             ServiceLoader<T> serviceLoader = SERVICE_LOADER_MAP.get(key);
             if (serviceLoader == null) {
-                serviceLoader = ServiceLoader.load(clazz,clazz.getClassLoader());
+                serviceLoader = getFirstLoad(clazz);
                 SERVICE_LOADER_MAP.put(key, serviceLoader);
             }
 
@@ -70,7 +80,7 @@ public final class SpiLoader {
             // Not thread-safe, as it's expected to be resolved in a thread-safe context.
             ServiceLoader<T> serviceLoader = SERVICE_LOADER_MAP.get(key);
             if (serviceLoader == null) {
-                serviceLoader = ServiceLoader.load(clazz,clazz.getClassLoader());
+                serviceLoader = getFirstLoad(clazz);
                 SERVICE_LOADER_MAP.put(key, serviceLoader);
             }
 
@@ -105,7 +115,7 @@ public final class SpiLoader {
             // Not thread-safe, as it's expected to be resolved in a thread-safe context.
             ServiceLoader<T> serviceLoader = SERVICE_LOADER_MAP.get(key);
             if (serviceLoader == null) {
-                serviceLoader = ServiceLoader.load(clazz,clazz.getClassLoader());
+                serviceLoader = getFirstLoad(clazz);
                 SERVICE_LOADER_MAP.put(key, serviceLoader);
             }
 
@@ -135,7 +145,7 @@ public final class SpiLoader {
             // Not thread-safe, as it's expected to be resolved in a thread-safe context.
             ServiceLoader<T> serviceLoader = SERVICE_LOADER_MAP.get(key);
             if (serviceLoader == null) {
-                serviceLoader = ServiceLoader.load(clazz,clazz.getClassLoader());
+                serviceLoader = getFirstLoad(clazz);
                 SERVICE_LOADER_MAP.put(key, serviceLoader);
             }
 

@@ -22,6 +22,7 @@ import java.util.ServiceLoader;
 import com.alibaba.csp.sentinel.cluster.TokenService;
 import com.alibaba.csp.sentinel.cluster.flow.DefaultTokenService;
 import com.alibaba.csp.sentinel.log.RecordLog;
+import com.alibaba.csp.sentinel.util.SpiLoader;
 
 /**
  * @author Eric Zhao
@@ -31,7 +32,7 @@ public final class TokenServiceProvider {
 
     private static TokenService service = null;
 
-    private static final ServiceLoader<TokenService> LOADER = ServiceLoader.load(TokenService.class,TokenService.class.getClassLoader());
+    private static final ServiceLoader<TokenService> LOADER = SpiLoader.getFirstLoad(TokenService.class);
 
     static {
         resolveTokenServiceSpi();
