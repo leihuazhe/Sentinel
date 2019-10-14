@@ -18,10 +18,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.EnableMBeanExport;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +36,8 @@ public class NginxLuaRedisSerivce {
 
     private Logger logger = LoggerFactory.getLogger(NginxLuaRedisSerivce.class);
 
-    @Autowired
+
+    @Resource(name = "redisTemplateNginx")
     private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
@@ -163,6 +166,7 @@ public class NginxLuaRedisSerivce {
         return appInfoList;
 
     }
+
     /**
      * 清空原有数据
      */
@@ -193,7 +197,7 @@ public class NginxLuaRedisSerivce {
         if("running".equals(status)){
             //同一域名下2分钟内不允许重复操作
             String cache = stringRedisTemplate.opsForValue().get(prefix);
-            if(StringUtils.isNoneBlank(cache));{
+            if(StringUtils.isNoneBlank(cache)){
                 return "5分钟内同一域名不允许重复操作";
             }
         }

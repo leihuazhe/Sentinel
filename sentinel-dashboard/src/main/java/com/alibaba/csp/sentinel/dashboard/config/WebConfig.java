@@ -21,6 +21,7 @@ import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
 import com.yunji.sso.client.interceptor.LoginInterceptor;
 import com.yunji.sso.client.interceptor.PermissionInterceptor;
 import org.apache.commons.lang.StringUtils;
+import com.alibaba.csp.sentinel.dashboard.filter.AuthFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+import javax.servlet.Filter;
+
 /**
  * @author leyou
  */
@@ -47,7 +50,7 @@ public class WebConfig implements WebMvcConfigurer {
     private final Logger logger = LoggerFactory.getLogger(WebConfig.class);
 
     @Autowired
-    private AuthService<HttpServletRequest> authService;
+    private AuthFilter authFilter;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -75,6 +78,7 @@ public class WebConfig implements WebMvcConfigurer {
 
         return registration;
     }
+
 
     /**Some urls which needn't auth, such as /auth/login,/registry/machine and so on*/
     @Value("#{'${auth.filter.exclude-urls}'.split(',')}")
@@ -183,6 +187,5 @@ public class WebConfig implements WebMvcConfigurer {
             registry.addInterceptor(loginInterceptor);
             registry.addInterceptor(permissionInterceptor);
         }
-
     }
 }

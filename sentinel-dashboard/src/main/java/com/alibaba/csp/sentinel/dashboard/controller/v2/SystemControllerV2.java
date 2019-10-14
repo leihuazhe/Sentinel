@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -81,7 +82,7 @@ public class SystemControllerV2 {
         }
     }
 
-    private int countNotNullAndNotNegtive(Number... values) {
+    private int countNotNullAndNotNegative(Number... values) {
         int notNullCount = 0;
         for (int i = 0; i < values.length; i++) {
             if (values[i] != null && values[i].doubleValue() >= 0) {
@@ -93,15 +94,16 @@ public class SystemControllerV2 {
 
     @ResponseBody
     @RequestMapping("/new.json")
-    Result<?> add(HttpServletRequest request,
-                  String app, Double avgLoad, Long avgRt, Long maxThread, Double qps) {
+    Result<?> apiAdd(HttpServletRequest request, String app,
+                  Double highestSystemLoad, Double highestCpuUsage, Long avgRt,
+                  Long maxThread, Double qps) {
         AuthUser authUser = authService.getAuthUser(request);
         authUser.authTarget(app, PrivilegeType.WRITE_RULE);
         if (StringUtil.isBlank(app)) {
             return Result.ofFail(-1, "app can't be null or empty");
         }
 
-        int notNullCount = countNotNullAndNotNegtive(avgLoad, avgRt, maxThread, qps);
+        int notNullCount = countNotNullAndNotNegative(highestSystemLoad, avgRt, maxThread, qps, highestCpuUsage);
         List<SystemRuleEntity> rules = null;
         try{
             rules = ruleProvider.getRules(app);
@@ -116,11 +118,18 @@ public class SystemControllerV2 {
         SystemRuleEntity entity = new SystemRuleEntity();
         entity.setApp(app.trim());
         // -1 is a fake value
-        if (avgLoad != null) {
-            entity.setAvgLoad(avgLoad);
+        if (null != highestSystemLoad) {
+            entity.setHighestSystemLoad(highestSystemLoad);
         } else {
-            entity.setAvgLoad(-1D);
+            entity.setHighestSystemLoad(-1D);
         }
+
+        if (null != highestCpuUsage) {
+            entity.setHighestCpuUsage(highestCpuUsage);
+        } else {
+            entity.setHighestCpuUsage(-1D);
+        }
+
         if (avgRt != null) {
             entity.setAvgRt(avgRt);
         } else {
@@ -151,9 +160,10 @@ public class SystemControllerV2 {
     }
 
     @ResponseBody
-    @RequestMapping("/save.json")
-    Result<?> updateIfNotNull(HttpServletRequest request,
-                              Long id, String app, Double avgLoad, Long avgRt, Long maxThread, Double qps) {
+    @GetMapping("/save.json")
+    public Result<SystemRuleEntity> apiUpdateIfNotNull(HttpServletRequest request,
+                                                       Long id, String app, Double highestSystemLoad, Double highestCpuUsage,
+                                                       Long avgRt, Long maxThread, Double qps) {
         AuthUser authUser = authService.getAuthUser(request);
         if (id == null) {
             return Result.ofFail(-1, "id can't be null");
@@ -166,11 +176,20 @@ public class SystemControllerV2 {
         if (StringUtil.isNotBlank(app)) {
             entity.setApp(app.trim());
         }
-        if (avgLoad != null) {
-            if (avgLoad < 0) {
-                return Result.ofFail(-1, "avgLoad must >= 0");
+        if (highestSystemLoad != null) {
+            if (highestSystemLoad < 0) {
+                return Result.ofFail(-1, "highestSystemLoad must >= 0");
             }
-            entity.setAvgLoad(avgLoad);
+            entity.setHighestSystemLoad(highestSystemLoad);
+        }
+        if (highestCpuUsage != null) {
+            if (highestCpuUsage < 0) {
+                return Result.ofFail(-1, "highestCpuUsage must >= 0");
+            }
+            if (highestCpuUsage > 1) {
+                return Result.ofFail(-1, "highestCpuUsage must <= 1");
+            }
+            entity.setHighestCpuUsage(highestCpuUsage);
         }
         if (avgRt != null) {
             if (avgRt < 0) {

@@ -104,7 +104,7 @@ app.controller('SystemCtlV2', ['$scope', '$stateParams', 'SystemServiceV2', 'ngD
       var ruleTypeCount = null;
       if (rule.avgLoad != -1) {
         ruleTypeDesc = 'LOAD';
-        ruleTypeCount = rule.avgLoad;
+        ruleTypeCount = rule.highestSystemLoad;
       } else if (rule.avgRt != -1) {
         ruleTypeDesc = 'RT';
         ruleTypeCount = rule.avgRt;
@@ -114,6 +114,9 @@ app.controller('SystemCtlV2', ['$scope', '$stateParams', 'SystemServiceV2', 'ngD
       } else if (rule.qps != -1) {
         ruleTypeDesc = 'QPS';
         ruleTypeCount = rule.qps;
+      }else if (rule.highestCpuUsage != -1) {
+        ruleTypeDesc = 'CPU 使用率';
+        ruleTypeCount = rule.highestCpuUsage;
       }
 
       $scope.confirmDialog = {
@@ -132,7 +135,7 @@ app.controller('SystemCtlV2', ['$scope', '$stateParams', 'SystemServiceV2', 'ngD
 
 
     $scope.confirm = function () {
-      if ($scope.confirmDialog.type == 'delete_rule') {
+      if ($scope.confirmDialog.type === 'delete_rule') {
         deleteRule($scope.currentRule);
         // } else if ($scope.confirmDialog.type == 'enable_rule') {
         //     $scope.currentRule.enable = true;
@@ -151,42 +154,47 @@ app.controller('SystemCtlV2', ['$scope', '$stateParams', 'SystemServiceV2', 'ngD
 
     function deleteRule(rule) {
       SystemService.deleteRule(rule).success(function (data) {
-        if (data.code == 0) {
+        if (data.code === 0) {
           getMachineRules();
           confirmDialog.close();
+        } else if (data.msg != null) {
+          alert('失败：' + data.msg);
         } else {
-          alert
+          alert('失败：未知错误');
         }
       });
     };
 
     function addNewRule(rule) {
+      if (rule.grade == 4 && (rule.highestCpuUsage < 0 || rule.highestCpuUsage > 1)) {
+        alert('CPU 使用率模式的取值范围应为 [0.0, 1.0]，对应 0% - 100%');
+        return;
+      }
       SystemService.newRule(rule).success(function (data) {
-        if (data.code == 0) {
+        if (data.code === 0) {
           getMachineRules();
           systemRuleDialog.close();
+        } else if (data.msg != null) {
+          alert('失败：' + data.msg);
         } else {
-          alert('失败!');
+          alert('失败：未知错误');
         }
       });
     };
 
     function saveRule(rule, edit) {
       SystemService.saveRule(rule).success(function (data) {
-        if (data.code == 0) {
-          // if (rule.enable) {
-          //    rule.orginEnable = true;
-          // } else {
-          //    rule.orginEnable = false;
-          // }
+        if (data.code === 0) {
           getMachineRules();
           if (edit) {
             systemRuleDialog.close();
           } else {
             confirmDialog.close();
           }
+        } else if (data.msg != null) {
+          alert('失败：' + data.msg);
         } else {
-          alert('失败!');
+          alert('失败：未知错误');
         }
       });
     }

@@ -28,10 +28,14 @@ public class AppInfo {
 
     private String app = "";
 
+
     /**
      * 新增解决，启动页响应慢问题
      */
     private int machinesSize = 0;
+
+    private Integer appType = 0;
+
 
     private Set<MachineInfo> machines = ConcurrentHashMap.newKeySet();
 
@@ -41,12 +45,25 @@ public class AppInfo {
         this.app = app;
     }
 
+    public AppInfo(String app, Integer appType) {
+        this.app = app;
+        this.appType = appType;
+    }
+
     public String getApp() {
         return app;
     }
 
     public void setApp(String app) {
         this.app = app;
+    }
+
+    public Integer getAppType() {
+        return appType;
+    }
+
+    public void setAppType(Integer appType) {
+        this.appType = appType;
     }
 
     /**

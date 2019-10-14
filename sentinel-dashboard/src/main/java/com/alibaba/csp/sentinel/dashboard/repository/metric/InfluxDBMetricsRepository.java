@@ -494,7 +494,7 @@ public class InfluxDBMetricsRepository  {
 
             for(com.alibaba.csp.sentinel.dashboard.repository.metric.NodeVo vo : vos){
                 NodeVo nodeVo = new NodeVo();
-                if("__total_inbound_traffic__".equals(vo.getResource()))continue;
+                if("__total_inbound_traffic__".equals(vo.getResource())){continue;}
                 nodeVo.setResource(vo.getResource());
 
                 if(type==0){

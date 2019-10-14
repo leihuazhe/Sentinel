@@ -300,6 +300,15 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
                   paramFlowItemList: [],
                   count: 0,
                   limitApp: 'default',
+                  controlBehavior: 0,
+                  durationInSec: 1,
+                  burstCount: 0,
+                  maxQueueingTimeMs: 0,
+                  clusterMode: false,
+                  clusterConfig: {
+                      thresholdType: 0,
+                      fallbackToLocalWhenFail: true,
+                  }
               }
           };
 

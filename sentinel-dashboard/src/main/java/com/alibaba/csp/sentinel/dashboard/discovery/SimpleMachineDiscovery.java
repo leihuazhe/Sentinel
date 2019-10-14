@@ -28,11 +28,13 @@ import com.alibaba.dubbo.common.utils.NamedThreadFactory;
 import com.alibaba.fastjson.JSON;
 import io.netty.util.internal.ConcurrentSet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import static java.util.stream.Collectors.toList;
 
@@ -43,7 +45,7 @@ import static java.util.stream.Collectors.toList;
 public class SimpleMachineDiscovery implements MachineDiscovery {
 
 
-    @Autowired
+    @Resource(name = "redisTemplateReport")
     private StringRedisTemplate stringRedisTemplate;
     
     private final String SENTINEL_APPS = "sentinel:apps:";
@@ -162,6 +164,7 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
         List<String> appNames = getAppNames();
         //优化展示,由于redis是单线程，所以并发下性能更差
         if(!monitorShowDetail){
+            //存在开发时效问题
             return new HashSet<>(cacheAppInfo.values());
         }
 

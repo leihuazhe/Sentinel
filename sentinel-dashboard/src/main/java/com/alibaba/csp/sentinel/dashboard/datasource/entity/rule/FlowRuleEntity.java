@@ -257,6 +257,7 @@ public class FlowRuleEntity implements RuleEntity {
         this.gmtModified = gmtModified;
     }
 
+<<<<<<< HEAD
 
     public int getAdapterType() {
         return adapterType;
@@ -292,7 +293,8 @@ public class FlowRuleEntity implements RuleEntity {
         this.adapterWebType = adapterWebType;
     }
 
-    public FlowRule toFlowRule() {
+    @Override
+    public FlowRule toRule() {
         FlowRule flowRule = new FlowRule();
         flowRule.setCount(this.count);
         flowRule.setGrade(this.grade);

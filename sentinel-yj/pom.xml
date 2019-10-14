@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.yunji.csp</groupId>
         <artifactId>sentinel-parent</artifactId>
-        <version>1.5.2-SNAPSHOT</version>
+        <version>1.6.3</version>
     </parent>
     <artifactId>sentinel-yj</artifactId>
     <packaging>pom</packaging>
@@ -20,11 +20,6 @@
     <modules>
         <module>sentinel-yj-nacos</module>
         <module>sentinel-yj-report</module>
-        <!--
-        <module>sentinel-yj-dubbo</module>
-        <module>sentinel-yj-web</module>s
-        <module>sentinel-yj-all</module>
-        -->
     </modules>
 
     <dependencies>
