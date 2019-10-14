@@ -23,7 +23,7 @@
             <artifactId>sentinel-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-api-gateway-adapter-common</artifactId>
         </dependency>
 

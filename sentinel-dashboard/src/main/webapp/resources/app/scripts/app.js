@@ -58,9 +58,10 @@ angular
       events: true,
     });
 
+    $urlRouterProvider.otherwise('/dashboard/home');
 
       $stateProvider
-        .state('login', {
+ /*       .state('login', {
             url: '/login',
             templateUrl: 'app/views/login.html',
             controller: 'LoginCtl',
@@ -74,7 +75,7 @@ angular
                     });
                 }]
             }
-        })
+        })*/
 
       .state('dashboard', {
         url: '/dashboard',

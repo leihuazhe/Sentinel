@@ -257,7 +257,6 @@ public class FlowRuleEntity implements RuleEntity {
         this.gmtModified = gmtModified;
     }
 
-<<<<<<< HEAD
 
     public int getAdapterType() {
         return adapterType;

@@ -65,11 +65,13 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 /**
  * Fetch metric of machines.
@@ -95,7 +97,7 @@ public class MetricFetcher {
     @Autowired
     private AppManagement appManagement;
 
-    @Autowired
+    @Resource(name = "redisTemplateReport")
     private StringRedisTemplate stringRedisTemplate;
 
     private final String FETCHER_KEY = "fetcher:key";

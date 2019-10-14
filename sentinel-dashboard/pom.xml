@@ -39,7 +39,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-api-gateway-adapter-common</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -113,6 +113,17 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.61</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.yunji.csp</groupId>
+            <artifactId>sentinel-cluster-client-default</artifactId>
+            <version>1.6.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.yunji.csp</groupId>
+            <artifactId>sentinel-cluster-server-default</artifactId>
+            <version>1.6.3</version>
         </dependency>
 
         <!-- for Nacos rule publisher sample -->

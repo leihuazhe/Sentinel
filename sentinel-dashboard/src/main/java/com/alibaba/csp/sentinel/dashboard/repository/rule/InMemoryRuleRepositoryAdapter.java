@@ -15,21 +15,17 @@
  */
 package com.alibaba.csp.sentinel.dashboard.repository.rule;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.RuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.service.NginxLuaRedisSerivce;
-import com.alibaba.csp.sentinel.dashboard.util.NginxUtils;
-import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
 import com.alibaba.csp.sentinel.util.AssertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author leyou
@@ -52,6 +48,10 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
 
     @Override
     public T save(T entity) {
+        return saveCondition(entity,true);
+    }
+
+    public T saveCondition(T entity,boolean nginxSave) {
         if (entity.getId() == null) {
             entity.setId(nextId());
         }
@@ -59,13 +59,13 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
         if (processedEntity != null) {
             allRules.put(processedEntity.getId(), processedEntity);
             machineRules.computeIfAbsent(MachineInfo.of(processedEntity.getApp(), processedEntity.getIp(),
-                processedEntity.getPort()), e -> new ConcurrentHashMap<>(32))
-                .put(processedEntity.getId(), processedEntity);
+                    processedEntity.getPort()), e -> new ConcurrentHashMap<>(32))
+                    .put(processedEntity.getId(), processedEntity);
             appRules.computeIfAbsent(processedEntity.getApp(), v -> new ConcurrentHashMap<>(32))
-                .put(processedEntity.getId(), processedEntity);
+                    .put(processedEntity.getId(), processedEntity);
         }
 
-        if( entity instanceof FlowRuleEntity && ((FlowRuleEntity) entity).getAdapterType() == 3){
+        if(nginxSave &&  entity instanceof FlowRuleEntity && ((FlowRuleEntity) entity).getAdapterType() == 3){
             nginxLuaRedisSerivce.save(entity);
         }
         return processedEntity;
@@ -83,7 +83,7 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
         }
         List<T> savedRules = new ArrayList<>(rules.size());
         for (T rule : rules) {
-            savedRules.add(save(rule));
+            savedRules.add(saveCondition(rule,false));
         }
         return savedRules;
     }

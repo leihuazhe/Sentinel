@@ -169,8 +169,8 @@ public class SystemController {
 
     @GetMapping("/save.json")
     public Result<SystemRuleEntity> apiUpdateIfNotNull(HttpServletRequest request,
-                                        Long id, String app, Double highestSystemLoad, Double highestCpuUsage,
-                                        Long avgRt, Long maxThread, Double qps) {
+                                                       Long id, String app, Double highestSystemLoad, Double highestCpuUsage,
+                                                       Long avgRt, Long maxThread, Double qps) {
         AuthUser authUser = authService.getAuthUser(request);
         if (id == null) {
             return Result.ofFail(-1, "id can't be null");

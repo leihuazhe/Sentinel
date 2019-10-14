@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>sentinel-adapter</artifactId>
-        <groupId>com.alibaba.csp</groupId>
+        <groupId>com.yunji.csp</groupId>
         <version>1.6.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -22,11 +22,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-api-gateway-adapter-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.csp</groupId>
+            <groupId>com.yunji.csp</groupId>
             <artifactId>sentinel-reactor-adapter</artifactId>
         </dependency>
 

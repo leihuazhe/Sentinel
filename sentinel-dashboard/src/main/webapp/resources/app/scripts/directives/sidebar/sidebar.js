@@ -22,11 +22,11 @@ angular.module('sentinelDashboardApp')
                   item.active = true;
                 }
                 if(item.machinesSize >0){
-                  item.heathyCount = item.machinesSize;
+                  item.healthyCount = item.machinesSize;
                   return item;
                 }
 
-                let heathyCount = 0;
+                let healthyCount = 0;
                 for (let i in item.machines) {
                   if (item.machines[i].healthy) {
                       healthyCount++;
