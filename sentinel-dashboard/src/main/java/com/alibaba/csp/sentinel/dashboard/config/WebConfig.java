@@ -16,12 +16,7 @@
 package com.alibaba.csp.sentinel.dashboard.config;
 
 import com.alibaba.csp.sentinel.adapter.servlet.CommonFilter;
-import com.alibaba.csp.sentinel.dashboard.auth.AuthService;
-import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
-import com.yunji.sso.client.interceptor.LoginInterceptor;
 import com.yunji.sso.client.interceptor.PermissionInterceptor;
-import org.apache.commons.lang.StringUtils;
-import com.alibaba.csp.sentinel.dashboard.filter.AuthFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,17 +24,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.config.annotation.*;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
-
 import javax.servlet.Filter;
+import java.util.List;
 
 /**
  * @author leyou
@@ -49,8 +37,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final Logger logger = LoggerFactory.getLogger(WebConfig.class);
 
-    @Autowired
-    private AuthFilter authFilter;
+//    @Autowired
+//    private AuthFilter authFilter;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

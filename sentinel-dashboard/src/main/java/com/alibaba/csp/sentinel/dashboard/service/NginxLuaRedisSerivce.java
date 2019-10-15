@@ -1,14 +1,22 @@
 package com.alibaba.csp.sentinel.dashboard.service;
 
+import com.alibaba.csp.sentinel.Constants;
+import com.alibaba.csp.sentinel.concurrent.NamedThreadFactory;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.AppInfo;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemFlowRuleStore;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemoryRuleRepositoryAdapter;
+import com.alibaba.csp.sentinel.dashboard.repository.rule.nacos.NacosConfigUtil;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.dashboard.util.NginxUtils;
-import com.alibaba.csp.sentinel.util.AppNameUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.nacos.api.config.ConfigService;
+import com.alibaba.nacos.api.config.listener.Listener;
+import com.taobao.diamond.manager.ManagerListener;
+import com.taobao.diamond.manager.ManagerListenerAdapter;
+import com.yunji.diamond.client.api.DiamondClient;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
@@ -18,15 +26,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.EnableMBeanExport;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.io.StringReader;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * 处理从Redis初始化数据
@@ -43,6 +50,17 @@ public class NginxLuaRedisSerivce {
     @Autowired
     private InMemFlowRuleStore inMemFlowRuleStore;
 
+//    @Autowired
+//    private ConfigService configService;
+//
+//    /**
+//     * Single-thread pool. Once the thread pool is blocked, we throw up the old task.
+//     */
+//    private final ExecutorService pool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS,
+//            new ArrayBlockingQueue<Runnable>(1), new NamedThreadFactory("sentinel-nacos-ds-update"),
+//            new ThreadPoolExecutor.DiscardOldestPolicy());
+
+    private DiamondClient diamondClient = null;
     private static final String MSG_LIST = "msg_list";
 
     private static final String MAX_STR = "max_";
@@ -65,6 +83,23 @@ public class NginxLuaRedisSerivce {
      * nginx 与 redis对应关系
      */
     private Map<String,String> redisIps = new HashMap<>();
+
+
+
+
+
+
+    private DiamondClient getDiamondClient(String dataId, ManagerListener managerListener){
+        DiamondClient diamondClient = new DiamondClient();
+        diamondClient.setDataId(dataId);
+        diamondClient.setPollingIntervalTime(10);
+        diamondClient.setTimeout(2000L);
+        diamondClient.setManagerListener(managerListener);
+        /* 初始化diamond */
+        diamondClient.init();
+        return diamondClient;
+    }
+
 
     @PostConstruct
     public void init(){
@@ -90,54 +125,89 @@ public class NginxLuaRedisSerivce {
          * yunji-insuranceweb. 			    172.21.200.184
          */
 
-        //环境判断
-        String configKey = "config_env";
-        String env = AppNameUtil.getEnvConfig(configKey);
-        logger.warn("config_env:{}",env);
+//        //环境判断
+//        String configKey = "config_env";
+//        String env = AppNameUtil.getEnvConfig(configKey);
+//        logger.warn("config_env:{}",env);
+//
+//        if("idc".equals(env)){
+//             /*
+//            redisIps.put("m.yunjiglobal.com","172.22.14.91");
+//            redisIps.put("app.yunjiglobal.com","172.22.14.61");
+//            redisIps.put("vipapp.yunjiglobal.com","172.22.14.159");
+//            redisIps.put("marketing.yunjiglobal.com","172.21.153.23");
+//            redisIps.put("yunjioperate.yunjiglobal.com","172.21.153.48");
+//            redisIps.put("reward.yunjiglobal.com","172.21.154.203");
+//            redisIps.put("ys.yunjiglobal.com","172.21.150.75");
+//            redisIps.put("spe.yunjix.com","172.21.154.79");//
+//            redisIps.put("user.yunjiglobal.com","172.21.154.221");
+//            redisIps.put("order.yunjiglobal.com","172.21.154.235");
+//            redisIps.put("search.yunjiglobal.com","172.21.154.201");
+//            redisIps.put("m.yj.ink","172.21.154.87");
+//            redisIps.put("item.yunjiglobal.com","172.21.153.135");
+//            redisIps.put("sc.yunjiglobal.com","172.21.154.162");
+//            redisIps.put("chicken.yunjiglobal.com","172.21.154.165");
+//            redisIps.put("insurance.yunjiglobal.com","172.21.200.184");
+//             /*
+//
+//        }else if("dev".equals(env)){
+//            redisIps.put("t.yunjiglobal.com","172.30.220.215:14159");
+//            //redisIps.put("m.yunjiglobal.com","172.30.220.215:14159");
+//            //redisIps.put("local.yunjiweidian.org","172.30.222.63:14159");
+//        }else if ("local".equals(env)){
+//            redisIps.put("m.yunjiglobal.com","172.16.0.2:7777");
+//        }
 
-        if("idc".equals(env)){
-            /*
-            redisIps.put("m.yunjiglobal.com","172.22.14.91");
-            redisIps.put("app.yunjiglobal.com","172.22.14.61");
-            redisIps.put("vipapp.yunjiglobal.com","172.22.14.159");
-            redisIps.put("marketing.yunjiglobal.com","172.21.153.23");
-            redisIps.put("yunjioperate.yunjiglobal.com","172.21.153.48");
-            redisIps.put("reward.yunjiglobal.com","172.21.154.203");
-            redisIps.put("ys.yunjiglobal.com","172.21.150.75");
-            redisIps.put("spe.yunjix.com","172.21.154.79");//
-            redisIps.put("user.yunjiglobal.com","172.21.154.221");
-            redisIps.put("order.yunjiglobal.com","172.21.154.235");
-            redisIps.put("search.yunjiglobal.com","172.21.154.201");
-            redisIps.put("m.yj.ink","172.21.154.87");
-            redisIps.put("item.yunjiglobal.com","172.21.153.135");
-            redisIps.put("sc.yunjiglobal.com","172.21.154.162");
-            redisIps.put("chicken.yunjiglobal.com","172.21.154.165");
-            redisIps.put("insurance.yunjiglobal.com","172.21.200.184");
-
-             */
-        }else if("dev".equals(env)){
-            redisIps.put("t.yunjiglobal.com","172.30.220.215:14159");
-            //redisIps.put("m.yunjiglobal.com","172.30.220.215:14159");
-            //redisIps.put("local.yunjiweidian.org","172.30.222.63:14159");
-        }else if ("local".equals(env)){
-            redisIps.put("m.yunjiglobal.com","172.16.0.2:7777");
-        }
-
-//        new Thread(()->{
+        new Thread(()->{
 //            Set<Map.Entry<String, String>> set =  redisIps.entrySet();
 //            for(Map.Entry<String, String> e:set){
 //                transform(e.getKey(),e.getValue());
 //            }
+
+//            try{
+//                configService.addListener("sentinel-nginx-init", NacosConfigUtil.GROUP_ID, new Listener() {
+//                    @Override
+//                    public Executor getExecutor() {
+//                        return pool;
+//                    }
 //
-//        }).start();
+//                    @Override
+//                    public void receiveConfigInfo(String configInfo) {
+//                        updateNginxInit(configInfo);
+//                    }
+//                });
+//
+//
+//                String configInfo = configService.getConfig("sentinel-nginx-init",
+//                        NacosConfigUtil.GROUP_ID, 3000);
+//                updateNginxInit(configInfo);
+//            }catch (Exception ex){
+//                logger.error("初始化nginx配置失败：",ex);
+//            }
+
+
+            diamondClient = getDiamondClient("sentinel-nginx-init", new ManagerListenerAdapter() {
+                @Override
+                public void receiveConfigInfo(String s) {
+                    updateNginxInit(s);
+                }
+            });
+            updateNginxInit(diamondClient.getConfig());
+
+        }).start();
+
 
 
 
     }
 
-
-    public Map<String,String> getRedisIps(){
-        return redisIps;
+    public void updateNginxInit(String configInfo){
+        if(StringUtils.isBlank(configInfo)){
+            return;
+        }
+        Map<String,String> redisIps = JSON.parseObject(configInfo,Map.class);
+        logger.warn("更新redisIps form:{},to:{}",this.redisIps,redisIps);
+        this.redisIps = redisIps;
     }
 
 
@@ -152,9 +222,9 @@ public class NginxLuaRedisSerivce {
 
             MachineInfo machineInfo = new MachineInfo();
             machineInfo.setApp(e.getKey());
-            machineInfo.setIp("127.0.0.1");
+            machineInfo.setIp(e.getValue());
             machineInfo.setPort(80);
-            machineInfo.setVersion("1.5.1");
+            machineInfo.setVersion(Constants.SENTINEL_VERSION);
             machineInfo.setHostname("nginx-pc");
             machineInfo.setLastHeartbeat(System.currentTimeMillis());
             machineInfo.setHeartbeatVersion(System.currentTimeMillis()-10);
@@ -219,24 +289,31 @@ public class NginxLuaRedisSerivce {
             keys.stream().forEach((key)->{
                 //创建实体
                 String newKey = key.substring(MAX_STR.length());
-                String redisKey = prefix + NginxUtils.excludeHttpPre(newKey);
-                String msg = syncCommands.hget(MSG_LIST,newKey);
-                String value = syncCommands.get(MAX_STR + newKey);
-                FlowRuleEntity flowRuleEntity = new FlowRuleEntity();
-                flowRuleEntity.setApp(prefix);
-                flowRuleEntity.setResource(redisKey);
-                flowRuleEntity.setCount(NumberUtils.toDouble(value,0));
-                flowRuleEntity.setAdapterText(msg);
-                flowRuleEntity.setAdapterResultOn(true);
-                flowRuleEntity.setAdapterType(3);
-                flowRuleEntity.setGrade(1);//1为qps
-                flowRuleEntity.setStrategy(0);
-                flowRuleEntity.setControlBehavior(0);
-                flowRuleEntity.setGmtCreate(new Date());
-                flowRuleEntity.setGmtModified(flowRuleEntity.getGmtCreate());
-                flowRuleEntity.setLimitApp("default");
+                //判断是否已经是配置的，如果是跳过
+                if(newKey.startsWith("/")){
+                    String redisKey = prefix + NginxUtils.excludeHttpPre(newKey);
+                    String msg = syncCommands.hget(MSG_LIST,newKey);
+                    String value = syncCommands.get(MAX_STR + newKey);
+                    FlowRuleEntity flowRuleEntity = new FlowRuleEntity();
+                    flowRuleEntity.setApp(prefix);
+                    flowRuleEntity.setResource(redisKey);
+                    flowRuleEntity.setCount(NumberUtils.toDouble(value,0));
+                    flowRuleEntity.setAdapterText(msg);
+                    flowRuleEntity.setAdapterResultOn(true);
+                    flowRuleEntity.setAdapterType(3);
+                    flowRuleEntity.setGrade(1);//1为qps
+                    flowRuleEntity.setStrategy(0);
+                    flowRuleEntity.setControlBehavior(0);
+                    flowRuleEntity.setGmtCreate(new Date());
+                    flowRuleEntity.setGmtModified(flowRuleEntity.getGmtCreate());
+                    flowRuleEntity.setLimitApp("default");
 
-                inMemFlowRuleStore.save(flowRuleEntity);
+                    inMemFlowRuleStore.save(flowRuleEntity);
+                    logger.warn("newKey:{} to :{} ",newKey,redisKey);
+                }else{
+                    logger.warn("newKey:{} not startsWith: /",newKey);
+                }
+
             });
 
 
@@ -250,7 +327,7 @@ public class NginxLuaRedisSerivce {
 
         //做事并且写入
         stringRedisTemplate.opsForValue().set(redisInitKey,"runned");
-        String val = stringRedisTemplate.opsForValue().get(SENTINEL_NGINX);
+        String val = stringRedisTemplate.opsForValue().get(redisInitKey);
         logger.warn("read:{},val:{}",prefix,val);
         return "执行迁移 doamin:" + prefix +" 下redis:"+ redis + " to  sentinel success!!";
     }
