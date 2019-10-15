@@ -161,6 +161,14 @@ public class FlowControllerV2 {
         if(StringUtils.isNoneBlank(entity.getAdapterText())){
             entity.setAdapterResultOn(true);
         }
+        //判断是否已经存在
+        List<FlowRuleEntity> ruleEntitys = repository.findAllByApp(entity.getApp());
+        for(FlowRuleEntity ruleEntity:ruleEntitys){
+            if(ruleEntity.getResource().equals(entity.getResource())){
+                return Result.ofFail(-1,"resource:"+ entity.getResource() +" 已经存在！");
+            }
+        }
+
         try {
             entity = repository.save(entity);
             publishRules(entity.getApp());
@@ -170,6 +178,7 @@ public class FlowControllerV2 {
         }
         return Result.ofSuccess(entity);
     }
+
 
     @PutMapping("/rule/{id}")
     public Result<FlowRuleEntity> apiUpdateFlowRule(HttpServletRequest request,

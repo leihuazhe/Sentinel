@@ -141,6 +141,14 @@ public class ParamFlowRuleControllerV2 {
         Date date = new Date();
         entity.setGmtCreate(date);
         entity.setGmtModified(date);
+
+        //判断是否已经存在
+        List<ParamFlowRuleEntity> flowRuleEntitys = repository.findAllByApp(entity.getApp());
+        for(ParamFlowRuleEntity flowRuleEntity:flowRuleEntitys){
+            if(flowRuleEntity.getResource().equals(entity.getResource())){
+                return Result.ofFail(-1,"resource:"+ entity.getResource() +" 已经存在！");
+            }
+        }
         try {
             entity = repository.save(entity);
             publishRules(entity.getApp());
