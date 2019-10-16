@@ -73,6 +73,11 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
 
     @Override
     public List<T> saveAll(List<T> rules) {
+       return saveAll(rules,false);
+    }
+
+    @Override
+    public List<T> saveAll(List<T> rules,boolean ngingSave) {
         // TODO: check here.
         allRules.clear();
         machineRules.clear();
@@ -83,7 +88,7 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
         }
         List<T> savedRules = new ArrayList<>(rules.size());
         for (T rule : rules) {
-            savedRules.add(saveCondition(rule,false));
+            savedRules.add(saveCondition(rule,ngingSave));
         }
         return savedRules;
     }

@@ -43,6 +43,14 @@ public interface RuleRepository<T, ID> {
     List<T> saveAll(List<T> rules);
 
     /**
+     * Save all.
+     *
+     * @param rules
+     * @return rules saved.
+     */
+    List<T> saveAll(List<T> rules,boolean nginxSave);
+
+    /**
      * Delete by id
      *
      * @param id
