@@ -130,7 +130,7 @@ app.controller('DegradeCtlV2', ['$scope', '$stateParams', 'DegradeServiceV2', 'n
           getMachineRules();
           confirmDialog.close();
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       });
     };
@@ -141,7 +141,7 @@ app.controller('DegradeCtlV2', ['$scope', '$stateParams', 'DegradeServiceV2', 'n
           getMachineRules();
           degradeRuleDialog.close();
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       });
     };
@@ -156,7 +156,7 @@ app.controller('DegradeCtlV2', ['$scope', '$stateParams', 'DegradeServiceV2', 'n
             confirmDialog.close();
           }
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       });
     }

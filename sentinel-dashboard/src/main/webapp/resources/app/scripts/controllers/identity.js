@@ -100,7 +100,7 @@ app.controller('IdentityCtl', ['$scope', '$stateParams', 'IdentityService',
           let url = '/dashboard/flow/' + $scope.app;
           $location.path(url);
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       }).error((data, header, config, status) => {
           alert('未知错误');
@@ -115,7 +115,7 @@ app.controller('IdentityCtl', ['$scope', '$stateParams', 'IdentityService',
         if (data.code == 0) {
           flowRuleDialog.close();
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       });
     }
@@ -166,7 +166,7 @@ app.controller('IdentityCtl', ['$scope', '$stateParams', 'IdentityService',
           var url = '/dashboard/degrade/' + $scope.app;
           $location.path(url);
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       });
     }

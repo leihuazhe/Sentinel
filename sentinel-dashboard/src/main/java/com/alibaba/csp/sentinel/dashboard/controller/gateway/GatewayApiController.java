@@ -75,7 +75,7 @@ public class GatewayApiController {
 
         try {
             List<ApiDefinitionEntity> apis = sentinelApiClient.fetchApis(app, ip, port).get();
-            repository.saveAll(apis);
+            repository.saveAll(apis,app);
             return Result.ofSuccess(apis);
         } catch (Throwable throwable) {
             logger.error("queryApis error:", throwable);

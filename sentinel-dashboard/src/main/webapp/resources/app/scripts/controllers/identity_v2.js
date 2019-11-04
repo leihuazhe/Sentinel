@@ -94,7 +94,7 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
           let url = '/dashboard/v2/flow/' + $scope.app;
           $location.path(url);
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       }).error((data, header, config, status) => {
           alert('未知错误');
@@ -109,7 +109,7 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
         if (data.code == 0) {
           flowRuleDialog.close();
         } else {
-          alert('失败!');
+          alert('失败!'+ data.msg);
         }
       });
     }
@@ -154,7 +154,7 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
           var url = '/dashboard/v2/degrade/' + $scope.app;
           $location.path(url);
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       });
     }
@@ -167,7 +167,7 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
         if (data.code == 0) {
           degradeRuleDialog.close();
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       });
     }

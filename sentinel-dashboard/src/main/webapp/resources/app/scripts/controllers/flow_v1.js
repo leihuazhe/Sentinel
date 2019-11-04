@@ -150,7 +150,7 @@ app.controller('FlowControllerV1', ['$scope', '$stateParams', 'FlowServiceV1', '
           getMachineRules();
           confirmDialog.close();
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       });
     };
@@ -161,7 +161,7 @@ app.controller('FlowControllerV1', ['$scope', '$stateParams', 'FlowServiceV1', '
           getMachineRules();
           flowRuleDialog.close();
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       });
     };
@@ -183,7 +183,7 @@ app.controller('FlowControllerV1', ['$scope', '$stateParams', 'FlowServiceV1', '
             confirmDialog.close();
           }
         } else {
-          alert('失败!');
+          alert('失败!' + data.msg);
         }
       });
     }

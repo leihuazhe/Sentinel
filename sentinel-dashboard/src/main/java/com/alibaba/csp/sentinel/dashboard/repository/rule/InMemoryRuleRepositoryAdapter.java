@@ -81,17 +81,19 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
     @Override
     public List<T> saveAll(List<T> rules,String app,boolean ngingSave) {
         // TODO: check here.
+        if (rules == null) {
+            return null;
+        }
         if(StringUtil.isBlank(app)){
             return null;
         }
         Map<Long, T> oldRules = appRules.remove(app);
-        for(Long lo : oldRules.keySet()){
-            allRules.remove(lo);
+        if(oldRules!=null && !oldRules.isEmpty()){
+            for(Long lo : oldRules.keySet()){
+                allRules.remove(lo);
+            }
         }
 
-        if (rules == null) {
-            return null;
-        }
         List<T> savedRules = new ArrayList<>(rules.size());
         for (T rule : rules) {
             savedRules.add(saveCondition(rule,ngingSave));
