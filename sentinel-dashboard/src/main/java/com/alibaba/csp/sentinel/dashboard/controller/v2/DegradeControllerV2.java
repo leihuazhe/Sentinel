@@ -83,7 +83,7 @@ public class DegradeControllerV2 {
 //        }
         try {
             List<DegradeRuleEntity> rules = ruleProvider.getRules(app);
-            rules = repository.saveAll(rules);
+            rules = repository.saveAll(rules,app);
             return Result.ofSuccess(rules);
         } catch (Throwable throwable) {
             logger.error("queryApps error:", throwable);

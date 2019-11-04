@@ -106,7 +106,7 @@ public class ParamFlowRuleController {
         }
         try {
             return sentinelApiClient.fetchParamFlowRulesOfMachine(app, ip, port)
-                .thenApply(repository::saveAll)
+                .thenApply((list)->repository.saveAll(list,app))
                 .thenApply(Result::ofSuccess)
                 .get();
         } catch (ExecutionException ex) {

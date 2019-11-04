@@ -74,7 +74,7 @@ public class SystemControllerV2 {
         }
         try {
             List<SystemRuleEntity> rules = ruleProvider.getRules(app);
-            rules = repository.saveAll(rules);
+            rules = repository.saveAll(rules,app);
             return Result.ofSuccess(rules);
         } catch (Throwable throwable) {
             logger.error("queryApps error:", throwable);

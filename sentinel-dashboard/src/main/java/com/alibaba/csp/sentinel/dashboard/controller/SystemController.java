@@ -82,7 +82,7 @@ public class SystemController {
         }
         try {
             List<SystemRuleEntity> rules = sentinelApiClient.fetchSystemRuleOfMachine(app, ip, port);
-            rules = repository.saveAll(rules);
+            rules = repository.saveAll(rules,app);
             return Result.ofSuccess(rules);
         } catch (Throwable throwable) {
             logger.error("Query machine system rules error", throwable);

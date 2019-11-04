@@ -34,13 +34,6 @@ public interface RuleRepository<T, ID> {
      */
     T save(T entity);
 
-    /**
-     * Save all.
-     *
-     * @param rules
-     * @return rules saved.
-     */
-    List<T> saveAll(List<T> rules);
 
     /**
      * Save all.
@@ -48,7 +41,16 @@ public interface RuleRepository<T, ID> {
      * @param rules
      * @return rules saved.
      */
-    List<T> saveAll(List<T> rules,boolean nginxSave);
+    List<T> saveAll(List<T> rules,String app);
+
+
+    /**
+     * Save all.
+     *
+     * @param rules
+     * @return rules saved.
+     */
+    List<T> saveAll(List<T> rules,String app,boolean nginxSave);
 
     /**
      * Delete by id

@@ -20,6 +20,7 @@ import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.RuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.service.NginxLuaRedisSerivce;
 import com.alibaba.csp.sentinel.util.AssertUtil;
+import com.alibaba.csp.sentinel.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -71,17 +72,22 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
         return processedEntity;
     }
 
+
     @Override
-    public List<T> saveAll(List<T> rules) {
-       return saveAll(rules,false);
+    public List<T> saveAll(List<T> rules,String app) {
+        return saveAll(rules,app,false);
     }
 
     @Override
-    public List<T> saveAll(List<T> rules,boolean ngingSave) {
+    public List<T> saveAll(List<T> rules,String app,boolean ngingSave) {
         // TODO: check here.
-        allRules.clear();
-        machineRules.clear();
-        appRules.clear();
+        if(StringUtil.isBlank(app)){
+            return null;
+        }
+        Map<Long, T> oldRules = appRules.remove(app);
+        for(Long lo : oldRules.keySet()){
+            allRules.remove(lo);
+        }
 
         if (rules == null) {
             return null;

@@ -71,7 +71,7 @@ public class NginxLimitController {
                     }
                 }
             }
-            rules = repository.saveAll(rules,true);
+            rules = repository.saveAll(rules,domain,true);
             return Result.ofSuccess(rules);
         } catch (Throwable throwable) {
             logger.error("Error when querying flow rules", throwable);

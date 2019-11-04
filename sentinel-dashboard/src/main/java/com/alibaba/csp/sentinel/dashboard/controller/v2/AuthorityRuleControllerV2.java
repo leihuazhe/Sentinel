@@ -74,7 +74,7 @@ public class AuthorityRuleControllerV2 {
         }
         try {
             List<AuthorityRuleEntity> rules = ruleProvider.getRules(app);
-            rules = repository.saveAll(rules);
+            rules = repository.saveAll(rules,app);
             return Result.ofSuccess(rules);
         } catch (Throwable throwable) {
             logger.error("Error when querying authority rules", throwable);

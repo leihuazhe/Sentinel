@@ -100,7 +100,7 @@ public class ParamFlowRuleControllerV2 {
 
             List<ParamFlowRuleEntity> rules = ruleProvider.getRules(app);
 
-            rules = repository.saveAll(rules);
+            rules = repository.saveAll(rules,app);
             return Result.ofSuccess(rules);
             /*
             return sentinelApiClient.fetchParamFlowRulesOfMachine(app, ip, port)
