@@ -2,6 +2,7 @@ package com.alibaba.csp.sentinel.yj.nacos;
 
 import com.alibaba.csp.sentinel.datasource.Converter;
 import com.alibaba.csp.sentinel.datasource.ReadableDataSource;
+import com.alibaba.csp.sentinel.log.RecordLog;
 import com.alibaba.csp.sentinel.slots.block.authority.AuthorityRule;
 import com.alibaba.csp.sentinel.slots.block.authority.AuthorityRuleManager;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
@@ -13,7 +14,9 @@ import com.alibaba.csp.sentinel.slots.system.SystemRuleManager;
 import com.alibaba.csp.sentinel.util.AppNameUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.PropertyKeyConst;
+import com.alibaba.nacos.api.config.ConfigService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,90 +50,26 @@ public class NacosDataSource {
 
 
     private NacosConfig nacosConfig;
+    private ConfigService configService = null;
+    private Properties properties = new Properties();
 
 
     /**
      * 启动
      */
     public void start(){
+        properties.put(PropertyKeyConst.SERVER_ADDR, nacosConfig.getRemoteAddress());
         if (nacosConfig.getNamespace()) {
-            loadMyNamespaceRules();
-        } else {
-            loadRules();
+            properties.put(PropertyKeyConst.NAMESPACE, nacosConfig.getNamespaceId());
+        }
+        try{
+            this.configService = NacosFactory.createConfigService(this.properties);
+        }catch (Exception e){
+            RecordLog.warn("[NacosDataSource] Error occurred when initializing Nacos data source", e);
+            e.printStackTrace();
         }
 
-    }
-
-
-    private  void loadRules() {
-        String flowDataId = AppNameUtil.getAppName() + FLOW_DATA_ID_POSTFIX ;
-        String systemDataId = AppNameUtil.getAppName() + SYSTEM_DATA_ID_POSTFIX ;
-        String authorityDataId = AppNameUtil.getAppName() + AUTHORITY_DATA_ID_POSTFIX ;
-        String paramDataId = AppNameUtil.getAppName() + PARAM_FLOW_DATA_ID_POSTFIX ;
-        String clusterDataId = AppNameUtil.getAppName() + CLUSTER_MAP_DATA_ID_POSTFIX ;
-
-        //限流
-        ReadableDataSource<String, List<FlowRule>> flowRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(nacosConfig.getRemoteAddress(), nacosConfig.getGroupId(), flowDataId,
-                new Converter<String, List<FlowRule>>() {
-            @Override
-            public List<FlowRule> convert(String source) {
-                return JSON.parseObject(source, new TypeReference<List<FlowRule>>() {});
-            }
-        });
-
-        FlowRuleManager.register2Property(flowRuleDataSource.getProperty());
-
-        //系统
-        ReadableDataSource<String, List<SystemRule>> systemRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(nacosConfig.getRemoteAddress(), nacosConfig.getGroupId(), systemDataId,
-                new Converter<String, List<SystemRule>>() {
-                    @Override
-                    public List<SystemRule> convert(String source) {
-                        return JSON.parseObject(source, new TypeReference<List<SystemRule>>() {});
-                    }
-                });
-        SystemRuleManager.register2Property(systemRuleDataSource.getProperty());
-
-        //黑白名单
-        ReadableDataSource<String, List<AuthorityRule>> authorityRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(nacosConfig.getRemoteAddress(), nacosConfig.getGroupId(), authorityDataId,
-                new Converter<String, List<AuthorityRule>>() {
-                    @Override
-                    public List<AuthorityRule> convert(String source) {
-                        List<RuleEx<AuthorityRule>> ruleExList = JSON.parseObject(source, new TypeReference<List<RuleEx<AuthorityRule>>>() {});
-                        List<AuthorityRule> list = new ArrayList<>();
-                        if(ruleExList==null){
-                            return list;
-                        }
-                        for (RuleEx<AuthorityRule> ruleEx:ruleExList){
-                            if(ruleEx!=null){
-                                list.add(ruleEx.getRule());
-                            }
-                        }
-                        return list;
-                    }
-                });
-        AuthorityRuleManager.register2Property(authorityRuleDataSource.getProperty());
-
-        //热点参数
-        ReadableDataSource<String, List<ParamFlowRule>> paramRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(nacosConfig.getRemoteAddress(), nacosConfig.getGroupId(), paramDataId,
-                new Converter<String, List<ParamFlowRule>>() {
-                    @Override
-                    public List<ParamFlowRule> convert(String source) {
-                        List<RuleEx<ParamFlowRule>> ruleExList = JSON.parseObject(source, new TypeReference<List<RuleEx<ParamFlowRule>>>() {});
-                        List<ParamFlowRule> list = new ArrayList<>();
-                        if(ruleExList==null){
-                            return list;
-                        }
-                        for (RuleEx<ParamFlowRule> ruleEx:ruleExList){
-                            if(ruleEx!=null){
-                                list.add(ruleEx.getRule());
-                            }
-                        }
-                        return list;
-                    }
-                });
-        ParamFlowRuleManager.register2Property(paramRuleDataSource.getProperty());
-
-
+        loadMyNamespaceRules();
     }
 
     private void loadMyNamespaceRules() {
@@ -146,7 +85,7 @@ public class NacosDataSource {
         properties.put(PropertyKeyConst.NAMESPACE, nacosConfig.getNamespaceId());
 
         //限流
-        ReadableDataSource<String, List<FlowRule>> flowRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(properties, nacosConfig.getGroupId(), flowDataId,
+        ReadableDataSource<String, List<FlowRule>> flowRuleDataSource = new CustomNacosDataSource<>(configService,properties, nacosConfig.getGroupId(), flowDataId,
                 new Converter<String, List<FlowRule>>() {
                     @Override
                     public List<FlowRule> convert(String source) {
@@ -156,7 +95,7 @@ public class NacosDataSource {
         FlowRuleManager.register2Property(flowRuleDataSource.getProperty());
 
         //系统
-        ReadableDataSource<String, List<SystemRule>> systemRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(properties, nacosConfig.getGroupId(), systemDataId,
+        ReadableDataSource<String, List<SystemRule>> systemRuleDataSource = new CustomNacosDataSource<>(configService,properties, nacosConfig.getGroupId(), systemDataId,
                 new Converter<String, List<SystemRule>>() {
                     @Override
                     public List<SystemRule> convert(String source) {
@@ -166,7 +105,7 @@ public class NacosDataSource {
         SystemRuleManager.register2Property(systemRuleDataSource.getProperty());
 
         //黑白名单
-        ReadableDataSource<String, List<AuthorityRule>> authorityRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(properties, nacosConfig.getGroupId(), authorityDataId,
+        ReadableDataSource<String, List<AuthorityRule>> authorityRuleDataSource = new CustomNacosDataSource<>(configService,properties, nacosConfig.getGroupId(), authorityDataId,
                 new Converter<String, List<AuthorityRule>>() {
                     @Override
                     public List<AuthorityRule> convert(String source) {
@@ -187,7 +126,7 @@ public class NacosDataSource {
         AuthorityRuleManager.register2Property(authorityRuleDataSource.getProperty());
 
         //热点参数
-        ReadableDataSource<String, List<ParamFlowRule>> paramRuleDataSource = new com.alibaba.csp.sentinel.datasource.nacos.NacosDataSource<>(properties, nacosConfig.getGroupId(), paramDataId,
+        ReadableDataSource<String, List<ParamFlowRule>> paramRuleDataSource = new CustomNacosDataSource<>(configService,properties, nacosConfig.getGroupId(), paramDataId,
                 new Converter<String, List<ParamFlowRule>>() {
                     @Override
                     public List<ParamFlowRule> convert(String source) {
