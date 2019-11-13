@@ -422,12 +422,12 @@
             </build>
             <distributionManagement>
                 <repository>
-                    <id>nexus-releases</id>
+                    <id>nexus</id>
                     <name>yunji-releases</name>
                     <url>http://nexus.yunjiglobal.com/repository/yunji-releases/</url>
                 </repository>
                 <snapshotRepository>
-                    <id>nexus-snapshots</id>
+                    <id>nexus</id>
                     <name>yunji-snapshots</name>
                     <url>http://nexus.yunjiglobal.com/repository/yunji-snapshots/</url>
                 </snapshotRepository>
