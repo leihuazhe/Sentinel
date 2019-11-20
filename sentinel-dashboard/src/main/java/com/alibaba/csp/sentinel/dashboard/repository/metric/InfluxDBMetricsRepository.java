@@ -3,7 +3,6 @@ package com.alibaba.csp.sentinel.dashboard.repository.metric;
 import com.alibaba.csp.sentinel.command.vo.NodeVo;
 import com.alibaba.csp.sentinel.config.SentinelConfig;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.MetricEntity;
-import com.alibaba.csp.sentinel.dashboard.discovery.AppInfo;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.metric.InfluxDBMetric;
 import com.alibaba.csp.sentinel.node.metric.MetricNode;
@@ -12,7 +11,6 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -346,7 +344,7 @@ public class InfluxDBMetricsRepository  {
 
         final String url = getInfluxdbHttpUrl();
         try {
-            String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\"."+infuxdbUserName+" where app='"+app+"' and resource='"+resource+"' and time >= now() - 5m group by time(1m) #query_select#"+app,"UTF-8");
+            String q = URLEncoder.encode("select sum(blockQps) as blockQps,sum(count) as count,sum(exceptionQps)as exceptionQps,sum(passQps) as passQps,sum(rt) as rt,sum(successQps)as successQps  from \"1d\"."+infuxdbUserName+" where app='"+app+"' and resource='"+resource+"' and time >= now() - 5m group by time(1m) #single#sentinel#sentinel_data#"+app,"UTF-8");
             String result = httpGetContent(url + q);
             logger.debug("listResourcesOfApp:{}",result);
 
@@ -360,12 +358,15 @@ public class InfluxDBMetricsRepository  {
                 for(NodeVo2 vo : vos){
                     MetricEntity metricEntity = new MetricEntity();
                     metricEntity.setResource(resource);
-                    metricEntity.setBlockQps(NumberUtils.toLong(vo.getBlockQps(),0));
-                    metricEntity.setExceptionQps(NumberUtils.toLong(vo.getExceptionQps(),0));
-                    metricEntity.setRt(NumberUtils.toLong(vo.getAverageRt(),0));
-                    metricEntity.setSuccessQps(NumberUtils.toLong(vo.getSuccessQps(),0));
-                    metricEntity.setPassQps(NumberUtils.toLong(vo.getPassQps(),0));
-                    Date date =  DateUtils.parseDate(vo.getTime(),new String[]{"yyyy-MM-dd'T'HH:mm:ss'Z'"});
+                    metricEntity.setBlockQps(coverDoubleToLong(vo.getBlockQps()));
+                    metricEntity.setExceptionQps(coverDoubleToLong(vo.getExceptionQps()));
+                    metricEntity.setRt(NumberUtils.toDouble(vo.getAverageRt(),0L));
+                    metricEntity.setSuccessQps(coverDoubleToLong(vo.getSuccessQps()));
+                    metricEntity.setPassQps(coverDoubleToLong(vo.getPassQps()));
+
+//                    Date date =  DateUtils.parseDate(vo.getTime(),new String[]{"yyyy-MM-dd'T'HH:mm:ss'Z'"});
+                    //NumberUtils.toLong()
+                    Date date = new Date(NumberUtils.createBigDecimal(vo.getTime()).longValue());
                     metricEntity.setTimestamp(date);
                     metricEntity.setGmtCreate(date);
                     metricEntity.setGmtModified(date);
@@ -381,6 +382,13 @@ public class InfluxDBMetricsRepository  {
             logger.warn("listResourcesOfApp",ex);
         }
         return null;
+    }
+
+    public long coverDoubleToLong(String value){
+        if(value==null){
+            return 0L;
+        }
+        return (long)NumberUtils.toDouble(value,0L);
     }
 
     //@Override
@@ -483,7 +491,7 @@ public class InfluxDBMetricsRepository  {
         List<NodeVo> list = new ArrayList<>();
         final String url = getInfluxdbHttpUrl();
         try {
-            String q = URLEncoder.encode("select sum(successQps) as successQps,sum(blockQps) as blockQps,sum(exceptionQps) as exceptionQps,sum(rt) as rt,sum(passQps) as passQps  from \"1d\"."+infuxdbUserName+" where app='"+app+"' and time >= now() - "+time+" group by resource#query_select#"+app,"UTF-8");
+            String q = URLEncoder.encode("select sum(successQps) as successQps,sum(blockQps) as blockQps,sum(exceptionQps) as exceptionQps,sum(rt) as rt,sum(passQps) as passQps  from \"1d\"."+infuxdbUserName+" where app='"+app+"' and time >= now() - "+time+" group by resource#single#sentinel#sentinel_data#"+app,"UTF-8");
             String result = httpGetContent(url + q);
 
             logger.debug("listResourcesOfApp:{}",result);
@@ -498,23 +506,23 @@ public class InfluxDBMetricsRepository  {
                 nodeVo.setResource(vo.getResource());
 
                 if(type==0){
-                    nodeVo.setOneMinutePass(NumberUtils.toLong(vo.getSuccessQps(),0));
-                    nodeVo.setOneMinuteBlock(NumberUtils.toLong(vo.getBlockQps(),0));
-                    nodeVo.setOneMinuteException(NumberUtils.toLong(vo.getExceptionQps(),0));
+                    nodeVo.setOneMinutePass(coverDoubleToLong(vo.getSuccessQps()));
+                    nodeVo.setOneMinuteBlock(coverDoubleToLong(vo.getBlockQps()));
+                    nodeVo.setOneMinuteException(coverDoubleToLong(vo.getExceptionQps()));
                     nodeVo.setOneMinuteTotal(nodeVo.getOneMinuteBlock() + nodeVo.getOneMinuteException() + nodeVo.getOneMinutePass());
 
                 }else {
                     if(type>60){
-                        nodeVo.setOneMinuteBlock(NumberUtils.toLong(vo.getBlockQps(),0)/(type/60));
-                        nodeVo.setOneMinutePass(NumberUtils.toLong(vo.getPassQps(),0)/(type/60));
+                        nodeVo.setOneMinuteBlock(coverDoubleToLong(vo.getBlockQps())/(type/60));
+                        nodeVo.setOneMinutePass(coverDoubleToLong(vo.getPassQps())/(type/60));
                     }else{
-                        nodeVo.setOneMinuteBlock(NumberUtils.toLong(vo.getBlockQps(),0));
-                        nodeVo.setOneMinutePass(NumberUtils.toLong(vo.getPassQps(),0));
+                        nodeVo.setOneMinuteBlock(coverDoubleToLong(vo.getBlockQps()));
+                        nodeVo.setOneMinutePass(coverDoubleToLong(vo.getPassQps()));
                     }
-                    nodeVo.setBlockQps(NumberUtils.toLong(vo.getBlockQps(),0)/type);
-                    nodeVo.setExceptionQps(NumberUtils.toLong(vo.getExceptionQps(),0)/type);
-                    nodeVo.setAverageRt(NumberUtils.toLong(vo.getAverageRt(),0)/type);
-                    nodeVo.setPassQps(NumberUtils.toLong(vo.getPassQps(),0)/type);
+                    nodeVo.setBlockQps(coverDoubleToLong(vo.getBlockQps())/type);
+                    nodeVo.setExceptionQps(coverDoubleToLong(vo.getExceptionQps())/type);
+                    nodeVo.setAverageRt(coverDoubleToLong(vo.getAverageRt())/type);
+                    nodeVo.setPassQps(coverDoubleToLong(vo.getPassQps())/type);
                     nodeVo.setTotalQps(nodeVo.getBlockQps() + nodeVo.getExceptionQps() + nodeVo.getPassQps());
 
 

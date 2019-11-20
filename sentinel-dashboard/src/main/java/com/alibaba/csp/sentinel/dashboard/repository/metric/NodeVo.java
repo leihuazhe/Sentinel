@@ -1,6 +1,5 @@
 package com.alibaba.csp.sentinel.dashboard.repository.metric;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.influxdb.annotation.Column;
 
 public class NodeVo {
@@ -160,9 +159,9 @@ public class NodeVo {
     public void setTime(String time) {
         this.time = time;
         try{
-            this.timestamp = DateUtils.parseDate(time,new String[]{"yyyy-MM-dd'T'HH:mm:ss.SSSZ"}).getTime();
+            this.timestamp = org.apache.commons.lang.math.NumberUtils.createBigDecimal(time).longValue();
         }catch (Exception ex){
-
+            ex.printStackTrace();
         }
 
 
