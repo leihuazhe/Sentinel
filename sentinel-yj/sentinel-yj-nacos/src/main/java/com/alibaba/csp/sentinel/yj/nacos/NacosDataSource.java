@@ -63,23 +63,30 @@ public class NacosDataSource {
 
 
     private NacosConfig nacosConfig;
-    private NacosConfig nacosClusterConfig;
     private ConfigService configService = null;
-    private Properties properties = new Properties();
+    private Properties properties = null;
+
+    private NacosConfig nacosClusterConfig;
+    private ConfigService clusterConfigService = null;
+    private Properties propertiesCluster=null ;
+
 
 
     /**
      * 启动
      */
     public void start(){
-        properties.put(PropertyKeyConst.SERVER_ADDR, nacosConfig.getRemoteAddress());
-        if (nacosConfig.getNamespace()) {
-            properties.put(PropertyKeyConst.NAMESPACE, nacosConfig.getNamespaceId());
-        }
+
+
         try{
-            this.configService = NacosFactory.createConfigService(this.properties);
+            properties = new Properties();
+            properties.put(PropertyKeyConst.SERVER_ADDR, nacosConfig.getRemoteAddress());
+            if (nacosConfig.getNamespace()) {
+                properties.put(PropertyKeyConst.NAMESPACE, nacosConfig.getNamespaceId());
+            }
+            this.configService = NacosFactory.createConfigService(properties);
         }catch (Exception e){
-            RecordLog.warn("[NacosDataSource] Error occurred when initializing Nacos data source", e);
+            RecordLog.warn("[NacosDataSource] Error occurred when initializing Nacos data source nacosconfig:"+nacosConfig, e);
         }
 
         // Register client dynamic rule data source.
@@ -87,6 +94,18 @@ public class NacosDataSource {
 
 
         if(nacosClusterConfig!=null){
+            try{
+                propertiesCluster = new Properties();
+                propertiesCluster.put(PropertyKeyConst.SERVER_ADDR, nacosClusterConfig.getRemoteAddress());
+                if (nacosClusterConfig.getNamespace()) {
+                    propertiesCluster.put(PropertyKeyConst.NAMESPACE, nacosClusterConfig.getNamespaceId());
+                }
+                this.clusterConfigService = NacosFactory.createConfigService(propertiesCluster);
+            }catch (Exception e){
+                RecordLog.warn("[NacosDataSource] Error occurred when initializing Nacos data source nacosconfig:" + nacosClusterConfig, e);
+            }
+
+
             /**client cluster*/
             // Register token client related data source.
             // Token client common config:
@@ -122,7 +141,10 @@ public class NacosDataSource {
 
         Properties properties = new Properties();
         properties.put(PropertyKeyConst.SERVER_ADDR, nacosConfig.getRemoteAddress());
-        properties.put(PropertyKeyConst.NAMESPACE, nacosConfig.getNamespaceId());
+        if(nacosConfig.getNamespace()){
+            properties.put(PropertyKeyConst.NAMESPACE, nacosConfig.getNamespaceId());
+        }
+
 
         //限流
         ReadableDataSource<String, List<FlowRule>> flowRuleDataSource = new CustomNacosDataSource<>(configService,properties, nacosConfig.getGroupId(), flowDataId,
@@ -195,7 +217,7 @@ public class NacosDataSource {
      */
     private void initClientConfigProperty(String appName,final NacosConfig nacosConfig) {
         String configDataId = appName + CLIENT_CONFIG_POSTFIX;
-        ReadableDataSource<String, ClusterClientConfig> clientConfigDs = new CustomNacosDataSource<>(configService, properties, nacosConfig.getGroupId(),
+        ReadableDataSource<String, ClusterClientConfig> clientConfigDs = new CustomNacosDataSource<>(configService, propertiesCluster, nacosConfig.getGroupId(),
                 configDataId, new Converter<String, ClusterClientConfig>() {
             @Override
             public ClusterClientConfig convert(String source) {
@@ -213,7 +235,7 @@ public class NacosDataSource {
      */
     private void initServerTransportConfigProperty(String appName,NacosConfig nacosConfig) {
         String clusterMapDataId = appName + CLUSTER_MAP_DATA_ID_POSTFIX;
-        ReadableDataSource<String, ServerTransportConfig> serverTransportDs = new CustomNacosDataSource<>(configService, properties, nacosConfig.getGroupId(),
+        ReadableDataSource<String, ServerTransportConfig> serverTransportDs = new CustomNacosDataSource<>(configService, propertiesCluster, nacosConfig.getGroupId(),
                 clusterMapDataId, new Converter<String, ServerTransportConfig>() {
             @Override
             public ServerTransportConfig convert(String source) {
@@ -286,7 +308,7 @@ public class NacosDataSource {
         // [{"clientSet":["112.12.88.66@8729","112.12.88.67@8727"],"ip":"112.12.88.68","machineId":"112.12.88.68@8728","port":11111}]
         // machineId: <ip@commandPort>, commandPort for port exposed to Sentinel dashboard (transport module)
         String clusterMapDataId = appName + CLUSTER_MAP_DATA_ID_POSTFIX;
-        ReadableDataSource<String, Integer> clusterModeDs =  new CustomNacosDataSource<>(configService, properties, nacosConfig.getGroupId(),
+        ReadableDataSource<String, Integer> clusterModeDs =  new CustomNacosDataSource<>(configService, propertiesCluster, nacosConfig.getGroupId(),
                 clusterMapDataId, new Converter<String, Integer>() {
             @Override
             public Integer convert(String source) {

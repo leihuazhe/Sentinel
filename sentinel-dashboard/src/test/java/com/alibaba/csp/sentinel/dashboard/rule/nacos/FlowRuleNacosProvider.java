@@ -27,6 +27,8 @@ import com.alibaba.nacos.api.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+
 /**
  * @author Eric Zhao
  * @since 1.4.0
@@ -34,7 +36,7 @@ import org.springframework.stereotype.Component;
 @Component("flowRuleNacosProvider")
 public class FlowRuleNacosProvider implements DynamicRuleProvider<List<FlowRuleEntity>> {
 
-    @Autowired
+    @Resource(name = "nacosConfigService")
     private ConfigService configService;
     @Autowired
     private Converter<String, List<FlowRuleEntity>> converter;

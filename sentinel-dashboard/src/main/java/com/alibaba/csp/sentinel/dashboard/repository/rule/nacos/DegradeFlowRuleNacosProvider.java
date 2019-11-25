@@ -24,6 +24,7 @@ import com.alibaba.nacos.api.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +35,7 @@ import java.util.List;
 @Component("degradeFlowRuleNacosProvider")
 public class DegradeFlowRuleNacosProvider implements DynamicRuleProvider<List<DegradeRuleEntity>> {
 
-    @Autowired
+    @Resource(name = "nacosConfigService")
     private ConfigService configService;
     @Autowired
     private Converter<String, List<DegradeRuleEntity>> converter;
