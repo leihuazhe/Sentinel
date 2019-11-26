@@ -60,7 +60,7 @@ public class DegradeControllerV2 {
     private DynamicRuleProvider<List<DegradeRuleEntity>> ruleProvider;
 
     @Autowired
-    @Qualifier("degradeFlowFuleNacosPublisher")
+    @Qualifier("degradeFlowRuleNacosPublisher")
     private DynamicRulePublisher<List<DegradeRuleEntity>> rulePublisher;
 
     @Autowired

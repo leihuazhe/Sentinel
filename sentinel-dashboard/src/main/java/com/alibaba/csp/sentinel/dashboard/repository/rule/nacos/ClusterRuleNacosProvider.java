@@ -15,36 +15,37 @@
  */
 package com.alibaba.csp.sentinel.dashboard.repository.rule.nacos;
 
-import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
+import com.alibaba.csp.sentinel.dashboard.domain.cluster.ClusterGroupEntity;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.datasource.Converter;
-import com.alibaba.csp.sentinel.util.AssertUtil;
+import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.nacos.api.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Eric Zhao
  * @since 1.4.0
  */
-@Component("degradeFlowRuleNacosPublisher")
-public class DegradeRuleNacosPublisher implements DynamicRulePublisher<List<DegradeRuleEntity>> {
+@Component("clusterRuleNacosProvider")
+public class ClusterRuleNacosProvider implements DynamicRuleProvider<List<ClusterGroupEntity>> {
 
-    @Resource(name = "nacosConfigService")
+    @Resource(name = "nacosClusterConfigService")
     private ConfigService configService;
     @Autowired
-    private Converter<List<DegradeRuleEntity>, String> converter;
+    private Converter<String, List<ClusterGroupEntity>> converter;
 
     @Override
-    public void publish(String app, List<DegradeRuleEntity> rules) throws Exception {
-        AssertUtil.notEmpty(app, "app name cannot be empty");
-        if (rules == null) {
-            return;
+    public List<ClusterGroupEntity> getRules(String appName) throws Exception {
+        String rules = configService.getConfig(appName + NacosConfigUtil.CLUSTER_MAP_DATA_ID_POSTFIX,
+            NacosConfigUtil.CLUSTER_GROUP_ID, 3000);
+        if (StringUtil.isEmpty(rules)) {
+            return new ArrayList<>();
         }
-        configService.publishConfig(app + NacosConfigUtil.DEGRADE_FLOW_DATA_ID_POSTFIX,
-            NacosConfigUtil.GROUP_ID, converter.convert(rules));
+        return converter.convert(rules);
     }
 }

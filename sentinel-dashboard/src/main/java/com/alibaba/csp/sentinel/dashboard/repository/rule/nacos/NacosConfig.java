@@ -16,6 +16,7 @@
 package com.alibaba.csp.sentinel.dashboard.repository.rule.nacos;
 
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.*;
+import com.alibaba.csp.sentinel.dashboard.domain.cluster.ClusterGroupEntity;
 import com.alibaba.csp.sentinel.datasource.Converter;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.nacos.api.PropertyKeyConst;
@@ -87,6 +88,18 @@ public class NacosConfig {
     public Converter<String, List<DegradeRuleEntity>> degradeRuleEntityDecoder() {
         return s -> JSON.parseArray(s, DegradeRuleEntity.class);
     }
+
+    @Bean
+    public Converter<List<ClusterGroupEntity>, String> clusterRuleEntityEncoder() {
+        return JSON::toJSONString;
+    }
+
+
+    @Bean
+    public Converter<String, List<ClusterGroupEntity>> clusterRuleEntityDecoder() {
+        return s -> JSON.parseArray(s, ClusterGroupEntity.class);
+    }
+
 
 
     @Bean("nacosConfigService")

@@ -15,11 +15,7 @@
  */
 package com.alibaba.csp.sentinel.dashboard.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +23,9 @@ import java.util.stream.Collectors;
 
 import com.alibaba.csp.sentinel.cluster.ClusterStateManager;
 import com.alibaba.csp.sentinel.dashboard.domain.cluster.state.ClusterUniversalStatePairVO;
+import com.alibaba.csp.sentinel.dashboard.repository.rule.nacos.NacosConfigUtil;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.util.AssertUtil;
 import com.alibaba.csp.sentinel.util.function.Tuple2;
 
@@ -41,6 +40,7 @@ import com.alibaba.csp.sentinel.dashboard.util.MachineUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -56,6 +56,15 @@ public class ClusterAssignServiceImpl implements ClusterAssignService {
     private SentinelApiClient sentinelApiClient;
     @Autowired
     private ClusterConfigService clusterConfigService;
+
+
+    @Autowired
+    @Qualifier("clusterRuleNacosProvider")
+    private DynamicRuleProvider<List<ClusterGroupEntity>> ruleProvider;
+
+    @Autowired
+    @Qualifier("clusterRuleNacosPublisher")
+    private DynamicRulePublisher<List<ClusterGroupEntity>> rulePublisher;
 
     private boolean isMachineInApp(/*@NonEmpty*/ String machineId) {
         return machineId.contains(":");
@@ -115,6 +124,12 @@ public class ClusterAssignServiceImpl implements ClusterAssignService {
             }
             // Modify mode to NOT-STARTED for all chosen token servers and associated token clients.
             modifyToNonStarted(toModifySet, failedSet);
+
+            //cluster
+            Set<String> machineIdSet = new HashSet<>();
+            machineIdSet.add(machineId);
+            publishRules(app,machineIdSet);
+
         } catch (Exception ex) {
             Throwable e = ex instanceof ExecutionException ? ex.getCause() : ex;
             LOGGER.error("Failed to unbind machine <{}>", machineId, e);
@@ -137,6 +152,9 @@ public class ClusterAssignServiceImpl implements ClusterAssignService {
             result.getFailedClientSet().addAll(resultVO.getFailedClientSet());
             result.getFailedServerSet().addAll(resultVO.getFailedServerSet());
         }
+        //cluster
+        publishRules(app,machineIdSet);
+
         return result;
     }
 
@@ -168,6 +186,9 @@ public class ClusterAssignServiceImpl implements ClusterAssignService {
 
         // Unbind remaining (unassigned) machines.
         applyAllRemainingMachineSet(app, remainingSet, failedClientSet);
+
+        //cluster
+        publishRules(app,clusterMap);
 
         return new ClusterAppAssignResultVO()
             .setFailedClientSet(failedClientSet)
@@ -266,5 +287,41 @@ public class ClusterAssignServiceImpl implements ClusterAssignService {
     private int parsePort(ClusterAppAssignMap assignMap) {
         return MachineUtils.parseCommandPort(assignMap.getMachineId())
             .orElse(ServerTransportConfig.DEFAULT_PORT);
+    }
+
+
+    private boolean publishRules(/*@NonNull*/ String app, Set<String> machineIdSet)  {
+        try{
+            List<ClusterGroupEntity> rules = ruleProvider.getRules(app);
+            return publishRulesToNacos(app,rules.stream().filter(e-> machineIdSet.contains(e.getMachineId())).collect(Collectors.toList()));
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+
+        return false;
+    }
+
+    private boolean publishRules(/*@NonNull*/ String app,List<ClusterAppAssignMap> assignMapList)  {
+        List<ClusterGroupEntity> rules = new ArrayList<>();
+        if(assignMapList!=null && !assignMapList.isEmpty()){
+            rules = assignMapList.stream().map(rule->{
+                ClusterGroupEntity clusterGroupEntity = new ClusterGroupEntity();
+                return clusterGroupEntity;
+            }).collect(Collectors.toList());
+        }
+
+        return publishRulesToNacos(app,rules);
+    }
+
+    private boolean publishRulesToNacos(/*@NonNull*/ String app,List<ClusterGroupEntity> rules)  {
+        try{
+            rulePublisher.publish(app, rules);
+            Thread.sleep(NacosConfigUtil.SLEEP_AFTER_UP);//解决未及时问题
+            return true;
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return false;
+
     }
 }

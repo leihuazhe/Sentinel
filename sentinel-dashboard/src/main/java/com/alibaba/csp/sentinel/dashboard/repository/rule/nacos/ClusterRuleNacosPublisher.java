@@ -15,7 +15,7 @@
  */
 package com.alibaba.csp.sentinel.dashboard.repository.rule.nacos;
 
-import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.DegradeRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.domain.cluster.ClusterGroupEntity;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.datasource.Converter;
 import com.alibaba.csp.sentinel.util.AssertUtil;
@@ -30,21 +30,21 @@ import java.util.List;
  * @author Eric Zhao
  * @since 1.4.0
  */
-@Component("degradeFlowRuleNacosPublisher")
-public class DegradeRuleNacosPublisher implements DynamicRulePublisher<List<DegradeRuleEntity>> {
+@Component("clusterRuleNacosPublisher")
+public class ClusterRuleNacosPublisher implements DynamicRulePublisher<List<ClusterGroupEntity>> {
 
-    @Resource(name = "nacosConfigService")
+    @Resource(name = "nacosClusterConfigService")
     private ConfigService configService;
     @Autowired
-    private Converter<List<DegradeRuleEntity>, String> converter;
+    private Converter<List<ClusterGroupEntity>, String> converter;
 
     @Override
-    public void publish(String app, List<DegradeRuleEntity> rules) throws Exception {
+    public void publish(String app, List<ClusterGroupEntity> rules) throws Exception {
         AssertUtil.notEmpty(app, "app name cannot be empty");
         if (rules == null) {
             return;
         }
-        configService.publishConfig(app + NacosConfigUtil.DEGRADE_FLOW_DATA_ID_POSTFIX,
-            NacosConfigUtil.GROUP_ID, converter.convert(rules));
+        configService.publishConfig(app + NacosConfigUtil.CLUSTER_MAP_DATA_ID_POSTFIX,
+            NacosConfigUtil.CLUSTER_GROUP_ID, converter.convert(rules));
     }
 }

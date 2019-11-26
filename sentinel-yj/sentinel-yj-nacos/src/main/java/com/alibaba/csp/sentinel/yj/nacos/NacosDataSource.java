@@ -217,7 +217,7 @@ public class NacosDataSource {
      */
     private void initClientConfigProperty(String appName,final NacosConfig nacosConfig) {
         String configDataId = appName + CLIENT_CONFIG_POSTFIX;
-        ReadableDataSource<String, ClusterClientConfig> clientConfigDs = new CustomNacosDataSource<>(configService, propertiesCluster, nacosConfig.getGroupId(),
+        ReadableDataSource<String, ClusterClientConfig> clientConfigDs = new CustomNacosDataSource<>(clusterConfigService, propertiesCluster, nacosConfig.getGroupId(),
                 configDataId, new Converter<String, ClusterClientConfig>() {
             @Override
             public ClusterClientConfig convert(String source) {
@@ -235,7 +235,7 @@ public class NacosDataSource {
      */
     private void initServerTransportConfigProperty(String appName,NacosConfig nacosConfig) {
         String clusterMapDataId = appName + CLUSTER_MAP_DATA_ID_POSTFIX;
-        ReadableDataSource<String, ServerTransportConfig> serverTransportDs = new CustomNacosDataSource<>(configService, propertiesCluster, nacosConfig.getGroupId(),
+        ReadableDataSource<String, ServerTransportConfig> serverTransportDs = new CustomNacosDataSource<>(clusterConfigService, propertiesCluster, nacosConfig.getGroupId(),
                 clusterMapDataId, new Converter<String, ServerTransportConfig>() {
             @Override
             public ServerTransportConfig convert(String source) {
@@ -291,7 +291,7 @@ public class NacosDataSource {
         // [{"clientSet":["112.12.88.66@8729","112.12.88.67@8727"],"ip":"112.12.88.68","machineId":"112.12.88.68@8728","port":11111}]
         // machineId: <ip@commandPort>, commandPort for port exposed to Sentinel dashboard (transport module)
         String clusterMapDataId = appName + CLUSTER_MAP_DATA_ID_POSTFIX;
-        ReadableDataSource<String, ClusterClientAssignConfig> clientAssignDs = new CustomNacosDataSource<>(configService, properties, nacosConfig.getGroupId(),
+        ReadableDataSource<String, ClusterClientAssignConfig> clientAssignDs = new CustomNacosDataSource<>(clusterConfigService, properties, nacosConfig.getGroupId(),
                 clusterMapDataId, new Converter<String, ClusterClientAssignConfig>() {
             @Override
             public ClusterClientAssignConfig convert(String source) {
@@ -308,7 +308,7 @@ public class NacosDataSource {
         // [{"clientSet":["112.12.88.66@8729","112.12.88.67@8727"],"ip":"112.12.88.68","machineId":"112.12.88.68@8728","port":11111}]
         // machineId: <ip@commandPort>, commandPort for port exposed to Sentinel dashboard (transport module)
         String clusterMapDataId = appName + CLUSTER_MAP_DATA_ID_POSTFIX;
-        ReadableDataSource<String, Integer> clusterModeDs =  new CustomNacosDataSource<>(configService, propertiesCluster, nacosConfig.getGroupId(),
+        ReadableDataSource<String, Integer> clusterModeDs =  new CustomNacosDataSource<>(clusterConfigService, propertiesCluster, nacosConfig.getGroupId(),
                 clusterMapDataId, new Converter<String, Integer>() {
             @Override
             public Integer convert(String source) {
