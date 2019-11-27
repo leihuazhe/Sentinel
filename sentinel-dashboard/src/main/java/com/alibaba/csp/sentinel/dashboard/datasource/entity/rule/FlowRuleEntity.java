@@ -81,6 +81,16 @@ public class FlowRuleEntity implements RuleEntity {
 
     private int adapterWebType = 0 ;
 
+    /**
+     * 集群总量单机平摊
+     */
+    private boolean singleTotal = false;
+
+    /**
+     * 单机平摊
+     */
+    private double singleCount;
+
 
     public static FlowRuleEntity fromFlowRule(String app, String ip, Integer port, FlowRule rule) {
         FlowRuleEntity entity = new FlowRuleEntity();
@@ -109,6 +119,8 @@ public class FlowRuleEntity implements RuleEntity {
         if(rule.getAdapterType() == 2){ //web
 
         }
+        rule.setSingleCount(rule.getSingleCount());
+        rule.setSingleTotal(rule.isSingleTotal());
 
         return entity;
     }
@@ -292,6 +304,23 @@ public class FlowRuleEntity implements RuleEntity {
         this.adapterWebType = adapterWebType;
     }
 
+
+    public boolean isSingleTotal() {
+        return singleTotal;
+    }
+
+    public void setSingleTotal(boolean singleTotal) {
+        this.singleTotal = singleTotal;
+    }
+
+    public double getSingleCount() {
+        return singleCount;
+    }
+
+    public void setSingleCount(double singleCount) {
+        this.singleCount = singleCount;
+    }
+
     @Override
     public FlowRule toRule() {
         FlowRule flowRule = new FlowRule();
@@ -318,6 +347,8 @@ public class FlowRuleEntity implements RuleEntity {
         flowRule.setAdapterType(this.adapterType);
         flowRule.setAdapterWebType(this.adapterWebType);
 
+        flowRule.setSingleTotal(this.singleTotal);
+        flowRule.setSingleCount(this.singleCount);
 
         return flowRule;
     }

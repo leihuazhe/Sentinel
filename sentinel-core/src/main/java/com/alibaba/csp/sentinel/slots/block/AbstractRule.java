@@ -65,6 +65,16 @@ public abstract class AbstractRule implements Rule {
     private int adapterWebType = 0 ;
 
     /**
+     * 集群总量单机平均
+     */
+    private boolean singleTotal = false;
+
+    /**
+     * 单机平均
+     */
+    private double singleCount;
+
+    /**
      * 适配器属性
      */
     private Map<String,String> adapterProperties;
@@ -179,6 +189,22 @@ public abstract class AbstractRule implements Rule {
 
     public void setAdapterProperties(Map<String, String> adapterProperties) {
         this.adapterProperties = adapterProperties;
+    }
+
+    public boolean isSingleTotal() {
+        return singleTotal;
+    }
+
+    public void setSingleTotal(boolean singleTotal) {
+        this.singleTotal = singleTotal;
+    }
+
+    public double getSingleCount() {
+        return singleCount;
+    }
+
+    public void setSingleCount(double singleCount) {
+        this.singleCount = singleCount;
     }
 
     @Override

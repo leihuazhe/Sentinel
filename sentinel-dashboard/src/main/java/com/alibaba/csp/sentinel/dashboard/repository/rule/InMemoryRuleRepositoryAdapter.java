@@ -109,7 +109,7 @@ public abstract class InMemoryRuleRepositoryAdapter<T extends RuleEntity> implem
                 appRules.get(entity.getApp()).remove(id);
             }
             machineRules.get(MachineInfo.of(entity.getApp(), entity.getIp(), entity.getPort())).remove(id);
-            if("nginx".equals(entity.getApp()) && entity instanceof FlowRuleEntity){
+            if(entity instanceof FlowRuleEntity && ((FlowRuleEntity) entity).getAdapterType() == 3){
                 nginxLuaRedisSerivce.delete(entity);
             }
         }

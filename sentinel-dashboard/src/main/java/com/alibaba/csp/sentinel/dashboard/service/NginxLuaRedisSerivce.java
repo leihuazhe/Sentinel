@@ -1,19 +1,15 @@
 package com.alibaba.csp.sentinel.dashboard.service;
 
 import com.alibaba.csp.sentinel.Constants;
-import com.alibaba.csp.sentinel.concurrent.NamedThreadFactory;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.AppInfo;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemFlowRuleStore;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemoryRuleRepositoryAdapter;
-import com.alibaba.csp.sentinel.dashboard.repository.rule.nacos.NacosConfigUtil;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.dashboard.util.NginxUtils;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.nacos.api.config.ConfigService;
-import com.alibaba.nacos.api.config.listener.Listener;
 import com.taobao.diamond.manager.ManagerListener;
 import com.taobao.diamond.manager.ManagerListenerAdapter;
 import com.yunji.diamond.client.api.DiamondClient;
@@ -31,9 +27,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.io.StringReader;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 处理从Redis初始化数据
@@ -71,9 +66,9 @@ public class NginxLuaRedisSerivce {
     @Autowired
     private InMemoryRuleRepositoryAdapter<FlowRuleEntity> repository;
 
-    @Autowired
-    @Qualifier("flowRuleNacosProvider")
-    private DynamicRuleProvider<List<FlowRuleEntity>> ruleProvider;
+//    @Autowired
+//    @Qualifier("flowRuleNacosProvider")
+//    private DynamicRuleProvider<List<FlowRuleEntity>> ruleProvider;
 
     @Autowired
     @Qualifier("flowRuleNacosPublisher")

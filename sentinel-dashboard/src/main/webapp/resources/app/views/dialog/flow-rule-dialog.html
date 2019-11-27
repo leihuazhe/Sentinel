@@ -21,7 +21,14 @@
               />
             </div>
           </div>
-
+          <div class="form-group" ng-if="!currentRule.clusterMode">
+            <label class="col-sm-2 control-label">总量平均</label>
+            <div class="col-sm-2">
+              <label class="checkbox-inline">
+                <input type="checkbox" name="singleTotal" ng-model="currentRule.singleTotal">
+              </label>
+            </div>
+          </div>
           <div class="form-group">
             <label class="col-sm-2 control-label">阈值类型</label>
             <div class="col-sm-4">
@@ -30,7 +37,13 @@
                 <input type="radio" name="grade" value="0" ng-model='currentRule.grade' />&nbsp;线程数
               </div>
             </div>
-            <div ng-if="!currentRule.clusterMode">
+            <div ng-if="!currentRule.clusterMode && currentRule.singleTotal">
+              <label class="col-sm-2 control-label">总量平均</label>
+              <div class="col-sm-3">
+                <input type='number' min="0" class="form-control highlight-border" ng-model='currentRule.singleCount' placeholder="总量平均" />
+              </div>
+            </div>
+            <div ng-if="!currentRule.clusterMode && !currentRule.singleTotal">
               <label class="col-sm-2 control-label">单机阈值</label>
               <div class="col-sm-3">
                 <input type='number' min="0" class="form-control highlight-border" ng-model='currentRule.count' placeholder="单机阈值" />

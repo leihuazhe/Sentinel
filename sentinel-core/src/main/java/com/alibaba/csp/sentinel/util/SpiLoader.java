@@ -25,8 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.alibaba.csp.sentinel.init.InitExecutor;
 import com.alibaba.csp.sentinel.log.RecordLog;
 import com.alibaba.csp.sentinel.spi.SpiOrder;
-import org.omg.CORBA.INITIALIZE;
-
 /**
  * @author Eric Zhao
  * @since 1.4.0
