@@ -70,7 +70,7 @@ public class ClusterSingleTotalChangeService {
     /**
      * 集群机器数变更
      */
-    private static final String CLUSTER_CHANGE_LOCK = "cluster:change:lock";
+    private static final String CLUSTER_CHANGE_LOCK = "sentinel:cluster:change:lock";
 
     //任务调度
     private ScheduledExecutorService deleteExpireAppExecutor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("cluster-change-executor", true));
@@ -82,10 +82,9 @@ public class ClusterSingleTotalChangeService {
     /**
      * 还属于最近执行周期
      */
-    private static final String CLUSTER_CHANGE_LOCK_LAST = "cluster:change:lock:last";
+    private static final String CLUSTER_CHANGE_LOCK_LAST = "sentinel:cluster:c:lock:last";
 
-    private static final String CLUSTER_CHANGE_NAME_LAST = "cluster:change:l";
-    private static final String CLUSTER_CHANGE_NAME_CURRENT = "cluster:change:c";
+    private static final String CLUSTER_CHANGE_NAME_CURRENT = "sentinel:cluster:c:machines";
 
     @PostConstruct
     public void init(){
@@ -113,27 +112,26 @@ public class ClusterSingleTotalChangeService {
             return;
         }
         try{
-            //删除
-            stringRedisTemplate.delete(CLUSTER_CHANGE_NAME_LAST);
-            stringRedisTemplate.renameIfAbsent(CLUSTER_CHANGE_NAME_CURRENT,CLUSTER_CHANGE_NAME_LAST);
+            //拿出上次数据 (拿出失败，或者数据为空 return ) last
+            String lastString = stringRedisTemplate.opsForValue().get(CLUSTER_CHANGE_NAME_CURRENT);
+
             //拿出所有，要计算的项目(例：机器数) current
             Set<AppInfo> appInfos = appManagement.getBriefApps();
-            Map<String,Integer> currentMachines = new HashMap<>();
-            appInfos.stream().forEach((appInfo -> currentMachines.put(appInfo.getApp(),appInfo.getMachinesSize())));
+            Map<String,Long> currentMachines = new HashMap<>();
+            appInfos.stream().forEach(appInfo -> currentMachines.put(appInfo.getApp(),appInfo.getMachines().stream().filter(machineInfo -> machineInfo.isHealthy()).count()));
 
             stringRedisTemplate.opsForValue().set(CLUSTER_CHANGE_NAME_CURRENT, JSON.toJSONString(currentMachines));
-            //拿出上次数据 (拿出失败，或者数据为空 return ) last
-            String lastString  = stringRedisTemplate.opsForValue().get(CLUSTER_CHANGE_NAME_LAST);
+
             if(StringUtil.isEmpty(lastString)){
                 logger.info("last machines redis value is NULL");
                 return;
             }
-            Map<String,Integer> lastMachines = JSON.parseObject(lastString,Map.class);
+            Map<String,Long> lastMachines = JSON.parseObject(lastString,Map.class);
 
             //计算变化
             for(String key:currentMachines.keySet()){
-                Integer currentValue = currentMachines.get(key);
-                Integer lastValue = lastMachines.get(key);
+                Long currentValue = currentMachines.get(key);
+                Long lastValue = lastMachines.get(key);
                 if(lastValue==null || currentValue==null){
                     continue;
                 }
