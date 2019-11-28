@@ -23,14 +23,6 @@
 							<input type="number" class="form-control highlight-border" ng-model='currentRule.rule.paramIdx' placeholder='请填入传入的热点参数的索引（从 0 开始）' />
 						</div>
                     </div>
-					<div class="form-group" ng-if="!currentRule.clusterMode">
-						<label class="col-sm-2 control-label">总量平均</label>
-						<div class="col-sm-2">
-							<label class="checkbox-inline">
-								<input type="checkbox" name="singleTotal" ng-model="currentRule.singleTotal">
-							</label>
-						</div>
-					</div>
                     <div class="form-group">
 						<div ng-if="!currentRule.rule.clusterMode && !currentRule.rule.singleTotal">
 							<label class="col-sm-2 control-label">单机阈值</label>
@@ -84,6 +76,14 @@
 									<input type="radio" name="clusterThresholdType" value="0" ng-model='currentRule.rule.clusterConfig.thresholdType' />&nbsp;单机均摊&nbsp;&nbsp;
 									<input type="radio" name="clusterThresholdType" value="1" ng-model='currentRule.rule.clusterConfig.thresholdType' />&nbsp;总体阈值
 								</div>
+							</div>
+						</div>
+						<div  ng-if="!currentRule.rule.clusterMode">
+							<label class="col-sm-2 control-label">总量平均</label>
+							<div class="col-sm-2">
+								<label class="checkbox-inline">
+									<input type="checkbox" name="singleTotal" ng-model="currentRule.rule.singleTotal">
+								</label>
 							</div>
 						</div>
 					</div>

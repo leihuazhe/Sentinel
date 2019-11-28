@@ -21,14 +21,6 @@
               />
             </div>
           </div>
-          <div class="form-group" ng-if="!currentRule.clusterMode">
-            <label class="col-sm-2 control-label">总量平均</label>
-            <div class="col-sm-2">
-              <label class="checkbox-inline">
-                <input type="checkbox" name="singleTotal" ng-model="currentRule.singleTotal">
-              </label>
-            </div>
-          </div>
           <div class="form-group">
             <label class="col-sm-2 control-label">阈值类型</label>
             <div class="col-sm-4">
@@ -77,6 +69,14 @@
                   <input type="radio" name="clusterThresholdType" value="0" ng-model='currentRule.clusterConfig.thresholdType' />&nbsp;单机均摊&nbsp;&nbsp;
                   <input type="radio" name="clusterThresholdType" value="1" ng-model='currentRule.clusterConfig.thresholdType' />&nbsp;总体阈值
                 </div>
+              </div>
+            </div>
+            <div ng-if="!currentRule.clusterMode">
+              <label class="col-sm-3 control-label">总量平均</label>
+              <div class="col-sm-4">
+                  <label class="checkbox-inline">
+                    <input type="checkbox" name="singleTotal" ng-model="currentRule.singleTotal">
+                  </label>
               </div>
             </div>
           </div>
