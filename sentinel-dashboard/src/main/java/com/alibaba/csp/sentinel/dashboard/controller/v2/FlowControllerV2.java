@@ -15,37 +15,28 @@
  */
 package com.alibaba.csp.sentinel.dashboard.controller.v2;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.AuthUser;
 import com.alibaba.csp.sentinel.dashboard.auth.AuthService.PrivilegeType;
-import com.alibaba.csp.sentinel.dashboard.repository.rule.nacos.NacosConfigUtil;
-import com.alibaba.csp.sentinel.util.StringUtil;
-
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.discovery.AppManagement;
+import com.alibaba.csp.sentinel.dashboard.domain.Result;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemoryRuleRepositoryAdapter;
+import com.alibaba.csp.sentinel.dashboard.repository.rule.nacos.NacosConfigUtil;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
-import com.alibaba.csp.sentinel.dashboard.domain.Result;
-
+import com.alibaba.csp.sentinel.dashboard.util.MachineUtils;
+import com.alibaba.csp.sentinel.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Flow rule controller (v2).
@@ -72,6 +63,9 @@ public class FlowControllerV2 {
 
     @Autowired
     private AuthService<HttpServletRequest> authService;
+
+    @Autowired
+    private AppManagement appManagement;
 
     @GetMapping("/rules")
     public Result<List<FlowRuleEntity>> apiQueryMachineRules(HttpServletRequest request, @RequestParam String app) {
@@ -169,6 +163,9 @@ public class FlowControllerV2 {
             }
         }
 
+        //总量平均
+        MachineUtils.calcByMachines(entity,appManagement.getDetailApp(entity.getApp()));
+
         try {
             entity = repository.save(entity);
             publishRules(entity.getApp());
@@ -212,6 +209,8 @@ public class FlowControllerV2 {
         if(StringUtils.isNoneBlank(entity.getAdapterText())){
             entity.setAdapterResultOn(true);
         }
+        //总量平均
+        MachineUtils.calcByMachines(entity,appManagement.getDetailApp(entity.getApp()));
         try {
             entity = repository.save(entity);
             if (entity == null) {

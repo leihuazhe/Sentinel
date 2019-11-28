@@ -23,6 +23,7 @@ import com.alibaba.csp.sentinel.dashboard.client.SentinelApiClient;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.SentinelVersion;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.ParamFlowRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.discovery.AppInfo;
 import com.alibaba.csp.sentinel.dashboard.discovery.AppManagement;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
@@ -30,6 +31,7 @@ import com.alibaba.csp.sentinel.dashboard.repository.rule.RuleRepository;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.nacos.NacosConfigUtil;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
+import com.alibaba.csp.sentinel.dashboard.util.MachineUtils;
 import com.alibaba.csp.sentinel.dashboard.util.VersionUtils;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.util.StringUtil;
@@ -149,6 +151,10 @@ public class ParamFlowRuleControllerV2 {
                 return Result.ofFail(-1,"resource:"+ entity.getResource() +" 已经存在！");
             }
         }
+
+        //总量平均
+        MachineUtils.calcByMachines(entity,appManagement.getDetailApp(entity.getApp()));
+
         try {
             entity = repository.save(entity);
             publishRules(entity.getApp());
@@ -215,6 +221,10 @@ public class ParamFlowRuleControllerV2 {
         Date date = new Date();
         entity.setGmtCreate(oldEntity.getGmtCreate());
         entity.setGmtModified(date);
+
+        //总量平均
+        MachineUtils.calcByMachines(entity,appManagement.getDetailApp(entity.getApp()));
+
         try {
             entity = repository.save(entity);
             publishRules(entity.getApp());
@@ -259,6 +269,7 @@ public class ParamFlowRuleControllerV2 {
             return Result.ofFail(-1, throwable.getMessage());
         }
     }
+
 
     private void publishRules(/*@NonNull*/ String app) throws Exception {
         List<ParamFlowRuleEntity> rules = repository.findAllByApp(app);

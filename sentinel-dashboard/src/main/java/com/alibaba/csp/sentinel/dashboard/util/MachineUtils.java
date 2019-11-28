@@ -17,6 +17,9 @@ package com.alibaba.csp.sentinel.dashboard.util;
 
 import java.util.Optional;
 
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.ParamFlowRuleEntity;
+import com.alibaba.csp.sentinel.dashboard.discovery.AppInfo;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.csp.sentinel.util.function.Tuple2;
 
@@ -54,6 +57,42 @@ public final class MachineUtils {
             return Optional.empty();
         }
     }
+
+
+    /**
+     * 计算总量平均
+     * @param entity
+     */
+    public static boolean calcByMachines(FlowRuleEntity entity,AppInfo appInfo ){
+        if(!entity.isClusterMode() && entity.isSingleTotal() && entity.getSingleCount() > 0 ){ //&& entity.getAdapterType()!=3 因为nginx都是单机
+            int machinesSize = appInfo==null ? 0 :appInfo.getMachines().size();
+            if(machinesSize > 0){
+                entity.setCount(Math.ceil(entity.getSingleCount()/machinesSize));
+            }else{
+                entity.setCount(entity.getSingleCount());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 计算总量平均
+     * @param entity
+     */
+    public static boolean calcByMachines(ParamFlowRuleEntity entity,AppInfo appInfo){
+        if(!entity.isClusterMode() && entity.getRule().isSingleTotal() && entity.getRule().getSingleCount() > 0 ){ //&& entity.getAdapterType()!=3 因为nginx都是单机
+            int machinesSize = appInfo==null ? 0 :appInfo.getMachines().size();
+            if(machinesSize > 0){
+                entity.getRule().setCount(Math.ceil(entity.getRule().getSingleCount()/machinesSize));
+            }else{
+                entity.getRule().setCount(entity.getRule().getSingleCount());
+            }
+            return true;
+        }
+        return false;
+    }
+
 
     private MachineUtils() {}
 }

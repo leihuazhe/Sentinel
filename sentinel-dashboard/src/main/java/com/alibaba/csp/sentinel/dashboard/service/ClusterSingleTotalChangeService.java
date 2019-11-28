@@ -5,11 +5,14 @@ import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.FlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.datasource.entity.rule.ParamFlowRuleEntity;
 import com.alibaba.csp.sentinel.dashboard.discovery.AppInfo;
 import com.alibaba.csp.sentinel.dashboard.discovery.AppManagement;
+import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemoryRuleRepositoryAdapter;
+import com.alibaba.csp.sentinel.dashboard.repository.rule.RuleRepository;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
+import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.dashboard.tools.RedisLock;
+import com.alibaba.csp.sentinel.dashboard.util.MachineUtils;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.fastjson.JSON;
-import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,11 +47,25 @@ public class ClusterSingleTotalChangeService {
     private DynamicRuleProvider<List<FlowRuleEntity>> flowRuleProvider;
 
     @Autowired
+    @Qualifier("flowRuleNacosPublisher")
+    private DynamicRulePublisher<List<FlowRuleEntity>> flowRulePublisher;
+
+    @Autowired
     @Qualifier("paramFlowRuleNacosProvider")
     private DynamicRuleProvider<List<ParamFlowRuleEntity>> paramFlowRuleProvider;
 
     @Autowired
+    @Qualifier("paramFlowRuleNacosPublisher")
+    private DynamicRulePublisher<List<ParamFlowRuleEntity>> paramFlowRulePublisher;
+
+    @Autowired
     private AppManagement appManagement;
+
+    @Autowired
+    private InMemoryRuleRepositoryAdapter<FlowRuleEntity> flowRuleRepository;
+
+    @Autowired
+    private RuleRepository<ParamFlowRuleEntity, Long> paramFlowRuleRepository;
 
     /**
      * 集群机器数变更
@@ -127,28 +144,46 @@ public class ClusterSingleTotalChangeService {
 
                 //动态变更
                 //流控
+                AppInfo appInfo = appManagement.getDetailApp(key);
                 List<FlowRuleEntity>  flowRuleEntities = flowRuleProvider.getRules(key);
                 if(flowRuleEntities!=null && flowRuleEntities.size() >0){
                     //
-                    for(FlowRuleEntity ruleEntity:flowRuleEntities){
-                        if(ruleEntity.isClusterMode()){
-                            continue;
+                    try{
+                        int changeCount = 0;
+                        for(FlowRuleEntity ruleEntity:flowRuleEntities){
+                            if(MachineUtils.calcByMachines(ruleEntity,appInfo)){
+                                changeCount++;
+                            }
                         }
+                        if(changeCount>0){
+                            flowRuleRepository.saveAll(flowRuleEntities,key,false);
+                            flowRulePublisher.publish(key,flowRuleEntities);
+                        }
+                    }catch (Exception ex){
+                        logger.error("动态变更 app:" + key + " 流控  总量平均阈值 失败",ex);
                     }
+
                 }
                 //热点
                 List<ParamFlowRuleEntity> paramFlowRuleEntities = paramFlowRuleProvider.getRules(key);
                 if(paramFlowRuleEntities!=null && paramFlowRuleEntities.size() >0){
                     //
-                    for(ParamFlowRuleEntity paramFlowRuleEntity:paramFlowRuleEntities){
-                        if(paramFlowRuleEntity.isClusterMode()){
-                            continue;
+                    try{
+                        int changeCount = 0;
+                        for(ParamFlowRuleEntity paramFlowRuleEntity:paramFlowRuleEntities){
+                            if(MachineUtils.calcByMachines(paramFlowRuleEntity,appInfo)){
+                                changeCount++;
+                            }
                         }
+                        if(changeCount>0){
+                            paramFlowRuleRepository.saveAll(paramFlowRuleEntities,key,false);
+                            paramFlowRulePublisher.publish(key,paramFlowRuleEntities);
+                        }
+                    }catch (Exception ex){
+                        logger.error("动态变更 app:" + key + " 热点参数 总量平均阈值 失败",ex);
                     }
                 }
-
             }
-
 
         }catch (Exception ex){
             logger.warn("matchTotalChange",ex);
