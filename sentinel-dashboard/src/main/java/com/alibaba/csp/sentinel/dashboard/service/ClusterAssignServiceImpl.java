@@ -128,7 +128,7 @@ public class ClusterAssignServiceImpl implements ClusterAssignService {
             //cluster
             Set<String> machineIdSet = new HashSet<>();
             machineIdSet.add(machineId);
-            publishRules(app,machineIdSet);
+            unPublishRules(app,machineIdSet);
 
         } catch (Exception ex) {
             Throwable e = ex instanceof ExecutionException ? ex.getCause() : ex;
@@ -153,7 +153,7 @@ public class ClusterAssignServiceImpl implements ClusterAssignService {
             result.getFailedServerSet().addAll(resultVO.getFailedServerSet());
         }
         //cluster
-        publishRules(app,machineIdSet);
+        unPublishRules(app,machineIdSet);
 
         return result;
     }
@@ -290,10 +290,10 @@ public class ClusterAssignServiceImpl implements ClusterAssignService {
     }
 
 
-    private boolean publishRules(/*@NonNull*/ String app, Set<String> machineIdSet)  {
+    private boolean unPublishRules(/*@NonNull*/ String app, Set<String> machineIdSet)  {
         try{
             List<ClusterGroupEntity> rules = ruleProvider.getRules(app);
-            return publishRulesToNacos(app,rules.stream().filter(e-> machineIdSet.contains(e.getMachineId())).collect(Collectors.toList()));
+            return publishRulesToNacos(app,rules.stream().filter(e-> !machineIdSet.contains(e.getMachineId())).collect(Collectors.toList()));
         }catch (Exception ex){
             ex.printStackTrace();
         }
@@ -306,6 +306,11 @@ public class ClusterAssignServiceImpl implements ClusterAssignService {
         if(assignMapList!=null && !assignMapList.isEmpty()){
             rules = assignMapList.stream().map(rule->{
                 ClusterGroupEntity clusterGroupEntity = new ClusterGroupEntity();
+                clusterGroupEntity.setIp(rule.getIp());
+                clusterGroupEntity.setClientSet(rule.getClientSet());
+                clusterGroupEntity.setMachineId(rule.getMachineId());
+                clusterGroupEntity.setPort(rule.getPort());
+                clusterGroupEntity.setBelongToApp(rule.getBelongToApp());
                 return clusterGroupEntity;
             }).collect(Collectors.toList());
         }
