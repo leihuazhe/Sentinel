@@ -15,26 +15,20 @@
  */
 package com.alibaba.csp.sentinel.dashboard.discovery;
 
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.alibaba.csp.sentinel.dashboard.config.DashboardConfig;
+import com.alibaba.csp.sentinel.concurrent.NamedThreadFactory;
 import com.alibaba.csp.sentinel.util.AssertUtil;
-
-import com.alibaba.dubbo.common.utils.ConcurrentHashSet;
-import com.alibaba.dubbo.common.utils.NamedThreadFactory;
 import com.alibaba.fastjson.JSON;
-import io.netty.util.internal.ConcurrentSet;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -55,7 +49,8 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
     @Value("${monitor.show.detail}")
     private boolean monitorShowDetail;
 
-    private static final ScheduledExecutorService deleteExpireAppExecutor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("deleteExpireAppExecutor", true));
+    private static final ScheduledExecutorService deleteExpireAppExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(
+            "deleteExpireAppExecutor", true));
 
     /**
      * 不能并发操作

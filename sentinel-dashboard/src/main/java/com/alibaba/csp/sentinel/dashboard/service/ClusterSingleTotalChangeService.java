@@ -24,8 +24,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -73,7 +73,8 @@ public class ClusterSingleTotalChangeService {
     private static final String CLUSTER_CHANGE_LOCK = "sentinel:cluster:change:lock";
 
     //任务调度
-    private ScheduledExecutorService deleteExpireAppExecutor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("cluster-change-executor", true));
+    private ScheduledExecutorService deleteExpireAppExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(
+            "cluster-change-executor", true));
 
 
     @Value("${clusterChangeJobInterval}")
