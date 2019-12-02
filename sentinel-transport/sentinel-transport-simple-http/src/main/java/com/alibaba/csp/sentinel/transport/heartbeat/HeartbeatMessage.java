@@ -21,6 +21,7 @@ import java.util.Map;
 import com.alibaba.csp.sentinel.Constants;
 import com.alibaba.csp.sentinel.config.SentinelConfig;
 import com.alibaba.csp.sentinel.transport.config.TransportConfig;
+import com.alibaba.csp.sentinel.transport.util.JagentVersionUtils;
 import com.alibaba.csp.sentinel.util.AppNameUtil;
 import com.alibaba.csp.sentinel.util.HostNameUtil;
 import com.alibaba.csp.sentinel.util.TimeUtil;
@@ -42,6 +43,7 @@ public class HeartbeatMessage {
         // Put application type (since 1.6.0).
         message.put("app_type", String.valueOf(SentinelConfig.getAppType()));
         message.put("port", String.valueOf(TransportConfig.getPort()));
+        message.put("agentVersion", JagentVersionUtils.getVersion());
     }
 
     public HeartbeatMessage registerInformation(String key, String value) {

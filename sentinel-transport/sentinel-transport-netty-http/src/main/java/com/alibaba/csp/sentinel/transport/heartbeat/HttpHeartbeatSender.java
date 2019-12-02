@@ -23,6 +23,7 @@ import com.alibaba.csp.sentinel.config.SentinelConfig;
 import com.alibaba.csp.sentinel.spi.SpiOrder;
 import com.alibaba.csp.sentinel.transport.config.TransportConfig;
 import com.alibaba.csp.sentinel.log.RecordLog;
+import com.alibaba.csp.sentinel.transport.util.JagentVersionUtils;
 import com.alibaba.csp.sentinel.util.AppNameUtil;
 import com.alibaba.csp.sentinel.util.HostNameUtil;
 import com.alibaba.csp.sentinel.transport.HeartbeatSender;
@@ -117,7 +118,9 @@ public class HttpHeartbeatSender implements HeartbeatSender {
             .setParameter("hostname", HostNameUtil.getHostName())
             .setParameter("ip", TransportConfig.getHeartbeatClientIp())
             .setParameter("port", TransportConfig.getPort())
-            .setParameter("pid", String.valueOf(PidUtil.getPid()));
+            .setParameter("pid", String.valueOf(PidUtil.getPid()))
+            .setParameter("agentVersion", JagentVersionUtils.getVersion());
+
 
         HttpGet request = new HttpGet(uriBuilder.build());
         request.setConfig(requestConfig);

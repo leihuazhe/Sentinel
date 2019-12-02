@@ -29,6 +29,7 @@ public class MachineInfo implements Comparable<MachineInfo> {
     private Integer port = -1;
     private long lastHeartbeat;
     private long heartbeatVersion;
+    private String agentVersion = "";
 
     /**
      * Indicates the version of Sentinel client (since 0.2.0).
@@ -103,7 +104,15 @@ public class MachineInfo implements Comparable<MachineInfo> {
         this.version = version;
         return this;
     }
-    
+
+    public String getAgentVersion() {
+        return agentVersion;
+    }
+
+    public void setAgentVersion(String agentVersion) {
+        this.agentVersion = agentVersion;
+    }
+
     public boolean isHealthy() {
         long delta = System.currentTimeMillis() - lastHeartbeat;
         return delta < DashboardConfig.getUnhealthyMachineMillis();
@@ -155,6 +164,7 @@ public class MachineInfo implements Comparable<MachineInfo> {
             .append(", heartbeatVersion=").append(heartbeatVersion)
             .append(", lastHeartbeat=").append(lastHeartbeat)
             .append(", version='").append(version).append('\'')
+            .append(", agentVersion='").append(agentVersion).append('\'')
             .append(", healthy=").append(isHealthy())
             .append('}').toString();
     }
