@@ -34,6 +34,7 @@ public class MachineInfoVo {
     private boolean healthy;
 
     private String version;
+    private String agentVersion = "";
 
     public static List<MachineInfoVo> fromMachineInfoList(List<MachineInfo> machines) {
         List<MachineInfoVo> list = new ArrayList<>();
@@ -53,6 +54,7 @@ public class MachineInfoVo {
         vo.setHeartbeatVersion(machine.getHeartbeatVersion());
         vo.setVersion(machine.getVersion());
         vo.setHealthy(machine.isHealthy());
+        vo.setAgentVersion(machine.getAgentVersion());
         return vo;
     }
 
@@ -119,5 +121,13 @@ public class MachineInfoVo {
 
     public void setHealthy(boolean healthy) {
         this.healthy = healthy;
+    }
+
+    public String getAgentVersion() {
+        return agentVersion;
+    }
+
+    public void setAgentVersion(String agentVersion) {
+        this.agentVersion = agentVersion;
     }
 }
