@@ -134,6 +134,9 @@ public class FlowControllerV1 {
         if (entity.isClusterMode() && entity.getClusterConfig() == null) {
             return Result.ofFail(-1, "cluster config should be valid");
         }
+        if (entity.getAdapterType()==3 && !entity.getResource().startsWith(entity.getApp())) {
+            return Result.ofFail(-1, "nginx flow config must startsWith " + entity.getApp() );
+        }
         return null;
     }
 
