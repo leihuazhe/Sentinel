@@ -141,17 +141,4 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>nexus-releases</id>
-            <name>yunji-releases</name>
-            <url>http://nexus.yunjiglobal.com/repository/yunji-releases/</url>
-        </repository>
-        <repository>
-            <id>nexus-snapshots</id>
-            <name>yunji-snapshots</name>
-            <url>http://nexus.yunjiglobal.com/repository/yunji-snapshots/</url>
-        </repository>
-    </repositories>
 </project>
