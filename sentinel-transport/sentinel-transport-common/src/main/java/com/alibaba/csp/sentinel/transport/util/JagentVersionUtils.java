@@ -23,7 +23,7 @@ public class JagentVersionUtils {
         if(cls!=null){
             try{
                 Field field = cls.getField("VERSION");
-                VERSION = agent + (String) field.get(null);
+                VERSION = agent + field.get(null);
             }catch (Exception ex){
 
             }
