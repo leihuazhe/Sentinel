@@ -6,7 +6,6 @@ import com.alibaba.csp.sentinel.dashboard.discovery.AppInfo;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemFlowRuleStore;
 import com.alibaba.csp.sentinel.dashboard.repository.rule.InMemoryRuleRepositoryAdapter;
-import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.dashboard.util.NginxUtils;
 import com.alibaba.fastjson.JSON;
@@ -55,7 +54,7 @@ public class NginxLuaRedisSerivce {
 //            new ArrayBlockingQueue<Runnable>(1), new NamedThreadFactory("sentinel-nacos-ds-update"),
 //            new ThreadPoolExecutor.DiscardOldestPolicy());
 
-    private DiamondClient diamondClient = null;
+
     private static final String MSG_LIST = "msg_list";
 
     private static final String MAX_STR = "max_";
@@ -79,7 +78,10 @@ public class NginxLuaRedisSerivce {
      */
     private Map<String,String> redisIps = new HashMap<>();
 
-
+    /**
+     * 对应机器数
+     */
+    private Map<String,Integer> nginxMachineSize = new HashMap<>();
 
 
 
@@ -181,13 +183,21 @@ public class NginxLuaRedisSerivce {
 //            }
 
 
-            diamondClient = getDiamondClient("sentinel-nginx-init", new ManagerListenerAdapter() {
+            DiamondClient diamondClient = getDiamondClient("sentinel-nginx-init", new ManagerListenerAdapter() {
                 @Override
                 public void receiveConfigInfo(String s) {
                     updateNginxInit(s);
                 }
             });
             updateNginxInit(diamondClient.getConfig());
+
+            DiamondClient diamondClientNginx = getDiamondClient("sentinel-nginx-machine", new ManagerListenerAdapter() {
+                @Override
+                public void receiveConfigInfo(String s) {
+                    updateNginxInit(s);
+                }
+            });
+            updateNginxSize(diamondClientNginx.getConfig());
 
         }).start();
 
@@ -205,6 +215,14 @@ public class NginxLuaRedisSerivce {
         this.redisIps = redisIps;
     }
 
+    public void updateNginxSize(String configInfo){
+        if(StringUtils.isBlank(configInfo)){
+            return;
+        }
+        Map<String,Integer> nginxMachineSize = JSON.parseObject(configInfo,Map.class);
+        logger.warn("更新 nginxMachineSize form:{},to:{}",this.nginxMachineSize,nginxMachineSize);
+        this.nginxMachineSize = nginxMachineSize;
+    }
 
 
     public List<AppInfo> getNginxAppInfo(){
@@ -225,6 +243,7 @@ public class NginxLuaRedisSerivce {
             machineInfo.setHeartbeatVersion(System.currentTimeMillis()-10);
 
             appInfo.addMachine(machineInfo);
+            appInfo.setMachinesSize(nginxMachineSize.get(e.getKey())==null?1:nginxMachineSize.get(e.getKey()));
             appInfoList.add(appInfo);
         }
 
