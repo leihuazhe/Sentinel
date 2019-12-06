@@ -54,7 +54,8 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
         },
         app: $scope.app,
         adapterType:0,
-        adapterWebType:0
+        adapterWebType:0,
+        singleStrategy:0
       };
 
       flowRuleDialogScope.flowRuleDialog = {
@@ -308,7 +309,8 @@ app.controller('IdentityCtlV2', ['$scope', '$stateParams', 'IdentityServiceV2',
                   clusterConfig: {
                       thresholdType: 0,
                       fallbackToLocalWhenFail: true,
-                  }
+                  },
+                  singleStrategy:0
               }
           };
 
