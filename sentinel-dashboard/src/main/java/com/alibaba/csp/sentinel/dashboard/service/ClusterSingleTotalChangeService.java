@@ -127,7 +127,9 @@ public class ClusterSingleTotalChangeService {
             //拿出所有，要计算的项目(例：机器数) current
             Set<AppInfo> appInfos = appManagement.getBriefApps();
             Map<String,Integer> currentMachines = new HashMap<>();
-            appInfos.stream().forEach(appInfo -> currentMachines.put(appInfo.getApp(),(int)appInfo.getMachines().stream().filter(machineInfo -> machineInfo.isHealthy()).count()));
+            //由于是获取缓存信息不对称及性能考虑
+//            appInfos.stream().forEach(appInfo -> currentMachines.put(appInfo.getApp(),(int)appInfo.getMachines().stream().filter(machineInfo -> machineInfo.isHealthy()).count()));
+            appInfos.stream().forEach(appInfo -> currentMachines.put(appInfo.getApp(),appInfo.getMachinesSize() > 0 ? appInfo.getMachinesSize() : appManagement.getDetailApp(appInfo.getApp()).getMachines().size()));
 
             stringRedisTemplate.opsForValue().set(CLUSTER_CHANGE_NAME_CURRENT, JSON.toJSONString(currentMachines));
 
@@ -141,19 +143,19 @@ public class ClusterSingleTotalChangeService {
             for(String key:currentMachines.keySet()){
                 Integer currentValue = currentMachines.get(key);
                 Integer lastValue = lastMachines.get(key);
-                if(lastValue==null || currentValue==null){
+                if(lastValue==null || lastValue.intValue() < 1 || currentValue==null || currentValue.intValue() < 1){ //排除没有机器数情况
                     continue;
                 }
-                if(lastValue.intValue() == currentValue.intValue()){
+                if(lastValue.intValue() == currentValue.intValue()){ //机器数无变更
                     continue;
                 }
-                logger.warn("app:{} currentSize:{},lastSize:{}",key,currentValue,lastMachines);
+                logger.warn("app:{} currentSize:{},lastSize:{}",key,currentValue,lastValue);
 
                 //动态变更
                 //流控
                 AppInfo appInfo = appManagement.getDetailApp(key);
                 List<FlowRuleEntity>  flowRuleEntities = flowRuleProvider.getRules(key);
-                if(flowRuleEntities!=null && flowRuleEntities.size() >0){
+                if(flowRuleEntities!=null && flowRuleEntities.size() > 0 ){
                     //
                     String flowRule = flowRuleToStringconverter.convert(flowRuleEntities);
                     try{
@@ -164,7 +166,7 @@ public class ClusterSingleTotalChangeService {
                             }
                         }
                         if(changeCount>0){
-                            flowRuleRepository.saveAll(flowRuleEntities,key,false);
+                            flowRuleRepository.saveAll(flowRuleEntities,key);
                             flowRulePublisher.publish(key,flowRuleEntities);
                             logger.warn("app:{} requestId:{} old flowRule:{} \tnew flowRuleEntities:{} ",key,requestId,flowRule,flowRuleToStringconverter.convert(flowRuleEntities));
                         }
@@ -186,7 +188,7 @@ public class ClusterSingleTotalChangeService {
                             }
                         }
                         if(changeCount>0){
-                            paramFlowRuleRepository.saveAll(paramFlowRuleEntities,key,false);
+                            paramFlowRuleRepository.saveAll(paramFlowRuleEntities,key);
                             paramFlowRulePublisher.publish(key,paramFlowRuleEntities);
                             logger.warn("app:{} requestId:{} old paramFlowRule:{} \tnew paramFlowRule:{} ",key,requestId,paramFlowRule,paramFlowRuleconverter.convert(paramFlowRuleEntities));
                         }

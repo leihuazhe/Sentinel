@@ -73,7 +73,7 @@ public class SimpleMachineDiscovery implements MachineDiscovery {
                 while(machineInfos.hasNext()){
                     MachineInfo machineInfo = machineInfos.next();
                     long delta = System.currentTimeMillis() - machineInfo.getLastHeartbeat();
-                    if(delta > 1000 * 60 * 20 ){ //二十分钟内不可用
+                    if(delta > 1000 * 60 * 3 ){ //3分钟内不可用
                         removeMachine(machineInfo.getApp(),machineInfo.getIp(),machineInfo.getPort());
                         machineInfos.remove();
                     }
