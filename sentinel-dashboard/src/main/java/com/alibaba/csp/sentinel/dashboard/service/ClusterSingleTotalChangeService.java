@@ -11,6 +11,7 @@ import com.alibaba.csp.sentinel.dashboard.rule.DynamicRuleProvider;
 import com.alibaba.csp.sentinel.dashboard.rule.DynamicRulePublisher;
 import com.alibaba.csp.sentinel.dashboard.tools.RedisLock;
 import com.alibaba.csp.sentinel.dashboard.util.MachineUtils;
+import com.alibaba.csp.sentinel.datasource.Converter;
 import com.alibaba.csp.sentinel.util.StringUtil;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
@@ -57,6 +58,13 @@ public class ClusterSingleTotalChangeService {
     @Autowired
     @Qualifier("paramFlowRuleNacosPublisher")
     private DynamicRulePublisher<List<ParamFlowRuleEntity>> paramFlowRulePublisher;
+
+
+    @Autowired
+    private Converter<List<FlowRuleEntity>, String> flowRuleToStringconverter;
+
+    @Autowired
+    private Converter<List<ParamFlowRuleEntity>, String> paramFlowRuleconverter;
 
     @Autowired
     private AppManagement appManagement;
@@ -147,6 +155,7 @@ public class ClusterSingleTotalChangeService {
                 List<FlowRuleEntity>  flowRuleEntities = flowRuleProvider.getRules(key);
                 if(flowRuleEntities!=null && flowRuleEntities.size() >0){
                     //
+                    String flowRule = flowRuleToStringconverter.convert(flowRuleEntities);
                     try{
                         int changeCount = 0;
                         for(FlowRuleEntity ruleEntity:flowRuleEntities){
@@ -157,6 +166,7 @@ public class ClusterSingleTotalChangeService {
                         if(changeCount>0){
                             flowRuleRepository.saveAll(flowRuleEntities,key,false);
                             flowRulePublisher.publish(key,flowRuleEntities);
+                            logger.warn("app:{} requestId:{} old flowRule:{} \tnew flowRuleEntities:{} ",key,requestId,flowRule,flowRuleToStringconverter.convert(flowRuleEntities));
                         }
                     }catch (Exception ex){
                         logger.error("动态变更 app:" + key + " 流控  总量平均阈值 失败",ex);
@@ -167,6 +177,7 @@ public class ClusterSingleTotalChangeService {
                 List<ParamFlowRuleEntity> paramFlowRuleEntities = paramFlowRuleProvider.getRules(key);
                 if(paramFlowRuleEntities!=null && paramFlowRuleEntities.size() >0){
                     //
+                    String paramFlowRule = paramFlowRuleconverter.convert(paramFlowRuleEntities);
                     try{
                         int changeCount = 0;
                         for(ParamFlowRuleEntity paramFlowRuleEntity:paramFlowRuleEntities){
@@ -177,6 +188,7 @@ public class ClusterSingleTotalChangeService {
                         if(changeCount>0){
                             paramFlowRuleRepository.saveAll(paramFlowRuleEntities,key,false);
                             paramFlowRulePublisher.publish(key,paramFlowRuleEntities);
+                            logger.warn("app:{} requestId:{} old paramFlowRule:{} \tnew paramFlowRule:{} ",key,requestId,paramFlowRule,paramFlowRuleconverter.convert(paramFlowRuleEntities));
                         }
                     }catch (Exception ex){
                         logger.error("动态变更 app:" + key + " 热点参数 总量平均阈值 失败",ex);
