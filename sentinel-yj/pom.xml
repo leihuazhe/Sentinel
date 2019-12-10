@@ -15,6 +15,7 @@
     <properties>
         <java.source.version>1.7</java.source.version>
         <java.target.version>1.7</java.target.version>
+        <diamond.version>3.0.3</diamond.version>
     </properties>
 
     <modules>
