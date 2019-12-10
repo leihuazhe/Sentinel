@@ -76,7 +76,7 @@ public class AppController {
             funcVos = (List<FuncVo>) ThreadContextUtil.get(com.yunji.sso.client.util.Constants.FUNCTION_KEY);
         }
 
-        if(funcVos!=null && funcVos.isEmpty()){
+        if(funcVos!=null && !funcVos.isEmpty()){
             Set<String> funcVoMap = funcVos.stream().map(vo->vo.getFunctionUrl()).collect(Collectors.toSet());
             list = appInfoSet.stream().filter(appInfo -> funcVoMap.contains(appInfo.getApp())).collect(Collectors.toList());
         }else{
