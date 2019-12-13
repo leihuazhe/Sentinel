@@ -24,7 +24,7 @@
 
         <!--<ul class="nav nav-second-level" collapse="{{entry.active}}" style="display: none;">-->
         <ul class="nav nav-second-level" ng-show="entry.active">
-          <li ui-sref-active="active">
+          <li ui-sref-active="active" ng-if="!entry.isNginx">
             <a ui-sref="dashboard.metric({app: entry.app})">
               <i class="fa fa-bar-chart"></i>&nbsp;&nbsp;实时监控</a>
           </li>
@@ -93,7 +93,7 @@
               <i class="glyphicon glyphicon-cloud"></i>&nbsp;&nbsp;集群流控</a>
           </li>
 
-          <li ui-sref-active="active">
+          <li ui-sref-active="active" ng-if="!entry.isNginx">
             <a ui-sref="dashboard.machine({app: entry.app})">
               <i class="glyphicon glyphicon-th-list"></i>&nbsp;&nbsp;机器列表</a>
           </li>
