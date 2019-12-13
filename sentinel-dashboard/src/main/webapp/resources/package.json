@@ -51,7 +51,6 @@
     "gulp-uglify": "^3.0.0",
     "jshint": "^2.10.2",
     "open": "^6.3.0",
-    "source-map": "^0.7.3",
-    "gulp-bower": "^0.0.14"
+    "source-map": "^0.7.3"
   }
 }

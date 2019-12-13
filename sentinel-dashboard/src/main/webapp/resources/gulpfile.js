@@ -1,5 +1,4 @@
 const gulp = require('gulp');
-var bower = require('gulp-bower');
 const plugins = require('gulp-load-plugins')();
 const open = require('open');
 const app = {
