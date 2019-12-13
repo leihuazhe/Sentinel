@@ -35,7 +35,7 @@ angular.module('sentinelDashboardApp')
                 item.healthyCount = healthyCount;
                 // Handle appType
                 item.isGateway = item.appType === 1 || item.appType === 11 || item.appType === 12;
-
+                item.isNginx = item.appType === 1000;
                 if (item.shown) {
                   return item;
                 }

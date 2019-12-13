@@ -32,7 +32,7 @@
             <a ui-sref="dashboard.identityV1({app: entry.app})">
               <i class="glyphicon glyphicon-list-alt"></i>&nbsp;&nbsp;簇点链路</a>
           </li>-->
-          <li ui-sref-active="active" ng-if="!entry.isGateway">
+          <li ui-sref-active="active" ng-if="!entry.isGateway && !entry.isNginx">
             <a ui-sref="dashboard.identity({app: entry.app})">
               <i class="glyphicon glyphicon-list-alt"></i>&nbsp;&nbsp;簇点链路</a>
           </li>
@@ -64,11 +64,11 @@
             <a ui-sref="dashboard.degradeV1({app: entry.app})">
               <i class="glyphicon glyphicon-flash"></i>&nbsp;&nbsp;降级规则</a>
           </li>-->
-          <li ui-sref-active="active">
+          <li ui-sref-active="active" ng-if="!entry.isNginx">
             <a ui-sref="dashboard.degrade({app: entry.app})">
               <i class="glyphicon glyphicon-flash"></i>&nbsp;&nbsp;降级规则</a>
           </li>
-          <li ui-sref-active="active" ng-if="!entry.isGateway">
+          <li ui-sref-active="active" ng-if="!entry.isGateway && !entry.isNginx">
             <a ui-sref="dashboard.paramFlow({app: entry.app})">
               <i class="glyphicon glyphicon-fire"></i>&nbsp;&nbsp;热点规则</a>
           </li>
@@ -76,7 +76,7 @@
             <a ui-sref="dashboard.systemV1({app: entry.app})">
               <i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;系统规则</a>
           </li>-->
-          <li ui-sref-active="active">
+          <li ui-sref-active="active" ng-if="!entry.isNginx">
             <a ui-sref="dashboard.system({app: entry.app})">
               <i class="glyphicon glyphicon-lock"></i>&nbsp;&nbsp;系统规则</a>
           </li>
@@ -84,11 +84,11 @@
             <a ui-sref="dashboard.authorityV1({app: entry.app})">
               <i class="glyphicon glyphicon-check"></i>&nbsp;&nbsp;授权规则</a>
           </li>-->
-          <li ui-sref-active="active" ng-if="!entry.isGateway">
+          <li ui-sref-active="active" ng-if="!entry.isGateway && !entry.isNginx">
             <a ui-sref="dashboard.authority({app: entry.app})">
               <i class="glyphicon glyphicon-check"></i>&nbsp;&nbsp;授权规则</a>
           </li>
-          <li ui-sref-active="active" ng-if="!entry.isGateway">
+          <li ui-sref-active="active" ng-if="!entry.isGateway && !entry.isNginx">
             <a ui-sref="dashboard.clusterAppServerList({app: entry.app})">
               <i class="glyphicon glyphicon-cloud"></i>&nbsp;&nbsp;集群流控</a>
           </li>

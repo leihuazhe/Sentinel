@@ -34,6 +34,9 @@ public class AppInfo {
      */
     private int machinesSize = 0;
 
+    /**
+     *  0：默认，(1,11,12)：gateway,1000:nginx
+     */
     private Integer appType = 0;
 
 

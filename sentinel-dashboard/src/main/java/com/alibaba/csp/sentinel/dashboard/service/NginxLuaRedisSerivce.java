@@ -44,16 +44,6 @@ public class NginxLuaRedisSerivce {
     @Autowired
     private InMemFlowRuleStore inMemFlowRuleStore;
 
-//    @Autowired
-//    private ConfigService configService;
-//
-//    /**
-//     * Single-thread pool. Once the thread pool is blocked, we throw up the old task.
-//     */
-//    private final ExecutorService pool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS,
-//            new ArrayBlockingQueue<Runnable>(1), new NamedThreadFactory("sentinel-nacos-ds-update"),
-//            new ThreadPoolExecutor.DiscardOldestPolicy());
-
 
     private static final String MSG_LIST = "msg_list";
 
@@ -64,10 +54,6 @@ public class NginxLuaRedisSerivce {
 
     @Autowired
     private InMemoryRuleRepositoryAdapter<FlowRuleEntity> repository;
-
-//    @Autowired
-//    @Qualifier("flowRuleNacosProvider")
-//    private DynamicRuleProvider<List<FlowRuleEntity>> ruleProvider;
 
     @Autowired
     @Qualifier("flowRuleNacosPublisher")
@@ -102,87 +88,7 @@ public class NginxLuaRedisSerivce {
     public void init(){
         //判断redis中是否有 标识位
 
-        //拉取配置信息
-        /**
-         * yunjibuyer    					172.22.14.91
-         * yunjiapp.   					    172.22.14.61
-         * yunjiapp4buyer.   				172.22.14.159
-         * yunjimarketingapp.   			172.21.153.23
-         * yunjioperateapp. 				172.21.153.48
-         * yunjirewardapp.   				172.21.154.203
-         * yunjiysapp.   					172.21.150.75
-         * yunjispecialbuyer.  			    172.21.154.79
-         * yunjiuserapp. 					172.21.154.221
-         * yunjiorderapp.    				172.21.154.235
-         * yunji-searchweb.  				172.21.154.201
-         * yunjishorturl.  				    172.21.154.87
-         * yunjiitemapp.   				    172.21.153.135
-         * yunjiscapp. 					    172.21.154.162
-         * yunjichickengame. 				172.21.154.165
-         * yunji-insuranceweb. 			    172.21.200.184
-         */
-
-//        //环境判断
-//        String configKey = "config_env";
-//        String env = AppNameUtil.getEnvConfig(configKey);
-//        logger.warn("config_env:{}",env);
-//
-//        if("idc".equals(env)){
-//             /*
-//            redisIps.put("m.yunjiglobal.com","172.22.14.91");
-//            redisIps.put("app.yunjiglobal.com","172.22.14.61");
-//            redisIps.put("vipapp.yunjiglobal.com","172.22.14.159");
-//            redisIps.put("marketing.yunjiglobal.com","172.21.153.23");
-//            redisIps.put("yunjioperate.yunjiglobal.com","172.21.153.48");
-//            redisIps.put("reward.yunjiglobal.com","172.21.154.203");
-//            redisIps.put("ys.yunjiglobal.com","172.21.150.75");
-//            redisIps.put("spe.yunjix.com","172.21.154.79");//
-//            redisIps.put("user.yunjiglobal.com","172.21.154.221");
-//            redisIps.put("order.yunjiglobal.com","172.21.154.235");
-//            redisIps.put("search.yunjiglobal.com","172.21.154.201");
-//            redisIps.put("m.yj.ink","172.21.154.87");
-//            redisIps.put("item.yunjiglobal.com","172.21.153.135");
-//            redisIps.put("sc.yunjiglobal.com","172.21.154.162");
-//            redisIps.put("chicken.yunjiglobal.com","172.21.154.165");
-//            redisIps.put("insurance.yunjiglobal.com","172.21.200.184");
-//             /*
-//
-//        }else if("dev".equals(env)){
-//            redisIps.put("t.yunjiglobal.com","172.30.220.215:14159");
-//            //redisIps.put("m.yunjiglobal.com","172.30.220.215:14159");
-//            //redisIps.put("local.yunjiweidian.org","172.30.222.63:14159");
-//        }else if ("local".equals(env)){
-//            redisIps.put("m.yunjiglobal.com","172.16.0.2:7777");
-//        }
-
         new Thread(()->{
-//            Set<Map.Entry<String, String>> set =  redisIps.entrySet();
-//            for(Map.Entry<String, String> e:set){
-//                transform(e.getKey(),e.getValue());
-//            }
-
-//            try{
-//                configService.addListener("sentinel-nginx-init", NacosConfigUtil.GROUP_ID, new Listener() {
-//                    @Override
-//                    public Executor getExecutor() {
-//                        return pool;
-//                    }
-//
-//                    @Override
-//                    public void receiveConfigInfo(String configInfo) {
-//                        updateNginxInit(configInfo);
-//                    }
-//                });
-//
-//
-//                String configInfo = configService.getConfig("sentinel-nginx-init",
-//                        NacosConfigUtil.GROUP_ID, 3000);
-//                updateNginxInit(configInfo);
-//            }catch (Exception ex){
-//                logger.error("初始化nginx配置失败：",ex);
-//            }
-
-
             DiamondClient diamondClient = getDiamondClient("sentinel-nginx-init", new ManagerListenerAdapter() {
                 @Override
                 public void receiveConfigInfo(String s) {
@@ -194,7 +100,7 @@ public class NginxLuaRedisSerivce {
             DiamondClient diamondClientNginx = getDiamondClient("sentinel-nginx-machine", new ManagerListenerAdapter() {
                 @Override
                 public void receiveConfigInfo(String s) {
-                    updateNginxInit(s);
+                    updateNginxSize(s);
                 }
             });
             updateNginxSize(diamondClientNginx.getConfig());
@@ -232,6 +138,7 @@ public class NginxLuaRedisSerivce {
         for(Map.Entry<String, String> e:set){
             AppInfo appInfo = new AppInfo();
             appInfo.setApp(e.getKey());
+            appInfo.setAppType(1000);
 
             MachineInfo machineInfo = new MachineInfo();
             machineInfo.setApp(e.getKey());
@@ -363,11 +270,17 @@ public class NginxLuaRedisSerivce {
             if(StringUtils.isNotBlank(flowRule.getAdapterText())){
                 stringRedisTemplate.boundHashOps(MSG_LIST).put(url,flowRule.getAdapterText());
             }
-
+            publicMsg(flowRule.getApp());
         }catch (Exception ex){
             logger.error("nginx save redis",ex);
         }
 
+    }
+
+    public boolean publicMsg(String app){
+        //通知
+        stringRedisTemplate.convertAndSend(app,"update");
+        return true;
     }
 
     public void delete(Object entity){
