@@ -112,12 +112,12 @@ public class ClusterSingleTotalChangeService {
         final String requestId = UUID.randomUUID().toString();
         boolean lock = redisLock.tryLock(CLUSTER_CHANGE_LOCK, requestId ,10, TimeUnit.MINUTES);
         if(!lock){
-            logger.info("get lock {} fail",CLUSTER_CHANGE_LOCK);
+            logger.debug("get lock {} fail",CLUSTER_CHANGE_LOCK);
             return;
         }
         //如果执行周期不够，返回
         if(stringRedisTemplate.hasKey(CLUSTER_CHANGE_LOCK_LAST)){
-            logger.info("get lock_last {}:{} ",CLUSTER_CHANGE_LOCK_LAST,stringRedisTemplate.opsForValue().get(CLUSTER_CHANGE_LOCK_LAST));
+            logger.debug("get lock_last {}:{} ",CLUSTER_CHANGE_LOCK_LAST,stringRedisTemplate.opsForValue().get(CLUSTER_CHANGE_LOCK_LAST));
             return;
         }
         try{
@@ -134,7 +134,7 @@ public class ClusterSingleTotalChangeService {
             stringRedisTemplate.opsForValue().set(CLUSTER_CHANGE_NAME_CURRENT, JSON.toJSONString(currentMachines));
 
             if(StringUtil.isEmpty(lastString)){
-                logger.info("last machines redis value is NULL");
+                logger.debug("last machines redis value is NULL");
                 return;
             }
             Map<String,Integer> lastMachines = JSON.parseObject(lastString,Map.class);

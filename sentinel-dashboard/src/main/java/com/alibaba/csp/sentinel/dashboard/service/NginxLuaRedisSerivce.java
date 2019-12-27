@@ -51,6 +51,11 @@ public class NginxLuaRedisSerivce {
 
     private static final String SENTINEL_NGINX = "sentinel:nginx:";
 
+    /**
+     * 用于拉取判断是否有更新
+     */
+    private static final String SENTINEL_NGINX_LUA= "sentinel:nginx:lua";
+
 
     @Autowired
     private InMemoryRuleRepositoryAdapter<FlowRuleEntity> repository;
@@ -270,16 +275,16 @@ public class NginxLuaRedisSerivce {
             if(StringUtils.isNotBlank(flowRule.getAdapterText())){
                 stringRedisTemplate.boundHashOps(MSG_LIST).put(url,flowRule.getAdapterText());
             }
-            publicMsg(flowRule.getApp());
+            publicMsg(flowRule,false);
         }catch (Exception ex){
             logger.error("nginx save redis",ex);
         }
 
     }
 
-    public boolean publicMsg(String app){
+    public boolean publicMsg(FlowRuleEntity flowRule,boolean delete){
         //通知
-        stringRedisTemplate.convertAndSend(app,"update");
+        stringRedisTemplate.boundZSetOps(SENTINEL_NGINX_LUA).add(flowRule.getResource(),System.currentTimeMillis());
         return true;
     }
 
@@ -292,6 +297,7 @@ public class NginxLuaRedisSerivce {
         //HASH返回值
         stringRedisTemplate.boundHashOps(MSG_LIST).delete(url);
 
+        publicMsg(flowRule,true);
     }
 
 
