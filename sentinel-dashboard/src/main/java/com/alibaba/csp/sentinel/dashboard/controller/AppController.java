@@ -15,27 +15,23 @@
  */
 package com.alibaba.csp.sentinel.dashboard.controller;
 
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.alibaba.csp.sentinel.dashboard.discovery.AppInfo;
 import com.alibaba.csp.sentinel.dashboard.discovery.AppManagement;
 import com.alibaba.csp.sentinel.dashboard.discovery.MachineInfo;
 import com.alibaba.csp.sentinel.dashboard.domain.Result;
+import com.alibaba.csp.sentinel.dashboard.domain.vo.AgentStatVo;
 import com.alibaba.csp.sentinel.dashboard.domain.vo.MachineInfoVo;
 import com.yunji.auth.entity.func.FuncVo;
 import com.yunji.sso.client.entity.SsoUser;
 import com.yunji.sso.client.util.ThreadContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Carpenter Lee
@@ -112,5 +108,39 @@ public class AppController {
         } else {
             return Result.ofFail(1, "remove failed");
         }
+    }
+
+    /**
+     * 统计agent版本
+     * @return
+     */
+    @RequestMapping(value = "/statsAgent.json",produces = MediaType.APPLICATION_JSON_VALUE)
+    public Result<List<AgentStatVo>> statsAgent()  {
+
+        List<String> listAppNames  = appManagement.getAppNames();
+        List<AgentStatVo> agentStatVoList = new ArrayList<>(listAppNames.size());
+        for(String app:listAppNames){
+            AppInfo appInfo = appManagement.getDetailApp(app);
+            AgentStatVo agentStatVo = new AgentStatVo();
+            agentStatVo.setAppName(appInfo.getApp());
+            agentStatVo.setMachineSize(appInfo.getMachines().size());
+            agentStatVo.setVersionMap(new HashMap<>());
+
+            Set<MachineInfo> machineInfos = appInfo.getMachines();
+            for(MachineInfo machineInfo:machineInfos){
+                Integer size = agentStatVo.getVersionMap().get(machineInfo.getAgentVersion());
+                if(size==null){
+                    size = new Integer(1);
+                }else{
+                    size = size + 1;
+                }
+                agentStatVo.getVersionMap().put(machineInfo.getAgentVersion(),size);
+
+            }
+
+            agentStatVoList.add(agentStatVo);
+        }
+
+        return Result.ofSuccess(agentStatVoList);
     }
 }
