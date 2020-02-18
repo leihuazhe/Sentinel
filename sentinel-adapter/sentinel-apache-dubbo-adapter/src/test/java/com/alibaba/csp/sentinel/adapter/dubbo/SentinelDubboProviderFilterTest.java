@@ -18,6 +18,8 @@ package com.alibaba.csp.sentinel.adapter.dubbo;
 import com.alibaba.csp.sentinel.BaseTest;
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.EntryType;
+import com.alibaba.csp.sentinel.adapter.apache.dubbo.DubboUtils;
+import com.alibaba.csp.sentinel.adapter.apache.dubbo.SentinelDubboProviderFilter;
 import com.alibaba.csp.sentinel.adapter.dubbo.provider.DemoService;
 import com.alibaba.csp.sentinel.context.Context;
 import com.alibaba.csp.sentinel.context.ContextUtil;

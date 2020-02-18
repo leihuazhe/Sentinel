@@ -15,6 +15,7 @@
  */
 package com.alibaba.csp.sentinel.adapter.dubbo;
 
+import com.alibaba.csp.sentinel.adapter.apache.dubbo.DubboUtils;
 import org.apache.dubbo.rpc.Invocation;
 import org.apache.dubbo.rpc.Invoker;
 import org.junit.Test;

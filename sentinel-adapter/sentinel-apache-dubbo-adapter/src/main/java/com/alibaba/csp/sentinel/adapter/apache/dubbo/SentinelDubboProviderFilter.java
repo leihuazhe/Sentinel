@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.csp.sentinel.adapter.dubbo;
+package com.alibaba.csp.sentinel.adapter.apache.dubbo;
 
 import com.alibaba.csp.sentinel.Entry;
 import com.alibaba.csp.sentinel.EntryType;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.Tracer;
+import com.alibaba.csp.sentinel.adapter.apache.dubbo.fallback.DubboFallbackRegistry;
+import com.alibaba.csp.sentinel.context.ContextUtil;
 import com.alibaba.csp.sentinel.log.RecordLog;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 
-import com.alibaba.csp.sentinel.adapter.dubbo.fallback.DubboFallbackRegistry;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.Filter;
 import org.apache.dubbo.rpc.Invocation;
@@ -31,31 +32,39 @@ import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcException;
 
 /**
- * <p>Dubbo service consumer filter for Sentinel. Auto activated by default.</p>
+ * <p>Apache Dubbo service provider filter that enables integration with Sentinel. Auto activated by default.</p>
+ * <p>Note: this only works for Apache Dubbo 2.7.x or above version.</p>
  *
- * If you want to disable the consumer filter, you can configure:
+ * If you want to disable the provider filter, you can configure:
  * <pre>
- * &lt;dubbo:consumer filter="-sentinel.dubbo.consumer.filter"/&gt;
+ * &lt;dubbo:provider filter="-sentinel.dubbo.provider.filter"/&gt;
  * </pre>
  *
  * @author Carpenter Lee
  * @author Eric Zhao
  */
-@Activate(group = "consumer")
-public class SentinelDubboConsumerFilter implements Filter {
+@Activate(group = "provider")
+public class SentinelDubboProviderFilter implements Filter {
 
-    public SentinelDubboConsumerFilter() {
-        RecordLog.info("Sentinel Apache Dubbo consumer filter initialized");
+    public SentinelDubboProviderFilter() {
+        RecordLog.info("Sentinel Apache Dubbo provider filter initialized");
     }
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        // Get origin caller.
+        String application = DubboUtils.getApplication(invocation, "");
+
         Entry interfaceEntry = null;
         Entry methodEntry = null;
         try {
             String resourceName = DubboUtils.getResourceName(invoker, invocation);
-            interfaceEntry = SphU.entry(invoker.getInterface().getName(), EntryType.OUT);
-            methodEntry = SphU.entry(resourceName, EntryType.OUT);
+            String interfaceName = invoker.getInterface().getName();
+            // Only need to create entrance context at provider side, as context will take effect
+            // at entrance of invocation chain only (for inbound traffic).
+            ContextUtil.enter(resourceName, application);
+            interfaceEntry = SphU.entry(interfaceName, EntryType.IN);
+            methodEntry = SphU.entry(resourceName, EntryType.IN, 1, invocation.getArguments());
 
             Result result = invoker.invoke(invocation);
             if (result.hasException()) {
@@ -66,18 +75,19 @@ public class SentinelDubboConsumerFilter implements Filter {
             }
             return result;
         } catch (BlockException e) {
-            return DubboFallbackRegistry.getConsumerFallback().handle(invoker, invocation, e);
+            return DubboFallbackRegistry.getProviderFallback().handle(invoker, invocation, e);
         } catch (RpcException e) {
             Tracer.traceEntry(e, interfaceEntry);
             Tracer.traceEntry(e, methodEntry);
             throw e;
         } finally {
             if (methodEntry != null) {
-                methodEntry.exit();
+                methodEntry.exit(1, invocation.getArguments());
             }
             if (interfaceEntry != null) {
                 interfaceEntry.exit();
             }
+            ContextUtil.exit();
         }
     }
 }
