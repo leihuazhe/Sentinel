@@ -55,7 +55,7 @@ If your application is build in Maven, just add the following dependency in `pom
 <dependency>
     <groupId>com.yunji.csp</groupId>
     <artifactId>sentinel-core</artifactId>
-    <version>1.6.4</version>
+    <version>1.6.6</version>
 </dependency>
 ```
 
